@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 9.625" name="gitdb">
+  <DataContextMoniker Name="/GitDataContext" />
+  <nestedChildShapes>
+    <classShape Id="87ecd896-9844-41e3-90f0-ec3cd4e33147" absoluteBounds="3.75, 0.75, 2, 1.1455000813802085">
+      <DataClassMoniker Name="/GitDataContext/Blob" />
+      <nestedChildShapes>
+        <elementListCompartment Id="56be04dc-8da7-45ec-91f3-ac2fd4e10330" absoluteBounds="3.765, 1.21, 1.9700000000000002, 0.58550008138020826" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="a70975c5-74cb-48a7-9a12-f54f844eaec0" absoluteBounds="3.5, 3.375, 2, 1.3239465332031259">
+      <DataClassMoniker Name="/GitDataContext/TreeTree" />
+      <nestedChildShapes>
+        <elementListCompartment Id="6e601214-872a-4df1-be80-2d48486259a2" absoluteBounds="3.515, 3.835, 1.9700000000000002, 0.763946533203125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="224bfd63-98d3-4f8e-91c1-1ab21a4b9920" absoluteBounds="3.5, 7.5, 2, 1.8592858886718755">
+      <DataClassMoniker Name="/GitDataContext/Commit" />
+      <nestedChildShapes>
+        <elementListCompartment Id="f9f014c1-7fed-4c66-b593-d0a4d8415af7" absoluteBounds="3.515, 7.96, 1.9700000000000002, 1.299285888671875" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="5a5acf5f-a3c5-4555-9d2e-dbc4c4d9c021" absoluteBounds="6.25, 7.75, 2, 1.3239465332031255">
+      <DataClassMoniker Name="/GitDataContext/CommitParent" />
+      <nestedChildShapes>
+        <elementListCompartment Id="136a157f-fe8f-40f8-b23e-4d3432a90561" absoluteBounds="6.265, 8.21, 1.9700000000000002, 0.763946533203125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="e76f67d9-ef61-4a36-a339-3fa04df53ca4" absoluteBounds="0.75, 4.875, 2, 0.96705362955729157">
+      <DataClassMoniker Name="/GitDataContext/Tree" />
+      <nestedChildShapes>
+        <elementListCompartment Id="22d79272-ae80-4f74-90de-47fa73899f85" absoluteBounds="0.765, 5.335, 1.9700000000000002, 0.40705362955729169" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <classShape Id="579499d1-2767-40d9-9580-f536a081227b" absoluteBounds="6.5, 4.625, 2, 1.3239465332031255">
+      <DataClassMoniker Name="/GitDataContext/TreeBlob" />
+      <nestedChildShapes>
+        <elementListCompartment Id="5b23e0ca-3f38-42e8-b356-d26b7c70cc94" absoluteBounds="6.515, 5.085, 1.9700000000000002, 0.763946533203125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+      </nestedChildShapes>
+    </classShape>
+    <associationConnector edgePoints="[(5.5 : 8.41197326660156); (6.25 : 8.41197326660156)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/GitDataContext/Commit/Commit_CommitParent" />
+      <nodes>
+        <classShapeMoniker Id="224bfd63-98d3-4f8e-91c1-1ab21a4b9920" />
+        <classShapeMoniker Id="5a5acf5f-a3c5-4555-9d2e-dbc4c4d9c021" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(5.5 : 8.01848663330078); (6.25 : 8.01848663330078)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/GitDataContext/Commit/Commit_CommitParent1" />
+      <nodes>
+        <classShapeMoniker Id="224bfd63-98d3-4f8e-91c1-1ab21a4b9920" />
+        <classShapeMoniker Id="5a5acf5f-a3c5-4555-9d2e-dbc4c4d9c021" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(2.75 : 4.875); (3.5 : 4.69894653320313)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/GitDataContext/Tree/Tree_TreeTree" />
+      <nodes>
+        <classShapeMoniker Id="e76f67d9-ef61-4a36-a339-3fa04df53ca4" />
+        <classShapeMoniker Id="a70975c5-74cb-48a7-9a12-f54f844eaec0" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(2.75 : 4.875); (3.5 : 4.69894653320313)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/GitDataContext/Tree/Tree_TreeTree1" />
+      <nodes>
+        <classShapeMoniker Id="e76f67d9-ef61-4a36-a339-3fa04df53ca4" />
+        <classShapeMoniker Id="a70975c5-74cb-48a7-9a12-f54f844eaec0" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(1.75 : 5.84205362955729); (1.75 : 8.42964294433594); (3.5 : 8.42964294433594)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/GitDataContext/Tree/Tree_Commit" />
+      <nodes>
+        <classShapeMoniker Id="e76f67d9-ef61-4a36-a339-3fa04df53ca4" />
+        <classShapeMoniker Id="224bfd63-98d3-4f8e-91c1-1ab21a4b9920" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(5.65625 : 1.89550008138021); (5.65625 : 5.35519653320313); (6.5 : 5.35519653320313)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/GitDataContext/Blob/Blob_TreeBlob" />
+      <nodes>
+        <classShapeMoniker Id="87ecd896-9844-41e3-90f0-ec3cd4e33147" />
+        <classShapeMoniker Id="579499d1-2767-40d9-9580-f536a081227b" />
+      </nodes>
+    </associationConnector>
+    <associationConnector edgePoints="[(2.75 : 5.66112508138021); (6.5 : 5.66112508138021)]" fixedFrom="NotFixed" fixedTo="NotFixed">
+      <AssociationMoniker Name="/GitDataContext/Tree/Tree_TreeBlob" />
+      <nodes>
+        <classShapeMoniker Id="e76f67d9-ef61-4a36-a339-3fa04df53ca4" />
+        <classShapeMoniker Id="579499d1-2767-40d9-9580-f536a081227b" />
+      </nodes>
+    </associationConnector>
+  </nestedChildShapes>
+</ordesignerObjectsDiagram>

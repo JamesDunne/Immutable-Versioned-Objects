@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="GitCMS" EntityNamespace="GitCMS.Data" ContextNamespace="GitCMS.Data" Class="GitDataContext" Modifier="Sealed" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=.\SQLEXPRESS;Initial Catalog=GitCMS;Integrated Security=True" SettingsObjectName="GitCMS.Data.Properties.Settings" SettingsPropertyName="GitCMSConnectionString" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.Blob" Member="Blob">
+    <Type Name="Blob">
+      <Column Name="blobid" Type="System.Data.Linq.Binary" DbType="Binary(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="contents" Type="System.Data.Linq.Binary" DbType="VarBinary(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Association Name="Blob_TreeBlob" Member="TreeBlobs" ThisKey="blobid" OtherKey="linked_blobid" Type="TreeBlob" />
+    </Type>
+  </Table>
+  <Table Name="dbo.TreeTree" Member="TreeTree">
+    <Type Name="TreeTree">
+      <Column Name="treeid" Type="System.Data.Linq.Binary" DbType="Binary(20) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="linked_treeid" Type="System.Data.Linq.Binary" DbType="Binary(20) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="name" Type="System.String" DbType="NVarChar(512) NOT NULL" CanBeNull="false" />
+      <Association Name="Tree_TreeTree" Member="Tree" ThisKey="linked_treeid" OtherKey="treeid" Type="Tree" IsForeignKey="true" />
+      <Association Name="Tree_TreeTree1" Member="Tree1" ThisKey="treeid" OtherKey="treeid" Type="Tree" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.[Commit]" Member="Commit">
+    <Type Name="Commit">
+      <Column Name="commitid" Type="System.Data.Linq.Binary" DbType="Binary(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="treeid" Type="System.Data.Linq.Binary" DbType="Binary(20) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="committer" Type="System.String" DbType="NVarChar(512) NOT NULL" CanBeNull="false" />
+      <Column Name="author" Type="System.String" DbType="NVarChar(512)" CanBeNull="true" />
+      <Column Name="date_committed" Type="System.DateTime" DbType="DateTime2 NOT NULL" CanBeNull="false" />
+      <Column Name="message" Type="System.String" DbType="NVarChar(MAX) NOT NULL" CanBeNull="false" />
+      <Association Name="Commit_CommitParent" Member="CommitParents" ThisKey="commitid" OtherKey="commitid" Type="CommitParent" />
+      <Association Name="Commit_CommitParent1" Member="CommitParents1" ThisKey="commitid" OtherKey="parent_commitid" Type="CommitParent" />
+      <Association Name="Tree_Commit" Member="Tree" ThisKey="treeid" OtherKey="treeid" Type="Tree" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CommitParent" Member="CommitParent">
+    <Type Name="CommitParent">
+      <Column Name="commitid" Type="System.Data.Linq.Binary" DbType="Binary(20) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="parent_commitid" Type="System.Data.Linq.Binary" DbType="Binary(20) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="ordinal" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="Commit_CommitParent" Member="Commit" ThisKey="commitid" OtherKey="commitid" Type="Commit" IsForeignKey="true" />
+      <Association Name="Commit_CommitParent1" Member="Commit1" ThisKey="parent_commitid" OtherKey="commitid" Type="Commit" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Tree" Member="Tree">
+    <Type Name="Tree">
+      <Column Name="treeid" Type="System.Data.Linq.Binary" DbType="Binary(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" UpdateCheck="Never" />
+      <Association Name="Tree_TreeTree" Member="TreeTrees" ThisKey="treeid" OtherKey="linked_treeid" Type="TreeTree" />
+      <Association Name="Tree_TreeTree1" Member="TreeTrees1" ThisKey="treeid" OtherKey="treeid" Type="TreeTree" />
+      <Association Name="Tree_Commit" Member="Commits" ThisKey="treeid" OtherKey="treeid" Type="Commit" />
+      <Association Name="Tree_TreeBlob" Member="TreeBlobs" ThisKey="treeid" OtherKey="treeid" Type="TreeBlob" />
+    </Type>
+  </Table>
+  <Table Name="dbo.TreeBlob" Member="TreeBlob">
+    <Type Name="TreeBlob">
+      <Column Name="treeid" Type="System.Data.Linq.Binary" DbType="Binary(20) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="linked_blobid" Type="System.Data.Linq.Binary" DbType="Binary(20) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="name" Type="System.String" DbType="NVarChar(512) NOT NULL" CanBeNull="false" />
+      <Association Name="Blob_TreeBlob" Member="Blob" ThisKey="linked_blobid" OtherKey="blobid" Type="Blob" IsForeignKey="true" />
+      <Association Name="Tree_TreeBlob" Member="Tree" ThisKey="treeid" OtherKey="treeid" Type="Tree" IsForeignKey="true" />
+    </Type>
+  </Table>
+</Database>

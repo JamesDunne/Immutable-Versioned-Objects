@@ -1,0 +1,75 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".generated.cs" #><#
+    var types = new[]
+    {
+        "CommitID",
+        "TreeID",
+        "BlobID",
+    };
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace GitCMS.Definition.Models
+{
+<#
+    for (int i = 0; i < types.Length; ++i)
+    {
+        if (i != 0)
+        {
+#>
+
+<#
+        }
+#>
+    public struct <#= types[i] #> : IEquatable<<#= types[i] #>>
+    {
+        public const int ByteArrayLength = 20;
+
+        private readonly byte[] _idValue;
+        private int _quickHash;
+
+        public <#= types[i] #>(byte[] value)
+        {
+            // Sanity check first:
+            if (value.Length != ByteArrayLength) throw new ArgumentOutOfRangeException("value", String.Format("value must be {0} bytes in length", ByteArrayLength));
+            
+            _idValue = value;
+            _quickHash = BitConverter.ToInt32(_idValue, 0);
+        }
+
+        public static explicit operator byte[](<#= types[i] #> id)
+        {
+            return id._idValue;
+        }
+
+        public static explicit operator <#= types[i] #>(byte[] hash)
+        {
+            return new <#= types[i] #>(hash);
+        }
+
+        public bool Equals(<#= types[i] #> other)
+        {
+            // Compare byte-by-byte:
+            for (int i = 0; i < ByteArrayLength; ++i)
+                if (this._idValue[i] != other._idValue[i]) return false;
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return _quickHash;
+        }
+
+        public override string ToString()
+        {
+            return null;
+        }
+    }
+<#
+    } // for (int i = 0; i < types.Length; ++i)
+#>
+}

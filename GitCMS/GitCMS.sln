@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitCMS.Data", "GitCMS.Data\GitCMS.Data.csproj", "{118C63D8-9380-4934-B024-674874388904}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitCMS.Definition", "GitCMS.Definition\GitCMS.Definition.csproj", "{29D4825B-A343-45AA-99FB-CE6671E78178}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{118C63D8-9380-4934-B024-674874388904}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{118C63D8-9380-4934-B024-674874388904}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{118C63D8-9380-4934-B024-674874388904}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{118C63D8-9380-4934-B024-674874388904}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29D4825B-A343-45AA-99FB-CE6671E78178}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29D4825B-A343-45AA-99FB-CE6671E78178}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29D4825B-A343-45AA-99FB-CE6671E78178}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29D4825B-A343-45AA-99FB-CE6671E78178}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

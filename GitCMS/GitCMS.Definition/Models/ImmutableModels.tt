@@ -1,0 +1,188 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core.dll" #>
+<#@ import namespace="System.Linq" #>
+<#@ output extension=".generated.cs" #><#
+    var types = new[] {
+        new {
+            name = "Commit",
+            comment = "A commit object.",
+            idType = "CommitID",
+            members = new[] {
+                new { name = "ParentCommits", type = "CommitID[]" },
+                new { name = "TreeID", type = "TreeID" },
+                new { name = "Committer", type = "string" },
+                new { name = "Author", type = "string" },
+                new { name = "DateCommitted", type = "DateTimeOffset" },
+                new { name = "Message", type = "string" },
+            }
+        },
+        new {
+            name = "TreeTreeReference",
+            comment = "A tree's named reference to another tree.",
+            idType = (string)null,
+            members = new[] {
+                new { name = "Name", type = "string" },
+                new { name = "TreeID", type = "TreeID" },
+            }
+        },
+        new {
+            name = "TreeBlobReference",
+            comment = "A tree's named reference to a blob.",
+            idType = (string)null,
+            members = new[] {
+                new { name = "Name", type = "string" },
+                new { name = "BlobID", type = "BlobID" },
+            }
+        },
+        new {
+            name = "Tree",
+            comment = "A tree object.",
+            idType = "TreeID",
+            members = new[] {
+                new { name = "Trees", type = "TreeTreeReference[]" },
+                new { name = "Blobs", type = "TreeBlobReference[]" },
+            }
+        },
+    };
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Security.Cryptography;
+
+namespace GitCMS.Definition.Models
+{
+<#
+    for (int i = 0; i < types.Length; ++i)
+    {
+        var ty = types[i];
+        if (i != 0)
+        {
+#>
+
+<#
+        } // if (i != 0)
+
+        if (ty.comment != (string)null)
+        {
+#>
+    /// <summary>
+    /// <#= ty.comment #>
+    /// </summary>
+<#
+        } // if (ty.comment != (string)null)
+#>
+    public sealed partial class <#= ty.name #>
+    {
+<#
+        if (ty.idType != (string)null)
+        {
+#>
+        public <#= ty.idType #> ID { get; private set; }
+<#
+        } // if (ty.idType != (string)null)
+#>
+<#
+        // Public read-only properties:
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+        public <#= mbr.type #> <#= mbr.name #> { get; private set; }
+<#
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+
+        public <#= ty.name #>(
+<#
+        bool doComma;
+        if (ty.idType != (string)null)
+        {
+            doComma = true;
+#>
+            <#= ty.idType #> pID
+<#
+        } // if (ty.idType != (string)null)
+        else
+        {
+            doComma = false;
+        } // if (ty.idType != (string)null) else
+
+        // Parameter names:
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+           <#= doComma ? "," : " "#><#= mbr.type #> p<#= mbr.name #>
+<#
+            doComma = true;
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+        )
+        {
+<#
+        if (ty.idType != (string)null)
+        {
+#>
+            this.ID = pID;
+<#
+        } // if (ty.idType != (string)null)
+        // Property assignment statements:
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+            this.<#= mbr.name #> = p<#= mbr.name #>;
+<#
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+        }
+
+        public sealed class Builder
+        {
+<#
+        // Public read-write properties:
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+            public <#= mbr.type #> <#= mbr.name #> { get; set; }
+<#
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+        }
+
+        private static readonly Encoding stringEncoding = Encoding.UTF8;
+<#
+        if (ty.idType != (string)null)
+        {
+#>
+
+        private static <#= ty.idType #> computeID(Builder m)
+        {
+            throw new NotImplementedException();
+
+            var sha1 = SHA1.Create();
+            byte[] hash = sha1.ComputeHash((byte[])null);
+
+            return new <#= ty.idType #>(hash);
+        }
+<#
+        } // if (ty.idType != (string)null)
+#>
+
+        public static implicit operator <#= ty.name #>(Builder m)
+        {
+            return new <#= ty.name #>(<#
+        if (ty.idType != (string)null)
+        {
+            #>computeID(m), <#
+        } // if (ty.idType != (string)null)
+            #><#= String.Join(", ", ty.members.Select(mbr => "m." + mbr.name).ToArray()) #>);
+        }
+    }
+<#
+    } // for (int i = 0; i < types.Length; ++i)
+#>
+}
