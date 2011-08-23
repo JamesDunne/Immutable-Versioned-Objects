@@ -321,8 +321,11 @@ namespace TestHarness
                 blobPersists[i] = db.AsynqNonQuery(new PersistBlob(blobs[id]));
             }
 
-            Console.WriteLine("Waiting for blob persists...");
-            Task.WaitAll(blobPersists);
+            if (blobPersists.Length > 0)
+            {
+                Console.WriteLine("Waiting for blob persists...");
+                Task.WaitAll(blobPersists);
+            }
 
             // Next, persist trees that don't exist:
             Console.WriteLine("Waiting for tree exists...");
@@ -350,15 +353,23 @@ namespace TestHarness
                 }
             }
 
-            // Synchronously persist the trees in dependency order:
+            // Asynchronously persist the trees in dependency order:
             // FIXME: asynchronous fan-out per depth level
+            Task<int> waiter = null, runner = null;
             while (treeIDsToPersist.Count > 0)
             {
                 TreeID id = treeIDsToPersist.Pop();
 
                 Console.WriteLine("PERSIST tree {0}", id.ToString());
-                Task<int> tmp = db.AsynqNonQuery(new PersistTree(trees[id]));
-                tmp.Wait();
+
+                if (runner == null) waiter = runner = db.AsynqNonQuery(new PersistTree(trees[id]));
+                else runner = runner.ContinueWith(r => db.AsynqNonQuery(new PersistTree(trees[id]))).Unwrap();
+            }
+
+            if (waiter != null)
+            {
+                Console.WriteLine("Waiting for tree persists...");
+                waiter.Wait();
             }
 
             Console.WriteLine("Complete");
