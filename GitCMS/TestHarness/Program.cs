@@ -252,20 +252,49 @@ namespace TestHarness
             blobs.Add(bl.ID, bl);
 
             // Create a Tree:
-            var trSrc = (Tree)new Tree.Builder()
+            var trPersists = (Tree)new Tree.Builder()
             {
-                Blobs = new TreeBlobReference[0],
+                Blobs = new TreeBlobReference[] {
+                    new TreeBlobReference("HelloWorld.cs", bl.ID),
+                    new TreeBlobReference("PersistBlob.cs", bl.ID),
+                    new TreeBlobReference("PersistTree.cs", bl.ID),
+                },
                 Trees = new TreeTreeReference[0]
             };
+            trees.Add(trPersists.ID, trPersists);
+
+            var trSrc = (Tree)new Tree.Builder()
+            {
+                Blobs = new TreeBlobReference[] {
+                    new TreeBlobReference("blah", bl.ID),
+                },
+                Trees = new TreeTreeReference[] {
+                    new TreeTreeReference("Persists", trPersists.ID),
+                }
+            };
             trees.Add(trSrc.ID, trSrc);
+
+            var trData = (Tree)new Tree.Builder()
+            {
+                Blobs = new TreeBlobReference[] {
+                    new TreeBlobReference("myTest.xml", bl.ID),
+                    new TreeBlobReference("myTest2.xml", bl.ID),
+                    new TreeBlobReference("myTest3.xml", bl.ID),
+                },
+                Trees = new TreeTreeReference[0]
+            };
+            trees.Add(trData.ID, trData);
 
             var trRoot = (Tree)new Tree.Builder()
             {
                 Blobs = new TreeBlobReference[] {
-                    new TreeBlobReference("README", bl.ID)
+                    new TreeBlobReference("README", bl.ID),
+                    new TreeBlobReference("main.xml", bl.ID),
+                    new TreeBlobReference("test.xml", bl.ID),
                 },
                 Trees = new TreeTreeReference[] {
-                    new TreeTreeReference("src", trSrc.ID)
+                    new TreeTreeReference("src", trSrc.ID),
+                    new TreeTreeReference("data", trData.ID),
                 },
             };
             trees.Add(trRoot.ID, trRoot);
@@ -282,6 +311,7 @@ namespace TestHarness
 
             BlobID[] blobIDsToPersist = blobs.Keys.Except(existBlobs.Result).ToArray();
 
+            // Blobs may be persisted in any order; there are no dependencies between blobs:
             Task<int>[] blobPersists = new Task<int>[blobIDsToPersist.Length];
             for (int i = 0; i < blobIDsToPersist.Length; ++i)
             {
@@ -298,20 +328,42 @@ namespace TestHarness
             Console.WriteLine("Waiting for tree exists...");
             existTrees.Wait();
 
-            TreeID[] treeIDsToPersist = trees.Keys.Except(existTrees.Result).ToArray();
+            // Trees must be created in dependency order!
+            HashSet<TreeID> treeIDsToPersistSet = new HashSet<TreeID>(trees.Keys.Except(existTrees.Result));
+            Stack<TreeID> treeIDsToPersist = new Stack<TreeID>(treeIDsToPersistSet.Count);
 
-            Task<int>[] treePersists = new Task<int>[treeIDsToPersist.Length];
-            for (int i = 0; i < treeIDsToPersist.Length; ++i)
+            // Run through trees from root to leaf:
+            Queue<TreeID> treeQueue = new Queue<TreeID>();
+            treeQueue.Enqueue(trRoot.ID);
+            while (treeQueue.Count > 0)
             {
-                TreeID id = treeIDsToPersist[i];
+                TreeID trID = treeQueue.Dequeue();
+                if (treeIDsToPersistSet.Contains(trID))
+                    treeIDsToPersist.Push(trID);
 
-                Console.WriteLine("PERSIST tree {0}", id.ToString());
-                treePersists[i] = db.AsynqNonQuery(new PersistTree(trees[id]));
+                Tree tr = trees[trID];
+                if (tr.Trees == null) continue;
+
+                foreach (TreeTreeReference r in tr.Trees)
+                {
+                    treeQueue.Enqueue(r.TreeID);
+                }
             }
 
-            Console.WriteLine("Waiting for tree persists...");
-            Task.WaitAll(treePersists);
+            // Synchronously persist the trees in dependency order:
+            // FIXME: asynchronous fan-out per depth level
+            while (treeIDsToPersist.Count > 0)
+            {
+                TreeID id = treeIDsToPersist.Pop();
+
+                Console.WriteLine("PERSIST tree {0}", id.ToString());
+                Task<int> tmp = db.AsynqNonQuery(new PersistTree(trees[id]));
+                tmp.Wait();
+            }
+
             Console.WriteLine("Complete");
+
+            Console.WriteLine("Root TreeID = {0}", trRoot.ID);
         }
     }
 }
