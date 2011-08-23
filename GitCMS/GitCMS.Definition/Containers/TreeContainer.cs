@@ -11,6 +11,11 @@ namespace GitCMS.Definition.Containers
     {
         private Dictionary<TreeID, Tree> _container;
 
+        public TreeContainer(params Tree[] trees)
+        {
+            _container = trees.ToDictionary(tr => tr.ID);
+        }
+
         public TreeContainer(IEnumerable<Tree> trees)
         {
             _container = trees.ToDictionary(tr => tr.ID);
@@ -40,5 +45,11 @@ namespace GitCMS.Definition.Containers
 
             return Maybe<Tree>.Nothing;
         }
+
+        public int Count { get { return _container.Count; } }
+
+        public IEnumerable<TreeID> Keys { get { return _container.Keys; } }
+
+        public IEnumerable<Tree> Values { get { return _container.Values; } }
     }
 }

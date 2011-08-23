@@ -11,6 +11,11 @@ namespace GitCMS.Definition.Containers
     {
         private Dictionary<BlobID, Blob> _container;
 
+        public BlobContainer(params Blob[] blobs)
+        {
+            _container = blobs.ToDictionary(bl => bl.ID);
+        }
+
         public BlobContainer(IEnumerable<Blob> blobs)
         {
             _container = blobs.ToDictionary(bl => bl.ID);
@@ -40,5 +45,11 @@ namespace GitCMS.Definition.Containers
 
             return Maybe<Blob>.Nothing;
         }
+
+        public int Count { get { return _container.Count; } }
+
+        public IEnumerable<BlobID> Keys { get { return _container.Keys; } }
+
+        public IEnumerable<Blob> Values { get { return _container.Values; } }
     }
 }

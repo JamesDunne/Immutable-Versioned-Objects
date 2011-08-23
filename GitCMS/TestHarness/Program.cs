@@ -7,6 +7,8 @@ using GitCMS.Definition.Models;
 using Asynq;
 using System.Threading.Tasks;
 using GitCMS.Data.Persists;
+using GitCMS.Definition.Containers;
+using GitCMS.Definition.Repositories;
 
 namespace TestHarness
 {
@@ -153,10 +155,7 @@ namespace TestHarness
         void TestPersistBlob()
         {
             // Create a Blob:
-            var bl = (Blob) new Blob.Builder()
-            {
-                Contents = Encoding.UTF8.GetBytes("Sample README content.")
-            };
+            var bl = (Blob) new Blob.Builder(Encoding.UTF8.GetBytes("Sample README content."));
             Console.WriteLine(bl.ID.ToString());
 
             var db = getDataContext();
@@ -191,17 +190,14 @@ namespace TestHarness
 
         void TestQueryBlobs()
         {
-            Dictionary<BlobID, Blob> blobs = new Dictionary<BlobID, Blob>();
-
             // Create some Blobs:
             Blob bl0 = new Blob.Builder(Encoding.UTF8.GetBytes("Sample README content."));
-            blobs.Add(bl0.ID, bl0);
             Console.WriteLine(bl0.ID.ToString());
 
             Blob bl1 = new Blob.Builder(Encoding.UTF8.GetBytes("Sample content."));
-            blobs.Add(bl1.ID, bl1);
             Console.WriteLine(bl1.ID.ToString());
 
+            BlobContainer blobs = new BlobContainer(bl0, bl1);
             var db = getDataContext();
 
             // Check which blobs exist already:
@@ -228,63 +224,51 @@ namespace TestHarness
 
         void TestPersistTree()
         {
-            Dictionary<BlobID, Blob> blobs = new Dictionary<BlobID, Blob>();
-            Dictionary<TreeID, Tree> trees = new Dictionary<TreeID, Tree>();
-
             // Create a Blob:
-            var bl = (Blob)new Blob.Builder()
-            {
-                Contents = Encoding.UTF8.GetBytes("Sample README content.")
-            };
-            blobs.Add(bl.ID, bl);
+            Blob bl = new Blob.Builder(Encoding.UTF8.GetBytes("Sample README content."));
+            BlobContainer blobs = new BlobContainer(bl);
 
             // Create a Tree:
-            var trPersists = (Tree)new Tree.Builder()
-            {
-                Blobs = new TreeBlobReference[] {
+            Tree trPersists = new Tree.Builder(
+                new TreeTreeReference[0],
+                new TreeBlobReference[] {
                     new TreeBlobReference.Builder("HelloWorld.cs", bl.ID),
                     new TreeBlobReference.Builder("PersistBlob.cs", bl.ID),
                     new TreeBlobReference.Builder("PersistTree.cs", bl.ID),
-                },
-                Trees = new TreeTreeReference[0]
-            };
-            trees.Add(trPersists.ID, trPersists);
-
-            var trSrc = (Tree)new Tree.Builder()
-            {
-                Blobs = new TreeBlobReference[] {
-                    new TreeBlobReference.Builder("blah", bl.ID),
-                },
-                Trees = new TreeTreeReference[] {
-                    new TreeTreeReference.Builder("Persists", trPersists.ID),
                 }
-            };
-            trees.Add(trSrc.ID, trSrc);
+            );
 
-            var trData = (Tree)new Tree.Builder()
-            {
-                Blobs = new TreeBlobReference[] {
+            Tree trSrc = new Tree.Builder(
+                new TreeTreeReference[] {
+                    new TreeTreeReference.Builder("Persists", trPersists.ID),
+                },
+                new TreeBlobReference[] {
+                    new TreeBlobReference.Builder("blah", bl.ID),
+                }
+            );
+
+            Tree trData = new Tree.Builder(
+                new TreeTreeReference[0],
+                new TreeBlobReference[] {
                     new TreeBlobReference.Builder("myTest.xml", bl.ID),
                     new TreeBlobReference.Builder("myTest2.xml", bl.ID),
                     new TreeBlobReference.Builder("myTest3.xml", bl.ID),
-                },
-                Trees = new TreeTreeReference[0]
-            };
-            trees.Add(trData.ID, trData);
+                }
+            );
 
-            var trRoot = (Tree)new Tree.Builder()
-            {
-                Blobs = new TreeBlobReference[] {
-                    new TreeBlobReference.Builder("README", bl.ID),
-                    new TreeBlobReference.Builder("main.xml", bl.ID),
-                    new TreeBlobReference.Builder("test.xml", bl.ID),
-                },
-                Trees = new TreeTreeReference[] {
+            Tree trRoot = new Tree.Builder(
+                new TreeTreeReference[] {
                     new TreeTreeReference.Builder("CRAP", trSrc.ID),
                     new TreeTreeReference.Builder("data", trData.ID),
                 },
-            };
-            trees.Add(trRoot.ID, trRoot);
+                new TreeBlobReference[] {
+                    new TreeBlobReference.Builder("README", bl.ID),
+                    new TreeBlobReference.Builder("main.xml", bl.ID),
+                    new TreeBlobReference.Builder("test.xml", bl.ID),
+                }
+            );
+
+            TreeContainer trees = new TreeContainer(trRoot, trSrc, trData, trPersists);
 
             var db = getDataContext();
 
