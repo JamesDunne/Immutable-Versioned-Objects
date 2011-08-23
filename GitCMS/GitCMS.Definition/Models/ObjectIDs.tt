@@ -68,6 +68,19 @@ namespace GitCMS.Definition.Models
         {
             return BitConverter.ToString(_idValue).ToLower();
         }
+
+        public class Comparer : IComparer<<#= types[i] #>>
+        {
+            public int Compare(<#= types[i] #> x, <#= types[i] #> y)
+            {
+                for (int i = 0; i < ByteArrayLength; ++i)
+                {
+                    if (x._idValue[i] == y._idValue[i]) continue;
+                    return x._idValue[i].CompareTo(y._idValue[i]);
+                }
+                return 0;
+            }
+        }
     }
 <#
     } // for (int i = 0; i < types.Length; ++i)

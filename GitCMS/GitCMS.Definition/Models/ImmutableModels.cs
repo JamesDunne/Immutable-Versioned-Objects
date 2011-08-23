@@ -26,10 +26,15 @@ namespace GitCMS.Definition.Models
                 if (m.Parents != null && m.Parents.Length > 0)
                 {
                     bw.WriteRaw("parents ");
-                    for (int i = 0; i < m.Parents.Length; ++i)
+
+                    // Sort parent CommitIDs in order:
+                    CommitID[] parents = new CommitID[m.Parents.Length];
+                    Array.Sort(parents, new CommitID.Comparer());
+                    
+                    for (int i = 0; i < parents.Length; ++i)
                     {
                         if (i != 0) bw.Write(',');
-                        bw.Write((byte[])m.Parents[i]);
+                        bw.Write((byte[])parents[i]);
                     }
                     bw.Write('\n');
                 }

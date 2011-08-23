@@ -49,6 +49,19 @@ namespace GitCMS.Definition.Models
         {
             return BitConverter.ToString(_idValue).ToLower();
         }
+
+        public class Comparer : IComparer<CommitID>
+        {
+            public int Compare(CommitID x, CommitID y)
+            {
+                for (int i = 0; i < ByteArrayLength; ++i)
+                {
+                    if (x._idValue[i] == y._idValue[i]) continue;
+                    return x._idValue[i].CompareTo(y._idValue[i]);
+                }
+                return 0;
+            }
+        }
     }
 
     public struct TreeID : IEquatable<TreeID>
@@ -95,6 +108,19 @@ namespace GitCMS.Definition.Models
         {
             return BitConverter.ToString(_idValue).ToLower();
         }
+
+        public class Comparer : IComparer<TreeID>
+        {
+            public int Compare(TreeID x, TreeID y)
+            {
+                for (int i = 0; i < ByteArrayLength; ++i)
+                {
+                    if (x._idValue[i] == y._idValue[i]) continue;
+                    return x._idValue[i].CompareTo(y._idValue[i]);
+                }
+                return 0;
+            }
+        }
     }
 
     public struct BlobID : IEquatable<BlobID>
@@ -140,6 +166,19 @@ namespace GitCMS.Definition.Models
         public override string ToString()
         {
             return BitConverter.ToString(_idValue).ToLower();
+        }
+
+        public class Comparer : IComparer<BlobID>
+        {
+            public int Compare(BlobID x, BlobID y)
+            {
+                for (int i = 0; i < ByteArrayLength; ++i)
+                {
+                    if (x._idValue[i] == y._idValue[i]) continue;
+                    return x._idValue[i].CompareTo(y._idValue[i]);
+                }
+                return 0;
+            }
         }
     }
 }
