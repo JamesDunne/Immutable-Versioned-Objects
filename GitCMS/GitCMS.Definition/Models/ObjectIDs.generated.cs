@@ -15,7 +15,7 @@ namespace GitCMS.Definition.Models
         public CommitID(byte[] value)
         {
             // Sanity check first:
-            if (value.Length != ByteArrayLength) throw new ArgumentOutOfRangeException("value", String.Format("value must be {0} bytes in length", ByteArrayLength));
+            if (value.Length != ByteArrayLength) throw new ArgumentOutOfRangeException("value", String.Format("CommitID value must be {0} bytes in length", ByteArrayLength));
             
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
@@ -61,7 +61,7 @@ namespace GitCMS.Definition.Models
         public TreeID(byte[] value)
         {
             // Sanity check first:
-            if (value.Length != ByteArrayLength) throw new ArgumentOutOfRangeException("value", String.Format("value must be {0} bytes in length", ByteArrayLength));
+            if (value.Length != ByteArrayLength) throw new ArgumentOutOfRangeException("value", String.Format("TreeID value must be {0} bytes in length", ByteArrayLength));
             
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
@@ -107,7 +107,7 @@ namespace GitCMS.Definition.Models
         public BlobID(byte[] value)
         {
             // Sanity check first:
-            if (value.Length != ByteArrayLength) throw new ArgumentOutOfRangeException("value", String.Format("value must be {0} bytes in length", ByteArrayLength));
+            if (value.Length != ByteArrayLength) throw new ArgumentOutOfRangeException("value", String.Format("BlobID value must be {0} bytes in length", ByteArrayLength));
             
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
