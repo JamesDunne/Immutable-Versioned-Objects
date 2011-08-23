@@ -293,7 +293,7 @@ namespace TestHarness
                     new TreeBlobReference("test.xml", bl.ID),
                 },
                 Trees = new TreeTreeReference[] {
-                    new TreeTreeReference("src", trSrc.ID),
+                    new TreeTreeReference("CRAP", trSrc.ID),
                     new TreeTreeReference("data", trData.ID),
                 },
             };
