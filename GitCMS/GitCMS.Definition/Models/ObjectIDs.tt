@@ -61,6 +61,11 @@ namespace GitCMS.Definition.Models
         {
             return !a.Equals(b);
         }
+        
+        public override bool Equals(object obj)
+        {
+            return this.Equals((<#= types[i] #>)obj);
+        }
 
         public bool Equals(<#= types[i] #> other)
         {

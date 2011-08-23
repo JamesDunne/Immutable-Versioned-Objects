@@ -36,6 +36,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Maybe.cs" />
+    <Compile Include="Containers\BlobContainer.cs" />
+    <Compile Include="Containers\TreeContainer.cs" />
     <Compile Include="Repositories\ITreeRepository.cs" />
     <None Include="Models\ImmutableModels.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

@@ -1,7 +1,7 @@
 USE [GitCMS];
 GO
 
-DECLARE @treeid varbinary(20);
+DECLARE @treeid binary(20);
 
 SET @treeid = 0x85cfe62db1cedba5e7c3a056c636c1df8557a305;
 --SET @treeid = 0x837166ec9e3168a3c11fc8eb461dac014e153ed0;
@@ -11,7 +11,7 @@ SET @treeid = 0x85cfe62db1cedba5e7c3a056c636c1df8557a305;
 ;WITH Trees AS (
     SELECT      CONVERT(binary(20), NULL) AS treeid, tr.treeid AS linked_treeid, CONVERT(nvarchar(128), NULL) AS name
     FROM        [dbo].[Tree] tr
-    WHERE       LEFT(tr.treeid, LEN(@treeid)) = @treeid
+    WHERE       tr.treeid = @treeid
     UNION ALL
     SELECT      tr.treeid, tr.linked_treeid, tr.name
     FROM        [dbo].[TreeTree] tr

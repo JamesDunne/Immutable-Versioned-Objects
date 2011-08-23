@@ -42,6 +42,11 @@ namespace GitCMS.Definition.Models
         {
             return !a.Equals(b);
         }
+        
+        public override bool Equals(object obj)
+        {
+            return this.Equals((CommitID)obj);
+        }
 
         public bool Equals(CommitID other)
         {
@@ -125,6 +130,11 @@ namespace GitCMS.Definition.Models
         {
             return !a.Equals(b);
         }
+        
+        public override bool Equals(object obj)
+        {
+            return this.Equals((TreeID)obj);
+        }
 
         public bool Equals(TreeID other)
         {
@@ -207,6 +217,11 @@ namespace GitCMS.Definition.Models
         public static bool operator !=(BlobID a, BlobID b)
         {
             return !a.Equals(b);
+        }
+        
+        public override bool Equals(object obj)
+        {
+            return this.Equals((BlobID)obj);
         }
 
         public bool Equals(BlobID other)
