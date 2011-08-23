@@ -30,7 +30,46 @@ namespace GitCMS.Data
         internal static readonly string[] TablePKs_Blob = new string[1] { "blobid" };
         internal static readonly string[] ColumnNames_Blob = new string[]
         {
-            "contents"
+            "contents",
+        };
+
+        #endregion
+
+        #region Tree table
+
+        internal const string TableName_Tree = "[dbo].[Tree]";
+        internal const string TableFromHint_Tree = @" WITH (NOLOCK)";
+        internal static readonly string[] TablePKs_Tree = new string[1] { "treeid" };
+        internal static readonly string[] ColumnNames_Tree = new string[]
+        {
+        };
+
+        #endregion
+
+        #region TreeTree table
+
+        internal const string TableName_TreeTree = "[dbo].[TreeTree]";
+        internal const string TableFromHint_TreeTree = @" WITH (NOLOCK)";
+        internal static readonly string[] TablePKs_TreeTree = new string[0];
+        internal static readonly string[] ColumnNames_TreeTree = new string[]
+        {
+            "treeid",
+            "linked_treeid",
+            "name",
+        };
+
+        #endregion
+
+        #region TreeBlob table
+
+        internal const string TableName_TreeBlob = "[dbo].[TreeBlob]";
+        internal const string TableFromHint_TreeBlob = @" WITH (NOLOCK)";
+        internal static readonly string[] TablePKs_TreeBlob = new string[0];
+        internal static readonly string[] ColumnNames_TreeBlob = new string[]
+        {
+            "treeid",
+            "linked_blobid",
+            "name",
         };
 
         #endregion

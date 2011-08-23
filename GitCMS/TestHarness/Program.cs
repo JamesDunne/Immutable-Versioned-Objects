@@ -20,10 +20,16 @@ namespace TestHarness
             //pr.TestTreeIDEquivalencies();
             //pr.TestAsynqQuery();
             //pr.TestPersistBlob();
-            pr.TestQueryBlobs();
+            //pr.TestQueryBlobs();
+            pr.TestPersistTree();
 
             Console.WriteLine("Press a key.");
             Console.ReadLine();
+        }
+
+        DataContext getDataContext()
+        {
+            return new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=GitCMS;Integrated Security=SSPI");
         }
 
         void TestIDGeneration()
@@ -130,7 +136,7 @@ namespace TestHarness
 
         void TestAsynqQuery()
         {
-            var db = new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=GitCMS;Integrated Security=SSPI");
+            var db = getDataContext();
 
             var q = new QueryCommit(new CommitID(new byte[20]));
 
@@ -160,7 +166,7 @@ namespace TestHarness
             };
             Console.WriteLine(bl.ID.ToString());
 
-            var db = new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=GitCMS;Integrated Security=SSPI");
+            var db = getDataContext();
 
             // Check if the Blob exists by this ID:
             var getBlob = db.AsynqSingle(new QueryBlob(bl.ID));
@@ -209,7 +215,7 @@ namespace TestHarness
             blobs.Add(bl1.ID, bl1);
             Console.WriteLine(bl1.ID.ToString());
 
-            var db = new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=GitCMS;Integrated Security=SSPI");
+            var db = getDataContext();
 
             // Check which blobs exist already:
             var qBlobs = db.AsynqMulti(new QueryBlobsExist(bl0.ID, bl1.ID), expectedCapacity: blobs.Count);
@@ -235,7 +241,77 @@ namespace TestHarness
 
         void TestPersistTree()
         {
+            Dictionary<BlobID, Blob> blobs = new Dictionary<BlobID, Blob>();
+            Dictionary<TreeID, Tree> trees = new Dictionary<TreeID, Tree>();
 
+            // Create a Blob:
+            var bl = (Blob)new Blob.Builder()
+            {
+                Contents = Encoding.UTF8.GetBytes("Sample README content.")
+            };
+            blobs.Add(bl.ID, bl);
+
+            // Create a Tree:
+            var trSrc = (Tree)new Tree.Builder()
+            {
+                Blobs = new TreeBlobReference[0],
+                Trees = new TreeTreeReference[0]
+            };
+            trees.Add(trSrc.ID, trSrc);
+
+            var trRoot = (Tree)new Tree.Builder()
+            {
+                Blobs = new TreeBlobReference[] {
+                    new TreeBlobReference("README", bl.ID)
+                },
+                Trees = new TreeTreeReference[] {
+                    new TreeTreeReference("src", trSrc.ID)
+                },
+            };
+            trees.Add(trRoot.ID, trRoot);
+
+            var db = getDataContext();
+
+            // Start queries to check what exists already:
+            var existBlobs = db.AsynqMulti(new QueryBlobsExist(blobs.Keys), expectedCapacity: blobs.Count);
+            var existTrees = db.AsynqMulti(new QueryTreesExist(trees.Keys), expectedCapacity: trees.Count);
+
+            // First, persist blobs that don't exist:
+            Console.WriteLine("Waiting for blob exists...");
+            existBlobs.Wait();
+
+            BlobID[] blobIDsToPersist = blobs.Keys.Except(existBlobs.Result).ToArray();
+
+            Task<int>[] blobPersists = new Task<int>[blobIDsToPersist.Length];
+            for (int i = 0; i < blobIDsToPersist.Length; ++i)
+            {
+                BlobID id = blobIDsToPersist[i];
+
+                Console.WriteLine("PERSIST blob {0}", id.ToString());
+                blobPersists[i] = db.AsynqNonQuery(new PersistBlob(blobs[id]));
+            }
+
+            Console.WriteLine("Waiting for blob persists...");
+            Task.WaitAll(blobPersists);
+
+            // Next, persist trees that don't exist:
+            Console.WriteLine("Waiting for tree exists...");
+            existTrees.Wait();
+
+            TreeID[] treeIDsToPersist = trees.Keys.Except(existTrees.Result).ToArray();
+
+            Task<int>[] treePersists = new Task<int>[treeIDsToPersist.Length];
+            for (int i = 0; i < treeIDsToPersist.Length; ++i)
+            {
+                TreeID id = treeIDsToPersist[i];
+
+                Console.WriteLine("PERSIST tree {0}", id.ToString());
+                treePersists[i] = db.AsynqNonQuery(new PersistTree(trees[id]));
+            }
+
+            Console.WriteLine("Waiting for tree persists...");
+            Task.WaitAll(treePersists);
+            Console.WriteLine("Complete");
         }
     }
 }
