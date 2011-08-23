@@ -38,6 +38,22 @@ namespace GitCMS.Definition.Models
             this.Message = pMessage;
         }
 
+        public Commit(
+            CommitID pID
+           ,Builder b
+        )
+        {
+            if (computeID(b) != pID) throw new ArgumentOutOfRangeException("pID");
+
+            this.ID = pID;
+            this.Parents = b.Parents;
+            this.TreeID = b.TreeID;
+            this.Committer = b.Committer;
+            this.Author = b.Author;
+            this.DateCommitted = b.DateCommitted;
+            this.Message = b.Message;
+        }
+
         public sealed class Builder
         {
             public CommitID[] Parents { get; set; }
@@ -48,11 +64,11 @@ namespace GitCMS.Definition.Models
             public string Message { get; set; }
         }
 
-        //private static CommitID computeID(Builder m);
+        //private static CommitID computeID(Builder b);
 
-        public static implicit operator Commit(Builder m)
+        public static implicit operator Commit(Builder b)
         {
-            return new Commit(computeID(m), m.Parents, m.TreeID, m.Committer, m.Author, m.DateCommitted, m.Message);
+            return new Commit(computeID(b), b);
         }
     }
 
@@ -73,15 +89,23 @@ namespace GitCMS.Definition.Models
             this.TreeID = pTreeID;
         }
 
+        public TreeTreeReference(
+            Builder b
+        )
+        {
+            this.Name = b.Name;
+            this.TreeID = b.TreeID;
+        }
+
         public sealed class Builder
         {
             public string Name { get; set; }
             public TreeID TreeID { get; set; }
         }
 
-        public static implicit operator TreeTreeReference(Builder m)
+        public static implicit operator TreeTreeReference(Builder b)
         {
-            return new TreeTreeReference(m.Name, m.TreeID);
+            return new TreeTreeReference(b);
         }
     }
 
@@ -102,15 +126,23 @@ namespace GitCMS.Definition.Models
             this.BlobID = pBlobID;
         }
 
+        public TreeBlobReference(
+            Builder b
+        )
+        {
+            this.Name = b.Name;
+            this.BlobID = b.BlobID;
+        }
+
         public sealed class Builder
         {
             public string Name { get; set; }
             public BlobID BlobID { get; set; }
         }
 
-        public static implicit operator TreeBlobReference(Builder m)
+        public static implicit operator TreeBlobReference(Builder b)
         {
-            return new TreeBlobReference(m.Name, m.BlobID);
+            return new TreeBlobReference(b);
         }
     }
 
@@ -134,17 +166,29 @@ namespace GitCMS.Definition.Models
             this.Blobs = pBlobs;
         }
 
+        public Tree(
+            TreeID pID
+           ,Builder b
+        )
+        {
+            if (computeID(b) != pID) throw new ArgumentOutOfRangeException("pID");
+
+            this.ID = pID;
+            this.Trees = b.Trees;
+            this.Blobs = b.Blobs;
+        }
+
         public sealed class Builder
         {
             public TreeTreeReference[] Trees { get; set; }
             public TreeBlobReference[] Blobs { get; set; }
         }
 
-        //private static TreeID computeID(Builder m);
+        //private static TreeID computeID(Builder b);
 
-        public static implicit operator Tree(Builder m)
+        public static implicit operator Tree(Builder b)
         {
-            return new Tree(computeID(m), m.Trees, m.Blobs);
+            return new Tree(computeID(b), b);
         }
     }
 
@@ -165,16 +209,27 @@ namespace GitCMS.Definition.Models
             this.Contents = pContents;
         }
 
+        public Blob(
+            BlobID pID
+           ,Builder b
+        )
+        {
+            if (computeID(b) != pID) throw new ArgumentOutOfRangeException("pID");
+
+            this.ID = pID;
+            this.Contents = b.Contents;
+        }
+
         public sealed class Builder
         {
             public byte[] Contents { get; set; }
         }
 
-        //private static BlobID computeID(Builder m);
+        //private static BlobID computeID(Builder b);
 
-        public static implicit operator Blob(Builder m)
+        public static implicit operator Blob(Builder b)
         {
-            return new Blob(computeID(m), m.Contents);
+            return new Blob(computeID(b), b);
         }
     }
 }

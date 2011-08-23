@@ -161,10 +161,22 @@ namespace TestHarness
 
             var db = new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=GitCMS;Integrated Security=SSPI");
 
-            var t = db.AsynqNonQuery(new PersistBlob(bl));
-            t.Wait();
+            // Check if the Blob exists by this ID:
+            var getBlob = db.AsynqSingle(new QueryBlob(bl.ID));
+            getBlob.Wait();
 
-            Console.WriteLine("{0} rows affected", t.Result);
+            if (getBlob.Result == null)
+            {
+                // It does not, persist it:
+                var t = db.AsynqNonQuery(new PersistBlob(bl));
+                t.Wait();
+
+                Console.WriteLine("{0} rows affected", t.Result);
+            }
+            else
+            {
+                Console.WriteLine("Blob retrieved {0}", getBlob.Result.ID.ToString());
+            }
         }
     }
 }

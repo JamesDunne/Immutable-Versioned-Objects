@@ -30,6 +30,16 @@ namespace GitCMS.Definition.Models
         {
             return new CommitID(hash);
         }
+        
+        public static bool operator ==(CommitID a, CommitID b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(CommitID a, CommitID b)
+        {
+            return !a.Equals(b);
+        }
 
         public bool Equals(CommitID other)
         {
@@ -89,6 +99,16 @@ namespace GitCMS.Definition.Models
         {
             return new TreeID(hash);
         }
+        
+        public static bool operator ==(TreeID a, TreeID b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(TreeID a, TreeID b)
+        {
+            return !a.Equals(b);
+        }
 
         public bool Equals(TreeID other)
         {
@@ -147,6 +167,16 @@ namespace GitCMS.Definition.Models
         public static explicit operator BlobID(byte[] hash)
         {
             return new BlobID(hash);
+        }
+        
+        public static bool operator ==(BlobID a, BlobID b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(BlobID a, BlobID b)
+        {
+            return !a.Equals(b);
         }
 
         public bool Equals(BlobID other)

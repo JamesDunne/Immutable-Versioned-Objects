@@ -153,6 +153,43 @@ namespace GitCMS.Definition.Models
 #>
         }
 
+        public <#= ty.name #>(
+<#
+        if (ty.idType != (string)null)
+        {
+            doComma = true;
+#>
+            <#= ty.idType #> pID
+<#
+        } // if (ty.idType != (string)null)
+        else
+        {
+            doComma = false;
+        } // if (ty.idType != (string)null) else
+#>
+           <#= doComma ? "," : " "#>Builder b
+        )
+        {
+<#
+        if (ty.idType != (string)null)
+        {
+#>
+            if (computeID(b) != pID) throw new ArgumentOutOfRangeException("pID");
+
+            this.ID = pID;
+<#
+        } // if (ty.idType != (string)null)
+        // Property assignment statements:
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+            this.<#= mbr.name #> = b.<#= mbr.name #>;
+<#
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+        }
+
         public sealed class Builder
         {
 <#
@@ -171,19 +208,20 @@ namespace GitCMS.Definition.Models
         {
 #>
 
-        //private static <#= ty.idType #> computeID(Builder m);
+        //private static <#= ty.idType #> computeID(Builder b);
 <#
         } // if (ty.idType != (string)null)
 #>
 
-        public static implicit operator <#= ty.name #>(Builder m)
+        public static implicit operator <#= ty.name #>(Builder b)
         {
             return new <#= ty.name #>(<#
         if (ty.idType != (string)null)
         {
-            #>computeID(m), <#
+            #>computeID(b), <#
         } // if (ty.idType != (string)null)
-            #><#= String.Join(", ", ty.members.Select(mbr => "m." + mbr.name).ToArray()) #>);
+        // = String.Join(", ", ty.members.Select(mbr => "b." + mbr.name).ToArray())
+            #>b);
         }
     }
 <#

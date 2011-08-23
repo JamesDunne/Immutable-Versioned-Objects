@@ -49,6 +49,16 @@ namespace GitCMS.Definition.Models
         {
             return new <#= types[i] #>(hash);
         }
+        
+        public static bool operator ==(<#= types[i] #> a, <#= types[i] #> b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(<#= types[i] #> a, <#= types[i] #> b)
+        {
+            return !a.Equals(b);
+        }
 
         public bool Equals(<#= types[i] #> other)
         {

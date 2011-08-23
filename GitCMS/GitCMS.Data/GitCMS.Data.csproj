@@ -40,6 +40,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Persists\PersistBlob.cs" />
+    <Compile Include="Queries\QueryBlob.cs" />
     <Compile Include="Queries\QueryCommit.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Tables.cs" />

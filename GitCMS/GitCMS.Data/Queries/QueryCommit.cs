@@ -7,7 +7,7 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Queries
 {
-    public class QueryCommit : DataQuery<Commit>
+    public sealed class QueryCommit : DataQuery<Commit>
     {
         private CommitID _id;
 
