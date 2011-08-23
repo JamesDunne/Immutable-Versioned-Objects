@@ -36,6 +36,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Repositories\ITreeRepository.cs" />
     <None Include="Models\ImmutableModels.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ImmutableModels.generated.cs</LastGenOutput>

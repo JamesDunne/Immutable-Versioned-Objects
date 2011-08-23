@@ -38,7 +38,12 @@ namespace GitCMS.Data.Queries
             Blob.Builder b = new Blob.Builder();
             b.Contents = dr.GetSqlBinary(1).Value;
             
-            return new Blob(id, b);
+            var bl = (Blob)b;
+#if DEBUG
+            if (bl.ID != id) throw new InvalidOperationException();
+#endif
+
+            return bl;
         }
     }
 }

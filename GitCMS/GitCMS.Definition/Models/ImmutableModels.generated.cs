@@ -19,33 +19,9 @@ namespace GitCMS.Definition.Models
         public DateTimeOffset DateCommitted { get; private set; }
         public string Message { get; private set; }
 
-        public Commit(
-            CommitID pID
-           ,CommitID[] pParents
-           ,TreeID pTreeID
-           ,string pCommitter
-           ,string pAuthor
-           ,DateTimeOffset pDateCommitted
-           ,string pMessage
-        )
+        public Commit(Builder b)
         {
-            this.ID = pID;
-            this.Parents = pParents;
-            this.TreeID = pTreeID;
-            this.Committer = pCommitter;
-            this.Author = pAuthor;
-            this.DateCommitted = pDateCommitted;
-            this.Message = pMessage;
-        }
-
-        public Commit(
-            CommitID pID
-           ,Builder b
-        )
-        {
-            if (computeID(b) != pID) throw new ArgumentOutOfRangeException("pID");
-
-            this.ID = pID;
+            this.ID = computeID(b);
             this.Parents = b.Parents;
             this.TreeID = b.TreeID;
             this.Committer = b.Committer;
@@ -62,13 +38,32 @@ namespace GitCMS.Definition.Models
             public string Author { get; set; }
             public DateTimeOffset DateCommitted { get; set; }
             public string Message { get; set; }
+
+            public Builder() { }
+
+            public Builder(
+                CommitID[] pParents
+               ,TreeID pTreeID
+               ,string pCommitter
+               ,string pAuthor
+               ,DateTimeOffset pDateCommitted
+               ,string pMessage
+            )
+            {
+                this.Parents = pParents;
+                this.TreeID = pTreeID;
+                this.Committer = pCommitter;
+                this.Author = pAuthor;
+                this.DateCommitted = pDateCommitted;
+                this.Message = pMessage;
+            }
         }
 
         //private static CommitID computeID(Builder b);
 
         public static implicit operator Commit(Builder b)
         {
-            return new Commit(computeID(b), b);
+            return new Commit(b);
         }
     }
 
@@ -80,18 +75,7 @@ namespace GitCMS.Definition.Models
         public string Name { get; private set; }
         public TreeID TreeID { get; private set; }
 
-        public TreeTreeReference(
-            string pName
-           ,TreeID pTreeID
-        )
-        {
-            this.Name = pName;
-            this.TreeID = pTreeID;
-        }
-
-        public TreeTreeReference(
-            Builder b
-        )
+        public TreeTreeReference(Builder b)
         {
             this.Name = b.Name;
             this.TreeID = b.TreeID;
@@ -101,6 +85,17 @@ namespace GitCMS.Definition.Models
         {
             public string Name { get; set; }
             public TreeID TreeID { get; set; }
+
+            public Builder() { }
+
+            public Builder(
+                string pName
+               ,TreeID pTreeID
+            )
+            {
+                this.Name = pName;
+                this.TreeID = pTreeID;
+            }
         }
 
         public static implicit operator TreeTreeReference(Builder b)
@@ -117,18 +112,7 @@ namespace GitCMS.Definition.Models
         public string Name { get; private set; }
         public BlobID BlobID { get; private set; }
 
-        public TreeBlobReference(
-            string pName
-           ,BlobID pBlobID
-        )
-        {
-            this.Name = pName;
-            this.BlobID = pBlobID;
-        }
-
-        public TreeBlobReference(
-            Builder b
-        )
+        public TreeBlobReference(Builder b)
         {
             this.Name = b.Name;
             this.BlobID = b.BlobID;
@@ -138,6 +122,17 @@ namespace GitCMS.Definition.Models
         {
             public string Name { get; set; }
             public BlobID BlobID { get; set; }
+
+            public Builder() { }
+
+            public Builder(
+                string pName
+               ,BlobID pBlobID
+            )
+            {
+                this.Name = pName;
+                this.BlobID = pBlobID;
+            }
         }
 
         public static implicit operator TreeBlobReference(Builder b)
@@ -155,25 +150,9 @@ namespace GitCMS.Definition.Models
         public TreeTreeReference[] Trees { get; private set; }
         public TreeBlobReference[] Blobs { get; private set; }
 
-        public Tree(
-            TreeID pID
-           ,TreeTreeReference[] pTrees
-           ,TreeBlobReference[] pBlobs
-        )
+        public Tree(Builder b)
         {
-            this.ID = pID;
-            this.Trees = pTrees;
-            this.Blobs = pBlobs;
-        }
-
-        public Tree(
-            TreeID pID
-           ,Builder b
-        )
-        {
-            if (computeID(b) != pID) throw new ArgumentOutOfRangeException("pID");
-
-            this.ID = pID;
+            this.ID = computeID(b);
             this.Trees = b.Trees;
             this.Blobs = b.Blobs;
         }
@@ -182,13 +161,24 @@ namespace GitCMS.Definition.Models
         {
             public TreeTreeReference[] Trees { get; set; }
             public TreeBlobReference[] Blobs { get; set; }
+
+            public Builder() { }
+
+            public Builder(
+                TreeTreeReference[] pTrees
+               ,TreeBlobReference[] pBlobs
+            )
+            {
+                this.Trees = pTrees;
+                this.Blobs = pBlobs;
+            }
         }
 
         //private static TreeID computeID(Builder b);
 
         public static implicit operator Tree(Builder b)
         {
-            return new Tree(computeID(b), b);
+            return new Tree(b);
         }
     }
 
@@ -200,36 +190,31 @@ namespace GitCMS.Definition.Models
         public BlobID ID { get; private set; }
         public byte[] Contents { get; private set; }
 
-        public Blob(
-            BlobID pID
-           ,byte[] pContents
-        )
+        public Blob(Builder b)
         {
-            this.ID = pID;
-            this.Contents = pContents;
-        }
-
-        public Blob(
-            BlobID pID
-           ,Builder b
-        )
-        {
-            if (computeID(b) != pID) throw new ArgumentOutOfRangeException("pID");
-
-            this.ID = pID;
+            this.ID = computeID(b);
             this.Contents = b.Contents;
         }
 
         public sealed class Builder
         {
             public byte[] Contents { get; set; }
+
+            public Builder() { }
+
+            public Builder(
+                byte[] pContents
+            )
+            {
+                this.Contents = pContents;
+            }
         }
 
         //private static BlobID computeID(Builder b);
 
         public static implicit operator Blob(Builder b)
         {
-            return new Blob(computeID(b), b);
+            return new Blob(b);
         }
     }
 }

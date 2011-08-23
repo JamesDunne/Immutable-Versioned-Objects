@@ -5,7 +5,7 @@ using System.Text;
 
 namespace System
 {
-    public sealed class Either<T1, T2>
+    public struct Either<T1, T2>
     {
         public enum Selected
         {

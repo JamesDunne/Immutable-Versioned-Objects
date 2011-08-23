@@ -108,75 +108,13 @@ namespace GitCMS.Definition.Models
         } // for (int j = 0; j < ty.members.Length; ++j)
 #>
 
-        public <#= ty.name #>(
-<#
-        bool doComma;
-        if (ty.idType != (string)null)
-        {
-            doComma = true;
-#>
-            <#= ty.idType #> pID
-<#
-        } // if (ty.idType != (string)null)
-        else
-        {
-            doComma = false;
-        } // if (ty.idType != (string)null) else
-
-        // Parameter names:
-        for (int j = 0; j < ty.members.Length; ++j)
-        {
-            var mbr = ty.members[j];
-#>
-           <#= doComma ? "," : " "#><#= mbr.type #> p<#= mbr.name #>
-<#
-            doComma = true;
-        } // for (int j = 0; j < ty.members.Length; ++j)
-#>
-        )
+        public <#= ty.name #>(Builder b)
         {
 <#
         if (ty.idType != (string)null)
         {
 #>
-            this.ID = pID;
-<#
-        } // if (ty.idType != (string)null)
-        // Property assignment statements:
-        for (int j = 0; j < ty.members.Length; ++j)
-        {
-            var mbr = ty.members[j];
-#>
-            this.<#= mbr.name #> = p<#= mbr.name #>;
-<#
-        } // for (int j = 0; j < ty.members.Length; ++j)
-#>
-        }
-
-        public <#= ty.name #>(
-<#
-        if (ty.idType != (string)null)
-        {
-            doComma = true;
-#>
-            <#= ty.idType #> pID
-<#
-        } // if (ty.idType != (string)null)
-        else
-        {
-            doComma = false;
-        } // if (ty.idType != (string)null) else
-#>
-           <#= doComma ? "," : " "#>Builder b
-        )
-        {
-<#
-        if (ty.idType != (string)null)
-        {
-#>
-            if (computeID(b) != pID) throw new ArgumentOutOfRangeException("pID");
-
-            this.ID = pID;
+            this.ID = computeID(b);
 <#
         } // if (ty.idType != (string)null)
         // Property assignment statements:
@@ -202,6 +140,33 @@ namespace GitCMS.Definition.Models
 <#
         } // for (int j = 0; j < ty.members.Length; ++j)
 #>
+
+            public Builder() { }
+
+            public Builder(
+<#
+        bool doComma = false;
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+               <#= doComma ? "," : " " #><#= mbr.type #> p<#= mbr.name #>
+<#
+            doComma = true;
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+            )
+            {
+<#
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+                this.<#= mbr.name #> = p<#= mbr.name #>;
+<#
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+            }
         }
 <#
         if (ty.idType != (string)null)
@@ -215,13 +180,7 @@ namespace GitCMS.Definition.Models
 
         public static implicit operator <#= ty.name #>(Builder b)
         {
-            return new <#= ty.name #>(<#
-        if (ty.idType != (string)null)
-        {
-            #>computeID(b), <#
-        } // if (ty.idType != (string)null)
-        // = String.Join(", ", ty.members.Select(mbr => "b." + mbr.name).ToArray())
-            #>b);
+            return new <#= ty.name #>(b);
         }
     }
 <#

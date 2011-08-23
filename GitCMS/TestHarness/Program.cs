@@ -35,32 +35,29 @@ namespace TestHarness
         void TestIDGeneration()
         {
             // Create a Blob:
-            var bl = (Blob) new Blob.Builder()
-            {
-                Contents = Encoding.UTF8.GetBytes("Sample README content.")
-            };
+            Blob bl = new Blob.Builder(
+                pContents:  Encoding.UTF8.GetBytes("Sample README content.")
+            );
             Console.WriteLine(bl.ID.ToString());
 
             // Create a Tree:
-            var tr = (Tree) new Tree.Builder()
-            {
-                Blobs = new TreeBlobReference[] {
-                    new TreeBlobReference("README", bl.ID)
-                },
-                Trees = new TreeTreeReference[0]
-            };
+            Tree tr = new Tree.Builder(
+                new TreeTreeReference[0],
+                new TreeBlobReference[] {
+                    new TreeBlobReference.Builder("README", bl.ID)
+                }
+            );
             Console.WriteLine(tr.ID.ToString());
 
             // Create a Commit:
-            var cm = (Commit) new Commit.Builder()
-            {
-                Parents = new CommitID[0],
-                TreeID = tr.ID,
-                Committer = "James Dunne <james.jdunne@gmail.com>",
-                Author = "James Dunne <james.jdunne@gmail.com>",
-                DateCommitted = DateTimeOffset.UtcNow.Date,
-                Message = "A commit message here."
-            };
+            Commit cm = new Commit.Builder(
+                pParents:       new CommitID[0],
+                pTreeID:        tr.ID,
+                pCommitter:     "James Dunne <james.jdunne@gmail.com>",
+                pAuthor:        "James Dunne <james.jdunne@gmail.com>",
+                pDateCommitted: DateTimeOffset.UtcNow.Date,
+                pMessage:       "A commit message here."
+            );
             Console.WriteLine(cm.ID.ToString());
         }
 
@@ -75,62 +72,58 @@ namespace TestHarness
             rnd.NextBytes(bidBuf);
 
             // Create several variants of the same Tree:
-            var tr0 = (Tree)new Tree.Builder()
-            {
-                Blobs = new TreeBlobReference[] {
-                    new TreeBlobReference("main", new BlobID(bidBuf)),
-                    new TreeBlobReference("README", new BlobID(bidBuf)),
+            Tree tr0 = new Tree.Builder(
+                new TreeTreeReference[] {
+                    new TreeTreeReference.Builder("src", new TreeID(tidBuf)),
+                    new TreeTreeReference.Builder("Content", new TreeID(tidBuf)),
+                    new TreeTreeReference.Builder("Images", new TreeID(tidBuf)),
                 },
-                Trees = new TreeTreeReference[] {
-                    new TreeTreeReference("src", new TreeID(tidBuf)),
-                    new TreeTreeReference("Content", new TreeID(tidBuf)),
-                    new TreeTreeReference("Images", new TreeID(tidBuf)),
-                },
-            };
+                new TreeBlobReference[] {
+                    new TreeBlobReference.Builder("main", new BlobID(bidBuf)),
+                    new TreeBlobReference.Builder("README", new BlobID(bidBuf)),
+                }
+            );
             Console.WriteLine(tr0.ID.ToString());
 
-            var tr1 = (Tree)new Tree.Builder()
-            {
-                Blobs = new TreeBlobReference[] {
-                    new TreeBlobReference("README", new BlobID(bidBuf)),
-                    new TreeBlobReference("main", new BlobID(bidBuf)),
+            Tree tr1 = new Tree.Builder(
+                new TreeTreeReference[] {
+                    new TreeTreeReference.Builder("Content", new TreeID(tidBuf)),
+                    new TreeTreeReference.Builder("src", new TreeID(tidBuf)),
+                    new TreeTreeReference.Builder("Images", new TreeID(tidBuf)),
                 },
-                Trees = new TreeTreeReference[] {
-                    new TreeTreeReference("Content", new TreeID(tidBuf)),
-                    new TreeTreeReference("src", new TreeID(tidBuf)),
-                    new TreeTreeReference("Images", new TreeID(tidBuf)),
-                },
-            };
+                new TreeBlobReference[] {
+                    new TreeBlobReference.Builder("README", new BlobID(bidBuf)),
+                    new TreeBlobReference.Builder("main", new BlobID(bidBuf)),
+                }
+            );
             Console.WriteLine(tr1.ID.ToString());
 
-            var tr2 = (Tree)new Tree.Builder()
-            {
-                Blobs = new TreeBlobReference[] {
-                    new TreeBlobReference("README", new BlobID(bidBuf)),
-                    new TreeBlobReference("main", new BlobID(bidBuf)),
+            Tree tr2 = new Tree.Builder(
+                new TreeTreeReference[] {
+                    new TreeTreeReference.Builder("Content", new TreeID(tidBuf)),
+                    new TreeTreeReference.Builder("Images", new TreeID(tidBuf)),
+                    new TreeTreeReference.Builder("src", new TreeID(tidBuf)),
                 },
-                Trees = new TreeTreeReference[] {
-                    new TreeTreeReference("Content", new TreeID(tidBuf)),
-                    new TreeTreeReference("Images", new TreeID(tidBuf)),
-                    new TreeTreeReference("src", new TreeID(tidBuf)),
-                },
-            };
+                new TreeBlobReference[] {
+                    new TreeBlobReference.Builder("README", new BlobID(bidBuf)),
+                    new TreeBlobReference.Builder("main", new BlobID(bidBuf)),
+                }
+            );
             Console.WriteLine(tr2.ID.ToString());
 
             // Create a different tree:
-            var tr3 = (Tree)new Tree.Builder()
-            {
-                Blobs = new TreeBlobReference[] {
+            Tree tr3 = new Tree.Builder(
+                new TreeTreeReference[] {
+                    new TreeTreeReference.Builder("src", new TreeID(tidBuf)),
+                    new TreeTreeReference.Builder("Images", new TreeID(tidBuf)),
+                    new TreeTreeReference.Builder("Content", new TreeID(tidBuf)),
+                },
+                new TreeBlobReference[] {
                     // Capitalization of name makes a difference:
-                    new TreeBlobReference("Readme", new BlobID(bidBuf)),
-                    new TreeBlobReference("main", new BlobID(bidBuf)),
-                },
-                Trees = new TreeTreeReference[] {
-                    new TreeTreeReference("src", new TreeID(tidBuf)),
-                    new TreeTreeReference("Images", new TreeID(tidBuf)),
-                    new TreeTreeReference("Content", new TreeID(tidBuf)),
-                },
-            };
+                    new TreeBlobReference.Builder("Readme", new BlobID(bidBuf)),
+                    new TreeBlobReference.Builder("main", new BlobID(bidBuf)),
+                }
+            );
             Console.WriteLine(tr3.ID.ToString());
         }
 
@@ -201,17 +194,11 @@ namespace TestHarness
             Dictionary<BlobID, Blob> blobs = new Dictionary<BlobID, Blob>();
 
             // Create some Blobs:
-            var bl0 = (Blob)new Blob.Builder()
-            {
-                Contents = Encoding.UTF8.GetBytes("Sample README content.")
-            };
+            Blob bl0 = new Blob.Builder(Encoding.UTF8.GetBytes("Sample README content."));
             blobs.Add(bl0.ID, bl0);
             Console.WriteLine(bl0.ID.ToString());
 
-            var bl1 = (Blob)new Blob.Builder()
-            {
-                Contents = Encoding.UTF8.GetBytes("Sample content.")
-            };
+            Blob bl1 = new Blob.Builder(Encoding.UTF8.GetBytes("Sample content."));
             blobs.Add(bl1.ID, bl1);
             Console.WriteLine(bl1.ID.ToString());
 
@@ -255,9 +242,9 @@ namespace TestHarness
             var trPersists = (Tree)new Tree.Builder()
             {
                 Blobs = new TreeBlobReference[] {
-                    new TreeBlobReference("HelloWorld.cs", bl.ID),
-                    new TreeBlobReference("PersistBlob.cs", bl.ID),
-                    new TreeBlobReference("PersistTree.cs", bl.ID),
+                    new TreeBlobReference.Builder("HelloWorld.cs", bl.ID),
+                    new TreeBlobReference.Builder("PersistBlob.cs", bl.ID),
+                    new TreeBlobReference.Builder("PersistTree.cs", bl.ID),
                 },
                 Trees = new TreeTreeReference[0]
             };
@@ -266,10 +253,10 @@ namespace TestHarness
             var trSrc = (Tree)new Tree.Builder()
             {
                 Blobs = new TreeBlobReference[] {
-                    new TreeBlobReference("blah", bl.ID),
+                    new TreeBlobReference.Builder("blah", bl.ID),
                 },
                 Trees = new TreeTreeReference[] {
-                    new TreeTreeReference("Persists", trPersists.ID),
+                    new TreeTreeReference.Builder("Persists", trPersists.ID),
                 }
             };
             trees.Add(trSrc.ID, trSrc);
@@ -277,9 +264,9 @@ namespace TestHarness
             var trData = (Tree)new Tree.Builder()
             {
                 Blobs = new TreeBlobReference[] {
-                    new TreeBlobReference("myTest.xml", bl.ID),
-                    new TreeBlobReference("myTest2.xml", bl.ID),
-                    new TreeBlobReference("myTest3.xml", bl.ID),
+                    new TreeBlobReference.Builder("myTest.xml", bl.ID),
+                    new TreeBlobReference.Builder("myTest2.xml", bl.ID),
+                    new TreeBlobReference.Builder("myTest3.xml", bl.ID),
                 },
                 Trees = new TreeTreeReference[0]
             };
@@ -288,13 +275,13 @@ namespace TestHarness
             var trRoot = (Tree)new Tree.Builder()
             {
                 Blobs = new TreeBlobReference[] {
-                    new TreeBlobReference("README", bl.ID),
-                    new TreeBlobReference("main.xml", bl.ID),
-                    new TreeBlobReference("test.xml", bl.ID),
+                    new TreeBlobReference.Builder("README", bl.ID),
+                    new TreeBlobReference.Builder("main.xml", bl.ID),
+                    new TreeBlobReference.Builder("test.xml", bl.ID),
                 },
                 Trees = new TreeTreeReference[] {
-                    new TreeTreeReference("CRAP", trSrc.ID),
-                    new TreeTreeReference("data", trData.ID),
+                    new TreeTreeReference.Builder("CRAP", trSrc.ID),
+                    new TreeTreeReference.Builder("data", trData.ID),
                 },
             };
             trees.Add(trRoot.ID, trRoot);
