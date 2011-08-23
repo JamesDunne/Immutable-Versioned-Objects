@@ -13,7 +13,7 @@ namespace GitCMS.Definition.Models
         {
             // Calculate a quick-and-dirty expected capacity:
             int initialCapacity =
-                m.Parents.Length == 0 ? 0 : "parents ".Length + m.Parents.Sum(t => CommitID.ByteArrayLength + 1) + 1
+                m.Parents == null || m.Parents.Length == 0 ? 0 : "parents ".Length + m.Parents.Sum(t => CommitID.ByteArrayLength + 1) + 1
               + "tree ".Length + TreeID.ByteArrayLength + 1
               + "author ".Length + m.Author.Length + 1
               + "committer ".Length + m.Committer.Length + 1
@@ -23,7 +23,7 @@ namespace GitCMS.Definition.Models
             using (var ms = new MemoryStream(initialCapacity))
             using (var bw = new BinaryWriter(ms, Encoding.UTF8))
             {
-                if (m.Parents.Length > 0)
+                if (m.Parents != null && m.Parents.Length > 0)
                 {
                     bw.WriteRaw("parents ");
                     for (int i = 0; i < m.Parents.Length; ++i)
@@ -96,13 +96,14 @@ namespace GitCMS.Definition.Models
                 // Read the list back in sorted-by-name order:
                 foreach (var either in namedRefs.Values)
                 {
-                    switch (either.Which) {
-                        case Either<TreeTreeReference,TreeBlobReference>.Selected.N1:
+                    switch (either.Which)
+                    {
+                        case Either<TreeTreeReference, TreeBlobReference>.Selected.N1:
                             bw.WriteRaw("tree ");
                             bw.Write((byte[])either.N1.TreeID);
                             bw.WriteRaw(either.N1.Name);
                             break;
-                        case Either<TreeTreeReference,TreeBlobReference>.Selected.N2:
+                        case Either<TreeTreeReference, TreeBlobReference>.Selected.N2:
                             bw.WriteRaw("blob ");
                             bw.Write((byte[])either.N2.BlobID);
                             bw.WriteRaw(either.N2.Name);

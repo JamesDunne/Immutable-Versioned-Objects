@@ -22,7 +22,7 @@ namespace GitCMS.Data.Persists
                 @"INSERT INTO {0} ({1}) VALUES ({2})",
                 Tables.TableName_Blob,
                 Tables.TablePKs_Blob.Concat(Tables.ColumnNames_Blob).NameList(),
-                Tables.ColumnNames_Blob.ParameterList()
+                Tables.TablePKs_Blob.Concat(Tables.ColumnNames_Blob).ParameterList()
             );
 
             var cmd = new SqlCommand(cmdText, cn);

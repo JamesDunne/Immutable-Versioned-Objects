@@ -47,7 +47,7 @@ namespace GitCMS.Definition.Models
 
         public override string ToString()
         {
-            return null;
+            return BitConverter.ToString(_idValue).ToLower();
         }
     }
 
@@ -93,7 +93,7 @@ namespace GitCMS.Definition.Models
 
         public override string ToString()
         {
-            return null;
+            return BitConverter.ToString(_idValue).ToLower();
         }
     }
 
@@ -139,7 +139,7 @@ namespace GitCMS.Definition.Models
 
         public override string ToString()
         {
-            return null;
+            return BitConverter.ToString(_idValue).ToLower();
         }
     }
 }

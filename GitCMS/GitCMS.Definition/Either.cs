@@ -17,9 +17,9 @@ namespace System
         public Selected Which { get { return _which; } }
 
         private T1 _n1;
-        public T1 N1 { get { if (_which == Selected.N1) throw new NullReferenceException(); return _n1; } }
+        public T1 N1 { get { if (_which == Selected.N2) throw new NullReferenceException(); return _n1; } }
         private T2 _n2;
-        public T2 N2 { get { if (_which == Selected.N2) throw new NullReferenceException(); return _n2; } }
+        public T2 N2 { get { if (_which == Selected.N1) throw new NullReferenceException(); return _n2; } }
 
         public Either(T1 n1)
         {
