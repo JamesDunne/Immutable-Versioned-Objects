@@ -38,6 +38,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Destroyers\DestroyBlob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Persists\PersistBlob.cs" />
     <Compile Include="Queries\QueryBlob.cs" />

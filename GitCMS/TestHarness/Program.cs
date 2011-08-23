@@ -168,14 +168,24 @@ namespace TestHarness
             if (getBlob.Result == null)
             {
                 // It does not, persist it:
-                var t = db.AsynqNonQuery(new PersistBlob(bl));
-                t.Wait();
+                Console.WriteLine("PERSIST {0}", bl.ID);
 
-                Console.WriteLine("{0} rows affected", t.Result);
+                var persistBlob = db.AsynqNonQuery(new PersistBlob(bl));
+                persistBlob.Wait();
+
+                Console.WriteLine("{0} rows affected", persistBlob.Result);
             }
             else
             {
                 Console.WriteLine("Blob retrieved {0}", getBlob.Result.ID.ToString());
+
+                // Destroy the blob:
+                Console.WriteLine("DELETE {0}", getBlob.Result.ID);
+
+                var destroyBlob = db.AsynqNonQuery(new DestroyBlob(getBlob.Result.ID));
+                destroyBlob.Wait();
+
+                Console.WriteLine("{0} rows affected", destroyBlob.Result);
             }
         }
     }
