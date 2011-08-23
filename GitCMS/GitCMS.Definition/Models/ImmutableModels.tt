@@ -2,13 +2,14 @@
 <#@ assembly name="System.Core.dll" #>
 <#@ import namespace="System.Linq" #>
 <#@ output extension=".generated.cs" #><#
+    // Describe the immutable model types to generate:
     var types = new[] {
         new {
             name = "Commit",
             comment = "A commit object.",
             idType = "CommitID",
             members = new[] {
-                new { name = "ParentCommits", type = "CommitID[]" },
+                new { name = "Parents", type = "CommitID[]" },
                 new { name = "TreeID", type = "TreeID" },
                 new { name = "Committer", type = "string" },
                 new { name = "Author", type = "string" },
@@ -43,6 +44,14 @@
                 new { name = "Blobs", type = "TreeBlobReference[]" },
             }
         },
+        new {
+            name = "Blob",
+            comment = "A blob.",
+            idType = "BlobID",
+            members = new[] {
+                new { name = "Contents", type = "byte[]" },
+            }
+        }
     };
 #>
 using System;
@@ -152,22 +161,12 @@ namespace GitCMS.Definition.Models
         } // for (int j = 0; j < ty.members.Length; ++j)
 #>
         }
-
-        private static readonly Encoding stringEncoding = Encoding.UTF8;
 <#
         if (ty.idType != (string)null)
         {
 #>
 
-        private static <#= ty.idType #> computeID(Builder m)
-        {
-            throw new NotImplementedException();
-
-            var sha1 = SHA1.Create();
-            byte[] hash = sha1.ComputeHash((byte[])null);
-
-            return new <#= ty.idType #>(hash);
-        }
+        //private static <#= ty.idType #> computeID(Builder m);
 <#
         } // if (ty.idType != (string)null)
 #>

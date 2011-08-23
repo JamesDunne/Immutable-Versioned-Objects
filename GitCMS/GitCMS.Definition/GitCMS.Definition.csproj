@@ -43,6 +43,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ImmutableModels.generated.cs</LastGenOutput>
     </None>
+    <Compile Include="Models\ImmutableModels.cs" />
     <Compile Include="Models\ImmutableModels.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

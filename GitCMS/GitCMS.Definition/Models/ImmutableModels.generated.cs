@@ -12,7 +12,7 @@ namespace GitCMS.Definition.Models
     public sealed partial class Commit
     {
         public CommitID ID { get; private set; }
-        public CommitID[] ParentCommits { get; private set; }
+        public CommitID[] Parents { get; private set; }
         public TreeID TreeID { get; private set; }
         public string Committer { get; private set; }
         public string Author { get; private set; }
@@ -21,7 +21,7 @@ namespace GitCMS.Definition.Models
 
         public Commit(
             CommitID pID
-           ,CommitID[] pParentCommits
+           ,CommitID[] pParents
            ,TreeID pTreeID
            ,string pCommitter
            ,string pAuthor
@@ -30,7 +30,7 @@ namespace GitCMS.Definition.Models
         )
         {
             this.ID = pID;
-            this.ParentCommits = pParentCommits;
+            this.Parents = pParents;
             this.TreeID = pTreeID;
             this.Committer = pCommitter;
             this.Author = pAuthor;
@@ -40,7 +40,7 @@ namespace GitCMS.Definition.Models
 
         public sealed class Builder
         {
-            public CommitID[] ParentCommits { get; set; }
+            public CommitID[] Parents { get; set; }
             public TreeID TreeID { get; set; }
             public string Committer { get; set; }
             public string Author { get; set; }
@@ -48,21 +48,11 @@ namespace GitCMS.Definition.Models
             public string Message { get; set; }
         }
 
-        private static readonly Encoding stringEncoding = Encoding.UTF8;
-
-        private static CommitID computeID(Builder m)
-        {
-            throw new NotImplementedException();
-
-            var sha1 = SHA1.Create();
-            byte[] hash = sha1.ComputeHash((byte[])null);
-
-            return new CommitID(hash);
-        }
+        //private static CommitID computeID(Builder m);
 
         public static implicit operator Commit(Builder m)
         {
-            return new Commit(computeID(m), m.ParentCommits, m.TreeID, m.Committer, m.Author, m.DateCommitted, m.Message);
+            return new Commit(computeID(m), m.Parents, m.TreeID, m.Committer, m.Author, m.DateCommitted, m.Message);
         }
     }
 
@@ -88,8 +78,6 @@ namespace GitCMS.Definition.Models
             public string Name { get; set; }
             public TreeID TreeID { get; set; }
         }
-
-        private static readonly Encoding stringEncoding = Encoding.UTF8;
 
         public static implicit operator TreeTreeReference(Builder m)
         {
@@ -119,8 +107,6 @@ namespace GitCMS.Definition.Models
             public string Name { get; set; }
             public BlobID BlobID { get; set; }
         }
-
-        private static readonly Encoding stringEncoding = Encoding.UTF8;
 
         public static implicit operator TreeBlobReference(Builder m)
         {
@@ -154,21 +140,41 @@ namespace GitCMS.Definition.Models
             public TreeBlobReference[] Blobs { get; set; }
         }
 
-        private static readonly Encoding stringEncoding = Encoding.UTF8;
-
-        private static TreeID computeID(Builder m)
-        {
-            throw new NotImplementedException();
-
-            var sha1 = SHA1.Create();
-            byte[] hash = sha1.ComputeHash((byte[])null);
-
-            return new TreeID(hash);
-        }
+        //private static TreeID computeID(Builder m);
 
         public static implicit operator Tree(Builder m)
         {
             return new Tree(computeID(m), m.Trees, m.Blobs);
+        }
+    }
+
+    /// <summary>
+    /// A blob.
+    /// </summary>
+    public sealed partial class Blob
+    {
+        public BlobID ID { get; private set; }
+        public byte[] Contents { get; private set; }
+
+        public Blob(
+            BlobID pID
+           ,byte[] pContents
+        )
+        {
+            this.ID = pID;
+            this.Contents = pContents;
+        }
+
+        public sealed class Builder
+        {
+            public byte[] Contents { get; set; }
+        }
+
+        //private static BlobID computeID(Builder m);
+
+        public static implicit operator Blob(Builder m)
+        {
+            return new Blob(computeID(m), m.Contents);
         }
     }
 }
