@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Linq;
-using System.Text;
-using GitCMS.Definition.Models;
 using Asynq;
+using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Queries
 {
-    public class CommitQuery : DataQuery<Commit>
+    public class QueryCommit : DataQuery<Commit>
     {
         private CommitID _id;
 
-        public CommitQuery(CommitID id)
+        public QueryCommit(CommitID id)
         {
             this._id = id;
         }
@@ -22,10 +20,10 @@ namespace GitCMS.Data.Queries
         {
             string cmdText = String.Format(
                 @"SELECT {0} FROM {1}{2}{3} WHERE commitid = @id",
-                Helpers.ColumnNames_Commit.NameList(),
-                Helpers.TableName_Commit,
+                Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList(),
+                Tables.TableName_Commit,
                 "", // no alias
-                Helpers.FromTableHint_Commit
+                Tables.TableFromHint_Commit
             );
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);

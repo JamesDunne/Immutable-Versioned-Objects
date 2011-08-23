@@ -4,6 +4,7 @@
 <#@ output extension=".generated.cs" #><#
     // Describe the immutable model types to generate:
     var types = new[] {
+
         new {
             name = "Commit",
             comment = "A commit object.",
@@ -17,6 +18,7 @@
                 new { name = "Message", type = "string" },
             }
         },
+
         new {
             name = "TreeTreeReference",
             comment = "A tree's named reference to another tree.",
@@ -26,6 +28,7 @@
                 new { name = "TreeID", type = "TreeID" },
             }
         },
+
         new {
             name = "TreeBlobReference",
             comment = "A tree's named reference to a blob.",
@@ -35,6 +38,7 @@
                 new { name = "BlobID", type = "BlobID" },
             }
         },
+
         new {
             name = "Tree",
             comment = "A tree object.",
@@ -44,6 +48,7 @@
                 new { name = "Blobs", type = "TreeBlobReference[]" },
             }
         },
+
         new {
             name = "Blob",
             comment = "A blob.",
