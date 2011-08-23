@@ -41,6 +41,7 @@
     <Compile Include="Destroyers\DestroyBlob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Persists\PersistBlob.cs" />
+    <Compile Include="Queries\QueryBlobsExist.cs" />
     <Compile Include="Queries\QueryBlob.cs" />
     <Compile Include="Queries\QueryCommit.cs" />
     <Compile Include="Helpers.cs" />

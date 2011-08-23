@@ -19,7 +19,8 @@ namespace TestHarness
             //pr.TestIDGeneration();
             //pr.TestTreeIDEquivalencies();
             //pr.TestAsynqQuery();
-            pr.TestPersistBlob();
+            //pr.TestPersistBlob();
+            pr.TestQueryBlobs();
 
             Console.WriteLine("Press a key.");
             Console.ReadLine();
@@ -187,6 +188,54 @@ namespace TestHarness
 
                 Console.WriteLine("{0} rows affected", destroyBlob.Result);
             }
+        }
+
+        void TestQueryBlobs()
+        {
+            Dictionary<BlobID, Blob> blobs = new Dictionary<BlobID, Blob>();
+
+            // Create some Blobs:
+            var bl0 = (Blob)new Blob.Builder()
+            {
+                Contents = Encoding.UTF8.GetBytes("Sample README content.")
+            };
+            blobs.Add(bl0.ID, bl0);
+            Console.WriteLine(bl0.ID.ToString());
+
+            var bl1 = (Blob)new Blob.Builder()
+            {
+                Contents = Encoding.UTF8.GetBytes("Sample content.")
+            };
+            blobs.Add(bl1.ID, bl1);
+            Console.WriteLine(bl1.ID.ToString());
+
+            var db = new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=GitCMS;Integrated Security=SSPI");
+
+            // Check which blobs exist already:
+            var qBlobs = db.AsynqMulti(new QueryBlobsExist(bl0.ID, bl1.ID), expectedCapacity: blobs.Count);
+            qBlobs.Wait();
+
+            // Find the blobs to persist:
+            var blobIDsToPersist = blobs.Keys.Except(qBlobs.Result).ToArray();
+
+            // Persist each blob asynchronously:
+            Task<int>[] persists = new Task<int>[blobIDsToPersist.Length];
+            for (int i = 0; i < blobIDsToPersist.Length; ++i)
+            {
+                BlobID id = blobIDsToPersist[i];
+
+                Console.WriteLine("PERSIST {0}", id.ToString());
+                persists[i] = db.AsynqNonQuery(new PersistBlob(blobs[id]));
+            }
+
+            Console.WriteLine("Waiting for persists...");
+            Task.WaitAll(persists);
+            Console.WriteLine("Complete.");
+        }
+
+        void TestPersistTree()
+        {
+
         }
     }
 }

@@ -11,6 +11,7 @@ namespace GitCMS.Definition.Models
 
         private readonly byte[] _idValue;
         private int _quickHash;
+        private string _toString;
 
         public CommitID(byte[] value)
         {
@@ -19,6 +20,7 @@ namespace GitCMS.Definition.Models
             
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
+            _toString = toString(_idValue);
         }
 
         public static explicit operator byte[](CommitID id)
@@ -55,9 +57,21 @@ namespace GitCMS.Definition.Models
             return _quickHash;
         }
 
+        private static readonly char[] hexChars = new char[16] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+        private static string toString(byte[] value)
+        {
+            char[] c = new char[ByteArrayLength * 2];
+            for (int i = 0; i < ByteArrayLength; ++i)
+            {
+                c[i * 2 + 0] = hexChars[value[i] >> 4];
+                c[i * 2 + 1] = hexChars[value[i] & 15];
+            }
+            return new string(c);
+        }
+
         public override string ToString()
         {
-            return BitConverter.ToString(_idValue).ToLower();
+            return _toString;
         }
 
         public class Comparer : IComparer<CommitID>
@@ -80,6 +94,7 @@ namespace GitCMS.Definition.Models
 
         private readonly byte[] _idValue;
         private int _quickHash;
+        private string _toString;
 
         public TreeID(byte[] value)
         {
@@ -88,6 +103,7 @@ namespace GitCMS.Definition.Models
             
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
+            _toString = toString(_idValue);
         }
 
         public static explicit operator byte[](TreeID id)
@@ -124,9 +140,21 @@ namespace GitCMS.Definition.Models
             return _quickHash;
         }
 
+        private static readonly char[] hexChars = new char[16] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+        private static string toString(byte[] value)
+        {
+            char[] c = new char[ByteArrayLength * 2];
+            for (int i = 0; i < ByteArrayLength; ++i)
+            {
+                c[i * 2 + 0] = hexChars[value[i] >> 4];
+                c[i * 2 + 1] = hexChars[value[i] & 15];
+            }
+            return new string(c);
+        }
+
         public override string ToString()
         {
-            return BitConverter.ToString(_idValue).ToLower();
+            return _toString;
         }
 
         public class Comparer : IComparer<TreeID>
@@ -149,6 +177,7 @@ namespace GitCMS.Definition.Models
 
         private readonly byte[] _idValue;
         private int _quickHash;
+        private string _toString;
 
         public BlobID(byte[] value)
         {
@@ -157,6 +186,7 @@ namespace GitCMS.Definition.Models
             
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
+            _toString = toString(_idValue);
         }
 
         public static explicit operator byte[](BlobID id)
@@ -193,9 +223,21 @@ namespace GitCMS.Definition.Models
             return _quickHash;
         }
 
+        private static readonly char[] hexChars = new char[16] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+        private static string toString(byte[] value)
+        {
+            char[] c = new char[ByteArrayLength * 2];
+            for (int i = 0; i < ByteArrayLength; ++i)
+            {
+                c[i * 2 + 0] = hexChars[value[i] >> 4];
+                c[i * 2 + 1] = hexChars[value[i] & 15];
+            }
+            return new string(c);
+        }
+
         public override string ToString()
         {
-            return BitConverter.ToString(_idValue).ToLower();
+            return _toString;
         }
 
         public class Comparer : IComparer<BlobID>

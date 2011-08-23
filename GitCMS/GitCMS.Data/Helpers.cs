@@ -25,6 +25,11 @@ namespace GitCMS.Data
             return String.Join(",", columnNames.Select(c => String.Concat("@", c)).ToArray());
         }
 
+        internal static string CommaList(this IEnumerable<string> columnNames)
+        {
+            return String.Join(",", columnNames.ToArray());
+        }
+
         internal static SqlParameter AddInParameter(this SqlCommand cmd, string name, SqlBinary value)
         {
             var prm = cmd.CreateParameter();
