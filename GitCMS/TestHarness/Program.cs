@@ -139,7 +139,7 @@ namespace TestHarness
 
             const int max = 500;
 
-            Task<List<Commit>>[] results = new Task<List<Commit>>[max];
+            Task<Commit>[] results = new Task<Commit>[max];
             for (int i = 0; i < max; ++i)
             {
                 // Asynchronously execute the query:
@@ -149,8 +149,6 @@ namespace TestHarness
             for (int i = 0; i < max; ++i)
             {
                 results[i].Wait();
-
-                Console.WriteLine("{0} rows", results[i].Result.Count);
             }
         }
 
@@ -376,7 +374,12 @@ namespace TestHarness
             RecursivePrint(trees, treeTask.Result.Item1, String.Empty);
         }
 
-        private void RecursivePrint(TreeContainer trees, TreeID treeID, string treeName, int depth = 1)
+        void TestCreateCommit()
+        {
+
+        }
+
+        static void RecursivePrint(TreeContainer trees, TreeID treeID, string treeName, int depth = 1)
         {
             var tr = trees[treeID];
             if (depth == 1)
