@@ -46,13 +46,15 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
 
         public Tuple<TreeID, TreeContainer> Retrieve(SqlDataReader dr, int expectedCount)
         {
-            throw new NotImplementedException();
+            Dictionary<TreeID, Tree> trees = new Dictionary<TreeID, Tree>(expectedCount);
 
-            Dictionary<TreeID, Tree> trees = new Dictionary<TreeID, Tree>();
-
+            TreeID? curr = null;
             while (dr.Read())
             {
-                dr.GetSqlBinary(0);
+                SqlBinary b0 = dr.GetSqlBinary(0);
+
+                TreeID? id = b0.IsNull ? (TreeID?)null : (TreeID)b0.Value;
+                Console.WriteLine(id);
             }
 
             return new Tuple<TreeID, TreeContainer>(this._id, new TreeContainer(trees));

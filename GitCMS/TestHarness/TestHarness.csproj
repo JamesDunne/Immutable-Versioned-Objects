@@ -58,6 +58,10 @@
       <Project>{29D4825B-A343-45AA-99FB-CE6671E78178}</Project>
       <Name>GitCMS.Definition</Name>
     </ProjectReference>
+    <ProjectReference Include="..\GitCMS.Implementation.SQL\GitCMS.Implementation.SQL.csproj">
+      <Project>{BCD16F4B-3915-43B7-B1C8-5A9132D97615}</Project>
+      <Name>GitCMS.Implementation.SQL</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

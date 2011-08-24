@@ -22,6 +22,29 @@ namespace GitCMS.Definition.Models
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = toString(_idValue);
         }
+        
+        public CommitID(string hexValue)
+        {
+            // Sanity check first:
+            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("TreeID hex string must be {0} characters in length", ByteArrayLength * 2));
+
+            _idValue = new byte[ByteArrayLength];
+            for (int i = 0; i < ByteArrayLength; ++i)
+            {
+                _idValue[i] = (byte)((deHex(hexValue[i * 2 + 0]) << 4) | deHex(hexValue[i * 2 + 1]));
+            }
+
+            _quickHash = BitConverter.ToInt32(_idValue, 0);
+            _toString = toString(_idValue);
+        }
+        
+        private static int deHex(char c)
+        {
+            if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
+            if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
+            if (c >= '0' && c <= '9') return (int)(c - '0');
+            throw new ArgumentOutOfRangeException("c", "Not a hexadecimal character!");
+        }
 
         public static explicit operator byte[](CommitID id)
         {
@@ -110,6 +133,29 @@ namespace GitCMS.Definition.Models
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = toString(_idValue);
         }
+        
+        public TreeID(string hexValue)
+        {
+            // Sanity check first:
+            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("TreeID hex string must be {0} characters in length", ByteArrayLength * 2));
+
+            _idValue = new byte[ByteArrayLength];
+            for (int i = 0; i < ByteArrayLength; ++i)
+            {
+                _idValue[i] = (byte)((deHex(hexValue[i * 2 + 0]) << 4) | deHex(hexValue[i * 2 + 1]));
+            }
+
+            _quickHash = BitConverter.ToInt32(_idValue, 0);
+            _toString = toString(_idValue);
+        }
+        
+        private static int deHex(char c)
+        {
+            if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
+            if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
+            if (c >= '0' && c <= '9') return (int)(c - '0');
+            throw new ArgumentOutOfRangeException("c", "Not a hexadecimal character!");
+        }
 
         public static explicit operator byte[](TreeID id)
         {
@@ -197,6 +243,29 @@ namespace GitCMS.Definition.Models
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = toString(_idValue);
+        }
+        
+        public BlobID(string hexValue)
+        {
+            // Sanity check first:
+            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("TreeID hex string must be {0} characters in length", ByteArrayLength * 2));
+
+            _idValue = new byte[ByteArrayLength];
+            for (int i = 0; i < ByteArrayLength; ++i)
+            {
+                _idValue[i] = (byte)((deHex(hexValue[i * 2 + 0]) << 4) | deHex(hexValue[i * 2 + 1]));
+            }
+
+            _quickHash = BitConverter.ToInt32(_idValue, 0);
+            _toString = toString(_idValue);
+        }
+        
+        private static int deHex(char c)
+        {
+            if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
+            if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
+            if (c >= '0' && c <= '9') return (int)(c - '0');
+            throw new ArgumentOutOfRangeException("c", "Not a hexadecimal character!");
         }
 
         public static explicit operator byte[](BlobID id)

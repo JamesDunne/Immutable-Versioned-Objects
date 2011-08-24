@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using GitCMS.Data.Persists;
 using GitCMS.Definition.Containers;
 using GitCMS.Definition.Repositories;
+using GitCMS.Implementation.SQL;
 
 namespace TestHarness
 {
@@ -23,7 +24,8 @@ namespace TestHarness
             //pr.TestAsynqQuery();
             //pr.TestPersistBlob();
             //pr.TestQueryBlobs();
-            pr.TestPersistTree();
+            //pr.TestPersistTree();
+            pr.TestRetrieveTreeRecursively();
 
             Console.WriteLine("Press a key.");
             Console.ReadLine();
@@ -346,6 +348,45 @@ namespace TestHarness
             Console.WriteLine("Complete");
 
             Console.WriteLine("Root TreeID = {0}", trRoot.ID);
+        }
+
+        private static Stack<T> newStack<T>(T initial, int initialCapacity = 10)
+        {
+            var stk = new Stack<T>();
+            stk.Push(initial);
+            return stk;
+        }
+
+        void TestRetrieveTreeRecursively()
+        {
+            var db = getDataContext();
+
+            ITreeRepository repo = new TreeRepository(db);
+            TreeID rootid = new TreeID("85cfe62db1cedba5e7c3a056c636c1df8557a305");
+            Console.WriteLine(rootid);
+
+            var treeTask = repo.RetrieveTreeRecursively(rootid);
+            treeTask.Wait();
+
+            // Recursively display trees:
+            TreeContainer trees = treeTask.Result.Item2;
+
+            var idStk = newStack(new { id = treeTask.Result.Item1, name = "", depth = 0 }, trees.Count);
+            while (idStk.Count > 0)
+            {
+                var node = idStk.Pop();
+
+                Console.WriteLine("{0}{1}: {2}/", new string(' ', node.depth * 2), node.id, node.name);
+                foreach (var bl in trees[node.id].Blobs)
+                {
+                    Console.WriteLine("{0}{1}: {2}", new string(' ', (node.depth + 1) * 2), bl.BlobID, bl.Name);
+                }
+
+                foreach (var rf in trees[node.id].Trees)
+                {
+                    idStk.Push(new { id = rf.TreeID, name = rf.Name, depth = node.depth + 1 });
+                }
+            }
         }
     }
 }
