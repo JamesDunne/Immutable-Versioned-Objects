@@ -64,6 +64,7 @@
             idType = "TagID",
             members = new [] {
                 new { name = "CommitID",    type = "CommitID",  bType = (string)null, convert = (string)null },
+                // TODO: add timestamp?
                 new { name = "Message",     type = "string",    bType = (string)null, convert = (string)null },
             }
         },

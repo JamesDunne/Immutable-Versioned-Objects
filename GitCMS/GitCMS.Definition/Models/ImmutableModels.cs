@@ -11,7 +11,22 @@ namespace GitCMS.Definition.Models
     {
         private static TagID computeID(Builder b)
         {
-            throw new NotImplementedException();
+            int initialCapacity = "commit ".Length + TagID.ByteArrayLength;
+
+            using (var ms = new MemoryStream(initialCapacity))
+            using (var bw = new BinaryWriter(ms, Encoding.UTF8))
+            {
+                bw.WriteRaw("commit ");
+                bw.Write((byte[])b.CommitID);
+                // TODO: include timestamp?
+                // TODO: include name?
+                bw.Flush();
+
+                // SHA-1 the data:
+                var sha1 = SHA1.Create();
+                byte[] hash = sha1.ComputeHash(ms.ToArray());
+                return new TagID(hash);
+            }
         }
     }
 

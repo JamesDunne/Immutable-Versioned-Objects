@@ -39,6 +39,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Destroyers\DestroyBlob.cs" />
+    <Compile Include="Persists\PersistRef.cs" />
+    <Compile Include="Persists\PersistTag.cs" />
     <Compile Include="Persists\PersistCommit.cs" />
     <Compile Include="Persists\PersistTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -73,5 +73,32 @@ namespace GitCMS.Data
         };
 
         #endregion
+
+        #region Tag table
+
+        internal const string TableName_Tag = "[dbo].[Tag]";
+        internal const string TableFromHint_Tag = @" WITH (NOLOCK)";
+        internal static readonly string[] TablePKs_Tag = new string[1] { "tagid" };
+        internal static readonly string[] ColumnNames_Tag = new string[]
+        {
+            "commitid",
+            // TODO: add timestamp?
+            "message",
+        };
+
+        #endregion
+
+        #region Ref table
+
+        internal const string TableName_Ref = "[dbo].[Ref]";
+        internal const string TableFromHint_Ref = @" WITH (NOLOCK)";
+        internal static readonly string[] TablePKs_Ref = new string[0];
+        internal static readonly string[] ColumnNames_Ref = new string[]
+        {
+            "name",
+            "commitid",
+        };
+
+        #endregion
     }
 }
