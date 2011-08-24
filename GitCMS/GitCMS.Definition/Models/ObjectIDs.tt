@@ -5,6 +5,7 @@
         "CommitID",
         "TreeID",
         "BlobID",
+        "TagID",
     };
 #>
 using System;

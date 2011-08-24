@@ -183,7 +183,7 @@ namespace GitCMS.Definition.Models
     }
 
     /// <summary>
-    /// A blob.
+    /// An immutable blob.
     /// </summary>
     public sealed partial class Blob
     {
@@ -215,6 +215,84 @@ namespace GitCMS.Definition.Models
         public static implicit operator Blob(Builder b)
         {
             return new Blob(b);
+        }
+    }
+
+    /// <summary>
+    /// An immutable tag that points to a specific commit.
+    /// </summary>
+    public sealed partial class Tag
+    {
+        public TagID ID { get; private set; }
+        public CommitID CommitID { get; private set; }
+        public string Message { get; private set; }
+
+        public Tag(Builder b)
+        {
+            this.ID = computeID(b);
+            this.CommitID = b.CommitID;
+            this.Message = b.Message;
+        }
+
+        public sealed class Builder
+        {
+            public CommitID CommitID { get; set; }
+            public string Message { get; set; }
+
+            public Builder() { }
+
+            public Builder(
+                CommitID pCommitID
+               ,string pMessage
+            )
+            {
+                this.CommitID = pCommitID;
+                this.Message = pMessage;
+            }
+        }
+
+        //private static TagID computeID(Builder b);
+
+        public static implicit operator Tag(Builder b)
+        {
+            return new Tag(b);
+        }
+    }
+
+    /// <summary>
+    /// A mutable reference that points to a specific commit; usable for tracking branch heads.
+    /// </summary>
+    public sealed partial class Ref
+    {
+        public string Name { get; private set; }
+        public CommitID CommitID { get; private set; }
+
+        public Ref(Builder b)
+        {
+            this.Name = b.Name;
+            this.CommitID = b.CommitID;
+        }
+
+        public sealed class Builder
+        {
+            public string Name { get; set; }
+            public CommitID CommitID { get; set; }
+
+            public Builder() { }
+
+            public Builder(
+                string pName
+               ,CommitID pCommitID
+            )
+            {
+                this.Name = pName;
+                this.CommitID = pCommitID;
+            }
+        }
+
+        public static implicit operator Ref(Builder b)
+        {
+            return new Ref(b);
         }
     }
 }

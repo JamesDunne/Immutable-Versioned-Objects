@@ -7,6 +7,14 @@ using System.IO;
 
 namespace GitCMS.Definition.Models
 {
+    public sealed partial class Tag
+    {
+        private static TagID computeID(Builder b)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public sealed partial class Commit
     {
         private static CommitID computeID(Builder m)

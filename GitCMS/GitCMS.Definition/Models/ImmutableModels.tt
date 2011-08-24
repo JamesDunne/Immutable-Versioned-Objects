@@ -51,10 +51,30 @@
 
         new {
             name = "Blob",
-            comment = "A blob.",
+            comment = "An immutable blob.",
             idType = "BlobID",
             members = new[] {
                 new { name = "Contents",    type = "byte[]",    bType = (string)null, convert = (string)null },
+            }
+        },
+
+        new {
+            name = "Tag",
+            comment = "An immutable tag that points to a specific commit.",
+            idType = "TagID",
+            members = new [] {
+                new { name = "CommitID",    type = "CommitID",  bType = (string)null, convert = (string)null },
+                new { name = "Message",     type = "string",    bType = (string)null, convert = (string)null },
+            }
+        },
+
+        new {
+            name = "Ref",
+            comment = "A mutable reference that points to a specific commit; usable for tracking branch heads.",
+            idType = (string)null,
+            members = new [] {
+                new { name = "Name",        type = "string",    bType = (string)null, convert = (string)null },
+                new { name = "CommitID",    type = "CommitID",  bType = (string)null, convert = (string)null },
             }
         }
     };
