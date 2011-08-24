@@ -376,10 +376,10 @@ namespace TestHarness
             {
                 var node = idStk.Pop();
 
-                Console.WriteLine("{0}{1}: {2}/", new string(' ', node.depth * 2), node.id, node.name);
+                Console.WriteLine("{0}TREE {1}: {2}/", new string(' ', node.depth * 2), node.id, node.name);
                 foreach (var bl in trees[node.id].Blobs)
                 {
-                    Console.WriteLine("{0}{1}: {2}", new string(' ', (node.depth + 1) * 2), bl.BlobID, bl.Name);
+                    Console.WriteLine("{0}BLOB {1}: {2}", new string(' ', (node.depth + 1) * 2), bl.BlobID, bl.Name);
                 }
 
                 foreach (var rf in trees[node.id].Trees)

@@ -6,6 +6,7 @@ using Asynq;
 using GitCMS.Definition.Models;
 using System.Collections.Generic;
 using GitCMS.Definition.Containers;
+using System.Diagnostics;
 
 namespace GitCMS.Data.Queries
 {
@@ -46,18 +47,86 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
 
         public Tuple<TreeID, TreeContainer> Retrieve(SqlDataReader dr, int expectedCount)
         {
-            Dictionary<TreeID, Tree> trees = new Dictionary<TreeID, Tree>(expectedCount);
+            Dictionary<TreeID, Tree.Builder> trees = new Dictionary<TreeID, Tree.Builder>(expectedCount);
 
-            TreeID? curr = null;
             while (dr.Read())
             {
-                SqlBinary b0 = dr.GetSqlBinary(0);
+                SqlBinary btreeid = dr.GetSqlBinary(0);
+                SqlBinary blinked_treeid = dr.GetSqlBinary(1);
+                SqlString treename = dr.GetSqlString(2);
+                SqlBinary linked_blobid = dr.GetSqlBinary(3);
+                SqlString blobname = dr.GetSqlString(4);
 
-                TreeID? id = b0.IsNull ? (TreeID?)null : (TreeID)b0.Value;
-                Console.WriteLine(id);
+                TreeID? treeid = btreeid.IsNull ? (TreeID?)null : (TreeID)btreeid.Value;
+                TreeID? linked_treeid = blinked_treeid.IsNull ? (TreeID?)null : (TreeID)blinked_treeid.Value;
+
+                Tree.Builder curr;
+
+                if (!treeid.HasValue)
+                {
+                    Debug.Assert(linked_treeid.HasValue);
+                    if (!trees.TryGetValue(linked_treeid.Value, out curr))
+                    {
+                        curr = new Tree.Builder(new TreeTreeReference[0], new TreeBlobReference[0]);
+                        trees.Add(linked_treeid.Value, curr);
+                    }
+                }
+                else
+                {
+                    if (!trees.TryGetValue(treeid.Value, out curr))
+                    {
+                        curr = new Tree.Builder(new TreeTreeReference[0], new TreeBlobReference[0]);
+                        trees.Add(treeid.Value, curr);
+                    }
+                }
+
+                Tree.Builder blobTree = curr;
+
+                // Add a tree link:
+                if (treeid.HasValue && linked_treeid.HasValue)
+                {
+                    // Create the Tree.Builder for the linked_treeid if it does not exist:
+                    if (!trees.TryGetValue(linked_treeid.Value, out blobTree))
+                    {
+                        blobTree = new Tree.Builder(new TreeTreeReference[0], new TreeBlobReference[0]);
+                        trees.Add(linked_treeid.Value, blobTree);
+                    }
+
+                    TreeTreeReference[] treeRefs = curr.Trees;
+
+                    bool isDupe = false;
+                    if (treeRefs.Length > 0)
+                    {
+                        isDupe = (
+                            (treeRefs[treeRefs.Length - 1].TreeID == linked_treeid.Value) &&
+                            (treeRefs[treeRefs.Length - 1].Name == treename.Value)
+                        );
+                    }
+
+                    // Don't re-add the same tree link:
+                    if (!isDupe)
+                    {
+                        Array.Resize(ref treeRefs, treeRefs.Length + 1);
+
+                        treeRefs[treeRefs.Length - 1] = new TreeTreeReference.Builder(treename.Value, linked_treeid.Value);
+
+                        curr.Trees = treeRefs;
+                    }
+                }
+
+                // Add a blob link to the child or parent tree:
+                if (!linked_blobid.IsNull)
+                {
+                    TreeBlobReference[] blobRefs = blobTree.Blobs;
+
+                    Array.Resize(ref blobRefs, blobRefs.Length + 1);
+                    blobRefs[blobRefs.Length - 1] = new TreeBlobReference.Builder(blobname.Value, (BlobID)linked_blobid.Value);
+
+                    blobTree.Blobs = blobRefs;
+                }
             }
 
-            return new Tuple<TreeID, TreeContainer>(this._id, new TreeContainer(trees));
+            return new Tuple<TreeID, TreeContainer>(this._id, new TreeContainer(trees.Values.Select(t => (Tree)t)));
         }
     }
 }
