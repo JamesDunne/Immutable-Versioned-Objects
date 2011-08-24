@@ -149,6 +149,41 @@ namespace Asynq
         }
 
         /// <summary>
+        /// Asynchronously execute the given query expected to return 0 or 1 items.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="factory"></param>
+        /// <returns></returns>
+        public Task<T> AsynqSingle<T>(IComplexDataQuery<T> query, TaskFactory<T> factory = null)
+        {
+            if (factory == null) factory = new TaskFactory<T>();
+
+            var cn = new SqlConnection(this.connectionString);
+            var cmd = query.ConstructCommand(cn);
+            cn.Open();
+
+            return factory.FromAsync(
+                cmd.BeginExecuteReader(CommandBehavior.CloseConnection | CommandBehavior.SingleRow),
+                ar =>
+                {
+                    try
+                    {
+                        var dr = cmd.EndExecuteReader(ar);
+
+                        var row = query.Retrieve(dr);
+
+                        return row;
+                    }
+                    finally
+                    {
+                        cn.Close();
+                    }
+                }
+            );
+        }
+
+        /// <summary>
         /// Asynchronously execute the given data operation expected to not return any values.
         /// </summary>
         /// <param name="op"></param>
