@@ -13,7 +13,7 @@ namespace GitCMS.Definition.Models
         {
             // Calculate a quick-and-dirty expected capacity:
             int initialCapacity =
-                m.Parents == null || m.Parents.Length == 0 ? 0 : "parents ".Length + m.Parents.Sum(t => CommitID.ByteArrayLength + 1) + 1
+                m.Parents == null || m.Parents.Count == 0 ? 0 : "parents ".Length + m.Parents.Sum(t => CommitID.ByteArrayLength + 1) + 1
               + "tree ".Length + TreeID.ByteArrayLength + 1
               + "author ".Length + m.Author.Length + 1
               + "committer ".Length + m.Committer.Length + 1
@@ -23,12 +23,12 @@ namespace GitCMS.Definition.Models
             using (var ms = new MemoryStream(initialCapacity))
             using (var bw = new BinaryWriter(ms, Encoding.UTF8))
             {
-                if (m.Parents != null && m.Parents.Length > 0)
+                if (m.Parents != null && m.Parents.Count > 0)
                 {
                     bw.WriteRaw("parents ");
 
                     // Sort parent CommitIDs in order:
-                    CommitID[] parents = new CommitID[m.Parents.Length];
+                    CommitID[] parents = new CommitID[m.Parents.Count];
                     Array.Sort(parents, new CommitID.Comparer());
                     
                     for (int i = 0; i < parents.Length; ++i)
@@ -68,10 +68,10 @@ namespace GitCMS.Definition.Models
         private static TreeID computeID(Builder m)
         {
             // Sort refs by name:
-            var namedRefs = new SortedList<string, Either<TreeTreeReference, TreeBlobReference>>(m.Trees.Length + m.Blobs.Length);
+            var namedRefs = new SortedList<string, Either<TreeTreeReference, TreeBlobReference>>(m.Trees.Count + m.Blobs.Count);
 
             // Add tree refs:
-            for (int i = 0; i < m.Trees.Length; ++i)
+            for (int i = 0; i < m.Trees.Count; ++i)
             {
                 string name = m.Trees[i].Name;
                 if (namedRefs.ContainsKey(name))
@@ -81,7 +81,7 @@ namespace GitCMS.Definition.Models
             }
 
             // Add blob refs:
-            for (int i = 0; i < m.Blobs.Length; ++i)
+            for (int i = 0; i < m.Blobs.Count; ++i)
             {
                 string name = m.Blobs[i].Name;
                 if (namedRefs.ContainsKey(name))

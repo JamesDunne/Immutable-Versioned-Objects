@@ -67,7 +67,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                     Debug.Assert(linked_treeid.HasValue);
                     if (!trees.TryGetValue(linked_treeid.Value, out curr))
                     {
-                        curr = new Tree.Builder(new TreeTreeReference[0], new TreeBlobReference[0]);
+                        curr = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
                         trees.Add(linked_treeid.Value, curr);
                     }
                 }
@@ -75,7 +75,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                 {
                     if (!trees.TryGetValue(treeid.Value, out curr))
                     {
-                        curr = new Tree.Builder(new TreeTreeReference[0], new TreeBlobReference[0]);
+                        curr = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
                         trees.Add(treeid.Value, curr);
                     }
                 }
@@ -88,41 +88,32 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                     // Create the Tree.Builder for the linked_treeid if it does not exist:
                     if (!trees.TryGetValue(linked_treeid.Value, out blobTree))
                     {
-                        blobTree = new Tree.Builder(new TreeTreeReference[0], new TreeBlobReference[0]);
+                        blobTree = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
                         trees.Add(linked_treeid.Value, blobTree);
                     }
 
-                    TreeTreeReference[] treeRefs = curr.Trees;
+                    List<TreeTreeReference> treeRefs = curr.Trees;
 
                     bool isDupe = false;
-                    if (treeRefs.Length > 0)
+                    if (treeRefs.Count > 0)
                     {
                         isDupe = (
-                            (treeRefs[treeRefs.Length - 1].TreeID == linked_treeid.Value) &&
-                            (treeRefs[treeRefs.Length - 1].Name == treename.Value)
+                            (treeRefs[treeRefs.Count - 1].TreeID == linked_treeid.Value) &&
+                            (treeRefs[treeRefs.Count - 1].Name == treename.Value)
                         );
                     }
 
                     // Don't re-add the same tree link:
                     if (!isDupe)
                     {
-                        Array.Resize(ref treeRefs, treeRefs.Length + 1);
-
-                        treeRefs[treeRefs.Length - 1] = new TreeTreeReference.Builder(treename.Value, linked_treeid.Value);
-
-                        curr.Trees = treeRefs;
+                        treeRefs.Add(new TreeTreeReference.Builder(treename.Value, linked_treeid.Value));
                     }
                 }
 
                 // Add a blob link to the child or parent tree:
                 if (!linked_blobid.IsNull)
                 {
-                    TreeBlobReference[] blobRefs = blobTree.Blobs;
-
-                    Array.Resize(ref blobRefs, blobRefs.Length + 1);
-                    blobRefs[blobRefs.Length - 1] = new TreeBlobReference.Builder(blobname.Value, (BlobID)linked_blobid.Value);
-
-                    blobTree.Blobs = blobRefs;
+                    blobTree.Blobs.Add(new TreeBlobReference.Builder(blobname.Value, (BlobID)linked_blobid.Value));
                 }
             }
 

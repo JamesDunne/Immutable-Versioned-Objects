@@ -10,12 +10,12 @@
             comment = "A commit object.",
             idType = "CommitID",
             members = new[] {
-                new { name = "Parents", type = "CommitID[]" },
-                new { name = "TreeID", type = "TreeID" },
-                new { name = "Committer", type = "string" },
-                new { name = "Author", type = "string" },
-                new { name = "DateCommitted", type = "DateTimeOffset" },
-                new { name = "Message", type = "string" },
+                new { name = "Parents",         type = "CommitID[]",        bType = "List<CommitID>", convert = "({0}).ToArray()" },
+                new { name = "TreeID",          type = "TreeID",            bType = (string)null, convert = (string)null },
+                new { name = "Committer",       type = "string",            bType = (string)null, convert = (string)null },
+                new { name = "Author",          type = "string",            bType = (string)null, convert = (string)null },
+                new { name = "DateCommitted",   type = "DateTimeOffset",    bType = (string)null, convert = (string)null },
+                new { name = "Message",         type = "string",            bType = (string)null, convert = (string)null },
             }
         },
 
@@ -24,8 +24,8 @@
             comment = "A tree's named reference to another tree.",
             idType = (string)null,
             members = new[] {
-                new { name = "Name", type = "string" },
-                new { name = "TreeID", type = "TreeID" },
+                new { name = "Name",    type = "string",    bType = (string)null, convert = (string)null },
+                new { name = "TreeID",  type = "TreeID",    bType = (string)null, convert = (string)null },
             }
         },
 
@@ -34,8 +34,8 @@
             comment = "A tree's named reference to a blob.",
             idType = (string)null,
             members = new[] {
-                new { name = "Name", type = "string" },
-                new { name = "BlobID", type = "BlobID" },
+                new { name = "Name",    type = "string",    bType = (string)null, convert = (string)null },
+                new { name = "BlobID",  type = "BlobID",    bType = (string)null, convert = (string)null },
             }
         },
 
@@ -44,8 +44,8 @@
             comment = "A tree object.",
             idType = "TreeID",
             members = new[] {
-                new { name = "Trees", type = "TreeTreeReference[]" },
-                new { name = "Blobs", type = "TreeBlobReference[]" },
+                new { name = "Trees", type = "TreeTreeReference[]", bType = "List<TreeTreeReference>", convert = "({0}).ToArray()" },
+                new { name = "Blobs", type = "TreeBlobReference[]", bType = "List<TreeBlobReference>", convert = "({0}).ToArray()" },
             }
         },
 
@@ -54,7 +54,7 @@
             comment = "A blob.",
             idType = "BlobID",
             members = new[] {
-                new { name = "Contents", type = "byte[]" },
+                new { name = "Contents",    type = "byte[]",    bType = (string)null, convert = (string)null },
             }
         }
     };
@@ -122,7 +122,7 @@ namespace GitCMS.Definition.Models
         {
             var mbr = ty.members[j];
 #>
-            this.<#= mbr.name #> = b.<#= mbr.name #>;
+            this.<#= mbr.name #> = <#= mbr.convert == null ? "b." + mbr.name : String.Format(mbr.convert, "b." + mbr.name, mbr.type, mbr.bType) #>;
 <#
         } // for (int j = 0; j < ty.members.Length; ++j)
 #>
@@ -136,7 +136,7 @@ namespace GitCMS.Definition.Models
         {
             var mbr = ty.members[j];
 #>
-            public <#= mbr.type #> <#= mbr.name #> { get; set; }
+            public <#= mbr.bType ?? mbr.type #> <#= mbr.name #> { get; set; }
 <#
         } // for (int j = 0; j < ty.members.Length; ++j)
 #>
@@ -150,7 +150,7 @@ namespace GitCMS.Definition.Models
         {
             var mbr = ty.members[j];
 #>
-               <#= doComma ? "," : " " #><#= mbr.type #> p<#= mbr.name #>
+               <#= doComma ? "," : " " #><#= mbr.bType ?? mbr.type #> p<#= mbr.name #>
 <#
             doComma = true;
         } // for (int j = 0; j < ty.members.Length; ++j)

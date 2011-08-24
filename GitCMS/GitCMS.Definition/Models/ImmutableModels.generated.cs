@@ -22,7 +22,7 @@ namespace GitCMS.Definition.Models
         public Commit(Builder b)
         {
             this.ID = computeID(b);
-            this.Parents = b.Parents;
+            this.Parents = (b.Parents).ToArray();
             this.TreeID = b.TreeID;
             this.Committer = b.Committer;
             this.Author = b.Author;
@@ -32,7 +32,7 @@ namespace GitCMS.Definition.Models
 
         public sealed class Builder
         {
-            public CommitID[] Parents { get; set; }
+            public List<CommitID> Parents { get; set; }
             public TreeID TreeID { get; set; }
             public string Committer { get; set; }
             public string Author { get; set; }
@@ -42,7 +42,7 @@ namespace GitCMS.Definition.Models
             public Builder() { }
 
             public Builder(
-                CommitID[] pParents
+                List<CommitID> pParents
                ,TreeID pTreeID
                ,string pCommitter
                ,string pAuthor
@@ -153,20 +153,20 @@ namespace GitCMS.Definition.Models
         public Tree(Builder b)
         {
             this.ID = computeID(b);
-            this.Trees = b.Trees;
-            this.Blobs = b.Blobs;
+            this.Trees = (b.Trees).ToArray();
+            this.Blobs = (b.Blobs).ToArray();
         }
 
         public sealed class Builder
         {
-            public TreeTreeReference[] Trees { get; set; }
-            public TreeBlobReference[] Blobs { get; set; }
+            public List<TreeTreeReference> Trees { get; set; }
+            public List<TreeBlobReference> Blobs { get; set; }
 
             public Builder() { }
 
             public Builder(
-                TreeTreeReference[] pTrees
-               ,TreeBlobReference[] pBlobs
+                List<TreeTreeReference> pTrees
+               ,List<TreeBlobReference> pBlobs
             )
             {
                 this.Trees = pTrees;
