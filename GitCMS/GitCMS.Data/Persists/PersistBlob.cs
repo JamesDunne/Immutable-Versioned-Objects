@@ -7,7 +7,7 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Persists
 {
-    public sealed class PersistBlob : DataQuery<int>
+    public sealed class PersistBlob : IDataOperation
     {
         private Blob _bl;
 
@@ -16,7 +16,7 @@ namespace GitCMS.Data.Persists
             this._bl = bl;
         }
 
-        public override SqlCommand ConstructCommand(SqlConnection cn)
+        public SqlCommand ConstructCommand(SqlConnection cn)
         {
             var cmdText = String.Format(
                 @"INSERT INTO {0} ({1}) VALUES ({2})",
@@ -29,11 +29,6 @@ namespace GitCMS.Data.Persists
             cmd.AddInParameter("@blobid", new SqlBinary((byte[])_bl.ID));
             cmd.AddInParameter("@contents", new SqlBinary(_bl.Contents));
             return cmd;
-        }
-
-        public override int Project(SqlDataReader dr)
-        {
-            throw new NotImplementedException();
         }
     }
 }

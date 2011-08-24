@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace GitCMS.Data.Queries
 {
-    public sealed class QueryBlobsExist : DataQuery<BlobID>
+    public sealed class QueryBlobsExist : ISimpleDataQuery<BlobID>
     {
         private BlobID[] _ids;
 
@@ -22,7 +22,7 @@ namespace GitCMS.Data.Queries
             this._ids = ids.ToArray();
         }
 
-        public override SqlCommand ConstructCommand(SqlConnection cn)
+        public SqlCommand ConstructCommand(SqlConnection cn)
         {
             string pkName = Tables.TablePKs_Blob.Single();
             string cmdText = String.Format(
@@ -37,7 +37,7 @@ namespace GitCMS.Data.Queries
             return cmd;
         }
 
-        public override BlobID Project(SqlDataReader dr)
+        public BlobID Project(SqlDataReader dr)
         {
             BlobID id = (BlobID) dr.GetSqlBinary(0).Value;
 

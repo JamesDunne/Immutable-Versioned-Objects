@@ -40,7 +40,7 @@ namespace Asynq
         /// <param name="expectedCapacity"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<List<T>> AsynqMulti<T>(DataQuery<T> query, int expectedCapacity = 10, TaskFactory<List<T>> factory = null)
+        public Task<List<T>> AsynqMulti<T>(ISimpleDataQuery<T> query, int expectedCapacity = 10, TaskFactory<List<T>> factory = null)
         {
             if (expectedCapacity < 0) expectedCapacity = 0;
             if (factory == null) factory = new TaskFactory<List<T>>();
@@ -76,13 +76,48 @@ namespace Asynq
         }
 
         /// <summary>
+        /// Asynchronously execute the given query expected to return 0 or more rows.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="expectedCapacity"></param>
+        /// <param name="factory"></param>
+        /// <returns></returns>
+        public Task<T> AsynqMulti<T>(IComplexDataQuery<T> query, int expectedCapacity = 10, TaskFactory<T> factory = null)
+        {
+            if (expectedCapacity < 0) expectedCapacity = 0;
+            if (factory == null) factory = new TaskFactory<T>();
+
+            var cn = new SqlConnection(this.connectionString);
+            var cmd = query.ConstructCommand(cn);
+            cn.Open();
+
+            return factory.FromAsync(
+                cmd.BeginExecuteReader(CommandBehavior.CloseConnection),
+                ar =>
+                {
+                    try
+                    {
+                        var dr = cmd.EndExecuteReader(ar);
+
+                        return query.Retrieve(dr, expectedCapacity);
+                    }
+                    finally
+                    {
+                        cn.Close();
+                    }
+                }
+            );
+        }
+
+        /// <summary>
         /// Asynchronously execute the given query expected to return 0 or 1 items.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="query"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<T> AsynqSingle<T>(DataQuery<T> query, TaskFactory<T> factory = null)
+        public Task<T> AsynqSingle<T>(ISimpleDataQuery<T> query, TaskFactory<T> factory = null)
         {
             if (factory == null) factory = new TaskFactory<T>();
 
@@ -114,17 +149,17 @@ namespace Asynq
         }
 
         /// <summary>
-        /// Asynchronously execute the given query expected to not return any values.
+        /// Asynchronously execute the given data operation expected to not return any values.
         /// </summary>
-        /// <param name="query"></param>
+        /// <param name="op"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<int> AsynqNonQuery(DataQuery<int> query, TaskFactory<int> factory = null)
+        public Task<int> AsynqNonQuery(IDataOperation op, TaskFactory<int> factory = null)
         {
             if (factory == null) factory = new TaskFactory<int>();
 
             var cn = new SqlConnection(this.connectionString);
-            var cmd = query.ConstructCommand(cn);
+            var cmd = op.ConstructCommand(cn);
             cn.Open();
 
             return factory.FromAsync(

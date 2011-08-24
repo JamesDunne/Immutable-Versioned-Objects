@@ -21,6 +21,11 @@ namespace GitCMS.Definition.Containers
             _container = blobs.ToDictionary(bl => bl.ID);
         }
 
+        public BlobContainer(IDictionary<BlobID, Blob> blobs)
+        {
+            _container = new Dictionary<BlobID, Blob>(blobs);
+        }
+
         public Blob this[BlobID id]
         {
             get { return _container[id]; }

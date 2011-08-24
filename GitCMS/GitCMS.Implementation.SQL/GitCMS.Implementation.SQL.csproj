@@ -5,14 +5,13 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{42EFAFD3-5939-492C-8B93-DFD1969BA925}</ProjectGuid>
+    <ProjectGuid>{BCD16F4B-3915-43B7-B1C8-5A9132D97615}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Asynq</RootNamespace>
-    <AssemblyName>Asynq</AssemblyName>
+    <RootNamespace>GitCMS.Implementation.SQL</RootNamespace>
+    <AssemblyName>GitCMS.Implementation.SQL</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +21,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\Asynq.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -37,15 +35,27 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataContext.cs" />
-    <Compile Include="IComplexDataQuery.cs" />
-    <Compile Include="IDataOperation.cs" />
-    <Compile Include="ISimpleDataQuery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TreeRepository.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Asynq\Asynq.csproj">
+      <Project>{42EFAFD3-5939-492C-8B93-DFD1969BA925}</Project>
+      <Name>Asynq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GitCMS.Data\GitCMS.Data.csproj">
+      <Project>{118C63D8-9380-4934-B024-674874388904}</Project>
+      <Name>GitCMS.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GitCMS.Definition\GitCMS.Definition.csproj">
+      <Project>{29D4825B-A343-45AA-99FB-CE6671E78178}</Project>
+      <Name>GitCMS.Definition</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

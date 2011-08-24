@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asynq", "..\Asynq\Asynq.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHarness", "TestHarness\TestHarness.csproj", "{69CE2DF8-0997-472B-AA39-566E4F1E80D7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitCMS.Implementation.SQL", "GitCMS.Implementation.SQL\GitCMS.Implementation.SQL.csproj", "{BCD16F4B-3915-43B7-B1C8-5A9132D97615}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,16 @@ Global
 		{69CE2DF8-0997-472B-AA39-566E4F1E80D7}.Release|Mixed Platforms.Build.0 = Release|x86
 		{69CE2DF8-0997-472B-AA39-566E4F1E80D7}.Release|x86.ActiveCfg = Release|x86
 		{69CE2DF8-0997-472B-AA39-566E4F1E80D7}.Release|x86.Build.0 = Release|x86
+		{BCD16F4B-3915-43B7-B1C8-5A9132D97615}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCD16F4B-3915-43B7-B1C8-5A9132D97615}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCD16F4B-3915-43B7-B1C8-5A9132D97615}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{BCD16F4B-3915-43B7-B1C8-5A9132D97615}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{BCD16F4B-3915-43B7-B1C8-5A9132D97615}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BCD16F4B-3915-43B7-B1C8-5A9132D97615}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCD16F4B-3915-43B7-B1C8-5A9132D97615}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCD16F4B-3915-43B7-B1C8-5A9132D97615}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{BCD16F4B-3915-43B7-B1C8-5A9132D97615}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{BCD16F4B-3915-43B7-B1C8-5A9132D97615}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

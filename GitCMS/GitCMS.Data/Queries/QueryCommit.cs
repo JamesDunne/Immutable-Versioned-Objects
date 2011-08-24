@@ -7,7 +7,7 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Queries
 {
-    public sealed class QueryCommit : DataQuery<Commit>
+    public sealed class QueryCommit : ISimpleDataQuery<Commit>
     {
         private CommitID _id;
 
@@ -16,7 +16,7 @@ namespace GitCMS.Data.Queries
             this._id = id;
         }
 
-        public override SqlCommand ConstructCommand(SqlConnection cn)
+        public SqlCommand ConstructCommand(SqlConnection cn)
         {
             string cmdText = String.Format(
                 @"SELECT {0} FROM {1}{2}{3} WHERE commitid = @id",
@@ -31,7 +31,7 @@ namespace GitCMS.Data.Queries
             return cmd;
         }
 
-        public override Commit Project(SqlDataReader dr)
+        public Commit Project(SqlDataReader dr)
         {
             throw new NotImplementedException();
         }

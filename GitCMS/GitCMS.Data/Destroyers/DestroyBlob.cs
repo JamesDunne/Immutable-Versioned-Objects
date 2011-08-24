@@ -7,7 +7,7 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Persists
 {
-    public sealed class DestroyBlob : DataQuery<int>
+    public sealed class DestroyBlob : IDataOperation
     {
         private BlobID _id;
 
@@ -16,7 +16,7 @@ namespace GitCMS.Data.Persists
             this._id = id;
         }
 
-        public override SqlCommand ConstructCommand(SqlConnection cn)
+        public SqlCommand ConstructCommand(SqlConnection cn)
         {
             string pkName = Tables.TablePKs_Blob.Single();
             var cmdText = String.Format(
@@ -28,11 +28,6 @@ namespace GitCMS.Data.Persists
             var cmd = new SqlCommand(cmdText, cn);
             cmd.AddInParameter("@" + pkName, new SqlBinary((byte[])_id));
             return cmd;
-        }
-
-        public override int Project(SqlDataReader dr)
-        {
-            throw new NotImplementedException();
         }
     }
 }

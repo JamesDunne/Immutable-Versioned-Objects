@@ -7,7 +7,7 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Queries
 {
-    public sealed class QueryBlob : DataQuery<Blob>
+    public sealed class QueryBlob : ISimpleDataQuery<Blob>
     {
         private BlobID _id;
 
@@ -16,7 +16,7 @@ namespace GitCMS.Data.Queries
             this._id = id;
         }
 
-        public override SqlCommand ConstructCommand(SqlConnection cn)
+        public SqlCommand ConstructCommand(SqlConnection cn)
         {
             string cmdText = String.Format(
                 @"SELECT {0} FROM {1}{2}{3} WHERE blobid = @blobid",
@@ -31,7 +31,7 @@ namespace GitCMS.Data.Queries
             return cmd;
         }
 
-        public override Blob Project(SqlDataReader dr)
+        public Blob Project(SqlDataReader dr)
         {
             BlobID id = (BlobID) dr.GetSqlBinary(0).Value;
 

@@ -17,7 +17,7 @@ namespace GitCMS.Data.Persists
     /// <item>All BlobIDs referenced are persisted.</item>
     /// </list>
     /// </summary>
-    public sealed class PersistTree : DataQuery<int>
+    public sealed class PersistTree : IDataOperation
     {
         private Tree _tr;
 
@@ -26,7 +26,7 @@ namespace GitCMS.Data.Persists
             this._tr = tr;
         }
 
-        public override SqlCommand ConstructCommand(SqlConnection cn)
+        public SqlCommand ConstructCommand(SqlConnection cn)
         {
             StringBuilder sbCmd = new StringBuilder();
             sbCmd.AppendLine(@"BEGIN TRAN");
@@ -71,11 +71,6 @@ namespace GitCMS.Data.Persists
             }
 
             return cmd;
-        }
-
-        public override int Project(SqlDataReader dr)
-        {
-            throw new NotImplementedException();
         }
     }
 }

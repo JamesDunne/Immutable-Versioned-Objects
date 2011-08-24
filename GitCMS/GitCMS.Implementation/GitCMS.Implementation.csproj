@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{42EFAFD3-5939-492C-8B93-DFD1969BA925}</ProjectGuid>
+    <ProjectGuid>{B4563DD0-472C-404B-ADA8-3F9F4C12FCF1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Asynq</RootNamespace>
-    <AssemblyName>Asynq</AssemblyName>
+    <RootNamespace>GitCMS.Implementation</RootNamespace>
+    <AssemblyName>GitCMS.Implementation</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -22,7 +22,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\Asynq.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,11 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataContext.cs" />
-    <Compile Include="IComplexDataQuery.cs" />
-    <Compile Include="IDataOperation.cs" />
-    <Compile Include="ISimpleDataQuery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Asynq\Asynq.csproj">
+      <Project>{42EFAFD3-5939-492C-8B93-DFD1969BA925}</Project>
+      <Name>Asynq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GitCMS.Data\GitCMS.Data.csproj">
+      <Project>{118C63D8-9380-4934-B024-674874388904}</Project>
+      <Name>GitCMS.Data</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

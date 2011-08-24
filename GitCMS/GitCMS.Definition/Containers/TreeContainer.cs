@@ -7,6 +7,9 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Definition.Containers
 {
+    /// <summary>
+    /// An immutable dictionary of Trees.
+    /// </summary>
     public sealed class TreeContainer
     {
         private Dictionary<TreeID, Tree> _container;
@@ -19,6 +22,11 @@ namespace GitCMS.Definition.Containers
         public TreeContainer(IEnumerable<Tree> trees)
         {
             _container = trees.ToDictionary(tr => tr.ID);
+        }
+
+        public TreeContainer(IDictionary<TreeID, Tree> trees)
+        {
+            _container = new Dictionary<TreeID, Tree>(trees);
         }
 
         public Tree this[TreeID id]

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace GitCMS.Data.Queries
 {
-    public sealed class QueryTreesExist : DataQuery<TreeID>
+    public sealed class QueryTreesExist : ISimpleDataQuery<TreeID>
     {
         private TreeID[] _ids;
 
@@ -22,7 +22,7 @@ namespace GitCMS.Data.Queries
             this._ids = ids.ToArray();
         }
 
-        public override SqlCommand ConstructCommand(SqlConnection cn)
+        public SqlCommand ConstructCommand(SqlConnection cn)
         {
             string pkName = Tables.TablePKs_Tree.Single();
             string cmdText = String.Format(
@@ -37,7 +37,7 @@ namespace GitCMS.Data.Queries
             return cmd;
         }
 
-        public override TreeID Project(SqlDataReader dr)
+        public TreeID Project(SqlDataReader dr)
         {
             TreeID id = (TreeID)dr.GetSqlBinary(0).Value;
             return id;
