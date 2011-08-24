@@ -20,6 +20,10 @@ namespace GitCMS.Definition.Models
                 bw.Write((byte[])b.CommitID);
                 // TODO: include timestamp?
                 // TODO: include name?
+                if (!String.IsNullOrEmpty(b.Message))
+                {
+                    bw.WriteRaw(b.Message);
+                }
                 bw.Flush();
 
                 // SHA-1 the data:
