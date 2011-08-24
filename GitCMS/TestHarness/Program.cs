@@ -24,8 +24,8 @@ namespace TestHarness
             //pr.TestAsynqQuery();
             //pr.TestPersistBlob();
             //pr.TestQueryBlobs();
-            //pr.TestPersistTree();
-            pr.TestRetrieveTreeRecursively();
+            TreeID rootid = pr.TestPersistTree();
+            pr.TestRetrieveTreeRecursively(rootid);
 
             Console.WriteLine("Press a key.");
             Console.ReadLine();
@@ -40,7 +40,7 @@ namespace TestHarness
         {
             // Create a Blob:
             Blob bl = new Blob.Builder(
-                pContents:  Encoding.UTF8.GetBytes("Sample README content.")
+                pContents: Encoding.UTF8.GetBytes("Sample README content.")
             );
             Console.WriteLine(bl.ID.ToString());
 
@@ -55,12 +55,12 @@ namespace TestHarness
 
             // Create a Commit:
             Commit cm = new Commit.Builder(
-                pParents:       new List<CommitID>(0),
-                pTreeID:        tr.ID,
-                pCommitter:     "James Dunne <james.jdunne@gmail.com>",
-                pAuthor:        "James Dunne <james.jdunne@gmail.com>",
+                pParents: new List<CommitID>(0),
+                pTreeID: tr.ID,
+                pCommitter: "James Dunne <james.jdunne@gmail.com>",
+                pAuthor: "James Dunne <james.jdunne@gmail.com>",
                 pDateCommitted: DateTimeOffset.UtcNow.Date,
-                pMessage:       "A commit message here."
+                pMessage: "A commit message here."
             );
             Console.WriteLine(cm.ID.ToString());
         }
@@ -224,7 +224,7 @@ namespace TestHarness
             Console.WriteLine("Complete.");
         }
 
-        void TestPersistTree()
+        TreeID TestPersistTree()
         {
             // Create a Blob:
             Blob bl = new Blob.Builder(Encoding.UTF8.GetBytes("Sample README content."));
@@ -339,15 +339,17 @@ namespace TestHarness
                 else runner = runner.ContinueWith(r => db.AsynqNonQuery(new PersistTree(trees[id]))).Unwrap();
             }
 
-            if (waiter != null)
+            if (runner != null)
             {
                 Console.WriteLine("Waiting for tree persists...");
-                waiter.Wait();
+                runner.Wait();
             }
 
             Console.WriteLine("Complete");
 
             Console.WriteLine("Root TreeID = {0}", trRoot.ID);
+
+            return trRoot.ID;
         }
 
         private static Stack<T> newStack<T>(T initial, int initialCapacity = 10)
@@ -357,34 +359,46 @@ namespace TestHarness
             return stk;
         }
 
-        void TestRetrieveTreeRecursively()
+        void TestRetrieveTreeRecursively(TreeID? id = null)
         {
             var db = getDataContext();
 
-            ITreeRepository repo = new TreeRepository(db);
-            TreeID rootid = new TreeID("85cfe62db1cedba5e7c3a056c636c1df8557a305");
-            Console.WriteLine(rootid);
+            TreeID rootid = id ?? new TreeID("85cfe62db1cedba5e7c3a056c636c1df8557a305");
+            Console.WriteLine("Retrieving TreeID {0} recursively...", rootid);
 
+            ITreeRepository repo = new TreeRepository(db);
             var treeTask = repo.RetrieveTreeRecursively(rootid);
             treeTask.Wait();
 
             // Recursively display trees:
             TreeContainer trees = treeTask.Result.Item2;
 
-            var idStk = newStack(new { id = treeTask.Result.Item1, name = String.Empty, depth = 0 }, trees.Count);
-            while (idStk.Count > 0)
+            RecursivePrint(trees, treeTask.Result.Item1, String.Empty);
+        }
+
+        private void RecursivePrint(TreeContainer trees, TreeID treeID, string treeName, int depth = 1)
+        {
+            var tr = trees[treeID];
+            if (depth == 1)
             {
-                var node = idStk.Pop();
+                Console.WriteLine("tree {1}: {0}/", new string('_', (depth - 1) * 2), tr.ID.ToString().Substring(0, 12));
+            }
 
-                Console.WriteLine("{0}TREE {1}: {2}/", new string('_', node.depth * 2), node.id, node.name);
-                foreach (var bl in trees[node.id].Blobs)
-                {
-                    Console.WriteLine("{0}BLOB {1}: {2}", new string('_', (node.depth + 1) * 2), bl.BlobID, bl.Name);
-                }
+            // Sort refs by name:
+            var namedRefs = Tree.ComputeChildList(tr.Trees, tr.Blobs);
 
-                foreach (var rf in trees[node.id].Trees)
+            foreach (var kv in namedRefs)
+            {
+                var nref = kv.Value;
+                switch (nref.Which)
                 {
-                    idStk.Push(new { id = rf.TreeID, name = rf.Name, depth = node.depth + 1 });
+                    case Either<TreeTreeReference,TreeBlobReference>.Selected.N1:
+                        Console.WriteLine("tree {1}: {0}{2}/", new string('_', depth * 2), nref.N1.TreeID.ToString().Substring(0, 12), nref.N1.Name);
+                        RecursivePrint(trees, nref.N1.TreeID, nref.N1.Name, depth + 1);
+                        break;
+                    case Either<TreeTreeReference,TreeBlobReference>.Selected.N2:
+                        Console.WriteLine("blob {1}: {0}{2}", new string('_', depth * 2), nref.N2.BlobID.ToString().Substring(0, 12), nref.N2.Name);
+                        break;
                 }
             }
         }

@@ -65,30 +65,36 @@ namespace GitCMS.Definition.Models
 
     public sealed partial class Tree
     {
-        private static TreeID computeID(Builder m)
+        public static SortedList<string, Either<TreeTreeReference, TreeBlobReference>> ComputeChildList(IEnumerable<TreeTreeReference> treeRefs, IEnumerable<TreeBlobReference> blobRefs)
         {
             // Sort refs by name:
-            var namedRefs = new SortedList<string, Either<TreeTreeReference, TreeBlobReference>>(m.Trees.Count + m.Blobs.Count);
+            var namedRefs = new SortedList<string, Either<TreeTreeReference, TreeBlobReference>>(treeRefs.Count() + blobRefs.Count(), StringComparer.Ordinal);
 
             // Add tree refs:
-            for (int i = 0; i < m.Trees.Count; ++i)
+            foreach (var tr in treeRefs)
             {
-                string name = m.Trees[i].Name;
-                if (namedRefs.ContainsKey(name))
+                if (namedRefs.ContainsKey(tr.Name))
                     throw new InvalidOperationException();
 
-                namedRefs.Add(name, m.Trees[i]);
+                namedRefs.Add(tr.Name, tr);
             }
 
             // Add blob refs:
-            for (int i = 0; i < m.Blobs.Count; ++i)
+            foreach (var bl in blobRefs)
             {
-                string name = m.Blobs[i].Name;
-                if (namedRefs.ContainsKey(name))
+                if (namedRefs.ContainsKey(bl.Name))
                     throw new InvalidOperationException();
 
-                namedRefs.Add(name, m.Blobs[i]);
+                namedRefs.Add(bl.Name, bl);
             }
+
+            return namedRefs;
+        }
+
+        private static TreeID computeID(Builder m)
+        {
+            // Sort refs by name:
+            var namedRefs = ComputeChildList(m.Trees, m.Blobs);
 
             // Calculate a quick-and-dirty expected capacity:
             int initialCapacity =

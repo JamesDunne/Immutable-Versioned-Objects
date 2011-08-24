@@ -49,6 +49,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
         {
             Dictionary<TreeID, Tree.Builder> trees = new Dictionary<TreeID, Tree.Builder>(expectedCount);
 
+            // Iterate through rows of the recursive query, assuming ordering of rows guarantees tree depth locality.
             while (dr.Read())
             {
                 SqlBinary btreeid = dr.GetSqlBinary(0);
@@ -60,26 +61,16 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                 TreeID? treeid = btreeid.IsNull ? (TreeID?)null : (TreeID)btreeid.Value;
                 TreeID? linked_treeid = blinked_treeid.IsNull ? (TreeID?)null : (TreeID)blinked_treeid.Value;
 
+                TreeID pullFor = treeid.HasValue ? treeid.Value : linked_treeid.Value;
+
                 Tree.Builder curr;
-
-                if (!treeid.HasValue)
+                if (!trees.TryGetValue(pullFor, out curr))
                 {
-                    Debug.Assert(linked_treeid.HasValue);
-                    if (!trees.TryGetValue(linked_treeid.Value, out curr))
-                    {
-                        curr = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
-                        trees.Add(linked_treeid.Value, curr);
-                    }
-                }
-                else
-                {
-                    if (!trees.TryGetValue(treeid.Value, out curr))
-                    {
-                        curr = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
-                        trees.Add(treeid.Value, curr);
-                    }
+                    curr = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
+                    trees.Add(pullFor, curr);
                 }
 
+                // The tree to add the blob link to:
                 Tree.Builder blobTree = curr;
 
                 // Add a tree link:
@@ -97,6 +88,8 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                     bool isDupe = false;
                     if (treeRefs.Count > 0)
                     {
+                        // Only check the previous ref record for dupe:
+                        // TODO: verify that SQL Server will *always* return rows in an order that supports depth locality from a recursive CTE.
                         isDupe = (
                             (treeRefs[treeRefs.Count - 1].TreeID == linked_treeid.Value) &&
                             (treeRefs[treeRefs.Count - 1].Name == treename.Value)
@@ -105,19 +98,24 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
 
                     // Don't re-add the same tree link:
                     if (!isDupe)
-                    {
                         treeRefs.Add(new TreeTreeReference.Builder(treename.Value, linked_treeid.Value));
-                    }
                 }
 
                 // Add a blob link to the child or parent tree:
                 if (!linked_blobid.IsNull)
-                {
                     blobTree.Blobs.Add(new TreeBlobReference.Builder(blobname.Value, (BlobID)linked_blobid.Value));
-                }
             }
 
-            return new Tuple<TreeID, TreeContainer>(this._id, new TreeContainer(trees.Values.Select(t => (Tree)t)));
+            // Return the final result with immutable objects:
+            return new Tuple<TreeID, TreeContainer>(
+                this._id,
+                new TreeContainer(
+                    trees.Select(kv =>
+                        // Verify that the retrieved ID is equivalent to the constructed ID:
+                        ((Tree)kv.Value).With(tr => tr.Assert(kv.Key == tr.ID))
+                    )
+                )
+            );
         }
     }
 }
