@@ -17,7 +17,7 @@ namespace GitCMS.Data.Persists
     /// <item>All BlobIDs referenced are persisted.</item>
     /// </list>
     /// </summary>
-    public sealed class PersistTree : IDataOperation
+    public sealed class PersistTree : IDataOperation<Tree>
     {
         private Tree _tr;
 
@@ -71,6 +71,11 @@ namespace GitCMS.Data.Persists
             }
 
             return cmd;
+        }
+
+        public Tree Return(int rowsAffected)
+        {
+            return this._tr;
         }
     }
 }

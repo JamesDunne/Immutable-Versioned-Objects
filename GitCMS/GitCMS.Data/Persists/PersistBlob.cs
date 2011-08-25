@@ -7,7 +7,7 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Persists
 {
-    public sealed class PersistBlob : IDataOperation
+    public sealed class PersistBlob : IDataOperation<Blob>
     {
         private Blob _bl;
 
@@ -29,6 +29,11 @@ namespace GitCMS.Data.Persists
             cmd.AddInParameter("@blobid", new SqlBinary((byte[])_bl.ID));
             cmd.AddInParameter("@contents", new SqlBinary(_bl.Contents));
             return cmd;
+        }
+
+        public Blob Return(int rowsAffected)
+        {
+            return this._bl;
         }
     }
 }

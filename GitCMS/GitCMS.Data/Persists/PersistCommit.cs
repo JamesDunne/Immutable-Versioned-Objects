@@ -7,7 +7,7 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Persists
 {
-    public sealed class PersistCommit : IDataOperation
+    public sealed class PersistCommit : IDataOperation<Commit>
     {
         private Commit _cm;
 
@@ -33,6 +33,11 @@ namespace GitCMS.Data.Persists
             cmd.AddInParameter("@date_committed", _cm.DateCommitted);
             cmd.AddInParameter("@message", new SqlString(_cm.Message));
             return cmd;
+        }
+
+        public Commit Return(int rowsAffected)
+        {
+            return this._cm;
         }
     }
 }

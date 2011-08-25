@@ -9,7 +9,7 @@ namespace GitCMS.Definition.Repositories
 {
     public interface ICommitRepository
     {
-        Task<int> PersistCommit(Commit cm);
+        Task<Commit> PersistCommit(Commit cm);
 
         Task<Commit> GetCommit(CommitID id);
 

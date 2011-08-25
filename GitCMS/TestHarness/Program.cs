@@ -211,7 +211,7 @@ namespace TestHarness
             var blobIDsToPersist = blobs.Keys.Except(qBlobs.Result).ToArray();
 
             // Persist each blob asynchronously:
-            Task<int>[] persists = new Task<int>[blobIDsToPersist.Length];
+            Task<Blob>[] persists = new Task<Blob>[blobIDsToPersist.Length];
             for (int i = 0; i < blobIDsToPersist.Length; ++i)
             {
                 BlobID id = blobIDsToPersist[i];
@@ -286,7 +286,7 @@ namespace TestHarness
             BlobID[] blobIDsToPersist = blobs.Keys.Except(existBlobs.Result).ToArray();
 
             // Blobs may be persisted in any order; there are no dependencies between blobs:
-            Task<int>[] blobPersists = new Task<int>[blobIDsToPersist.Length];
+            Task<Blob>[] blobPersists = new Task<Blob>[blobIDsToPersist.Length];
             for (int i = 0; i < blobIDsToPersist.Length; ++i)
             {
                 BlobID id = blobIDsToPersist[i];
@@ -329,7 +329,7 @@ namespace TestHarness
 
             // Asynchronously persist the trees in dependency order:
             // FIXME: asynchronous fan-out per depth level
-            Task<int> waiter = null, runner = null;
+            Task<Tree> waiter = null, runner = null;
             while (treeIDsToPersist.Count > 0)
             {
                 TreeID id = treeIDsToPersist.Pop();
@@ -390,13 +390,17 @@ namespace TestHarness
                 pMessage:       "Initial commit."
             );
 
+            Console.WriteLine("CommitID {0}", cm.ID);
+
             var db = getDataContext();
 
-            ICommitRepository repo = new CommitRepository(db);
-            var commitTask = repo.PersistCommit(cm);
-            commitTask.Wait();
+            ICommitRepository cmrepo = new CommitRepository(db);
+            IRefRepository rfrepo = new RefRepository(db);
 
-            Console.WriteLine("CommitID {0}", cm.ID);
+            // Persist the commit:
+            Task<Commit> commitTask = cmrepo.PersistCommit(cm);
+            // Then update the "refs/HEAD" to point to the new commit:
+            commitTask.ContinueWith(t => rfrepo.PersistRef(new Ref.Builder("refs/HEAD", cm.ID))).Wait();
         }
 
         static void RecursivePrint(TreeContainer trees, TreeID treeID, string treeName, int depth = 1)

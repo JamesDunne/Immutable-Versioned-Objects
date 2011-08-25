@@ -7,7 +7,7 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Persists
 {
-    public sealed class DestroyBlob : IDataOperation
+    public sealed class DestroyBlob : IDataOperation<BlobID>
     {
         private BlobID _id;
 
@@ -28,6 +28,11 @@ namespace GitCMS.Data.Persists
             var cmd = new SqlCommand(cmdText, cn);
             cmd.AddInParameter("@" + pkName, new SqlBinary((byte[])_id));
             return cmd;
+        }
+
+        public BlobID Return(int rowsAffected)
+        {
+            return this._id;
         }
     }
 }

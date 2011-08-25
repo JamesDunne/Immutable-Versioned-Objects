@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="CommitRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RefRepository.cs" />
     <Compile Include="TreeRepository.cs" />
   </ItemGroup>
   <ItemGroup>

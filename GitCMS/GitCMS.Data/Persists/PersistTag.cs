@@ -7,7 +7,7 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Persists
 {
-    public sealed class PersistTag : IDataOperation
+    public sealed class PersistTag : IDataOperation<Tag>
     {
         private Tag _tg;
 
@@ -31,6 +31,11 @@ namespace GitCMS.Data.Persists
             // TODO: add timestamp?
             cmd.AddInParameter("@message", new SqlString(_tg.Message));
             return cmd;
+        }
+
+        public Tag Return(int rowsAffected)
+        {
+            return this._tg;
         }
     }
 }

@@ -189,9 +189,9 @@ namespace Asynq
         /// <param name="op"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<int> AsynqNonQuery(IDataOperation op, TaskFactory<int> factory = null)
+        public Task<T> AsynqNonQuery<T>(IDataOperation<T> op, TaskFactory<T> factory = null)
         {
-            if (factory == null) factory = new TaskFactory<int>();
+            if (factory == null) factory = new TaskFactory<T>();
 
             var cn = new SqlConnection(this.connectionString);
             var cmd = op.ConstructCommand(cn);
@@ -205,7 +205,7 @@ namespace Asynq
                     {
                         int rc = cmd.EndExecuteNonQuery(ar);
 
-                        return rc;
+                        return op.Return(rc);
                     }
                     finally
                     {

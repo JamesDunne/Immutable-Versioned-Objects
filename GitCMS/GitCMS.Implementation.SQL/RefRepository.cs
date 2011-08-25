@@ -14,27 +14,23 @@ using GitCMS.Definition.Repositories;
 
 namespace GitCMS.Implementation.SQL
 {
-    public class TreeRepository : ITreeRepository
+    public sealed class RefRepository : IRefRepository
     {
         private DataContext db;
 
-        public TreeRepository(DataContext db)
+        public RefRepository(DataContext db)
         {
             this.db = db;
         }
 
-        public Task<Tree> PersistTree(TreeID rootid, TreeContainer trees)
+        public Task<Ref> PersistRef(Ref rf)
         {
-            throw new NotImplementedException();
+            return db.AsynqNonQuery(new PersistRef(rf));
         }
 
-        public Task<Tuple<TreeID, TreeContainer>> RetrieveTreeRecursively(TreeID rootid)
+        public Task<Ref> GetRef(string name)
         {
-            return db.AsynqMulti(new QueryTreeRecursively(rootid));
-        }
-
-        public Task<TreeID> DeleteTreeRecursively(TreeID rootid)
-        {
+            //return db.AsynqSingle(new QueryRef(name));
             throw new NotImplementedException();
         }
     }

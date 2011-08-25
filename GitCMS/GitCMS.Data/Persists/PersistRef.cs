@@ -7,7 +7,7 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Persists
 {
-    public sealed class PersistRef : IDataOperation
+    public sealed class PersistRef : IDataOperation<Ref>
     {
         private Ref _rf;
 
@@ -35,6 +35,11 @@ END",
             cmd.AddInParameter("@name", new SqlString(_rf.Name));
             cmd.AddInParameter("@commitid", new SqlBinary((byte[])_rf.CommitID));
             return cmd;
+        }
+
+        public Ref Return(int rowsAffected)
+        {
+            return this._rf;
         }
     }
 }

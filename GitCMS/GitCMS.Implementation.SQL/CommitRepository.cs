@@ -23,7 +23,7 @@ namespace GitCMS.Implementation.SQL
             this.db = db;
         }
 
-        public Task<int> PersistCommit(Commit cm)
+        public Task<Commit> PersistCommit(Commit cm)
         {
             return db.AsynqNonQuery(new PersistCommit(cm));
         }
