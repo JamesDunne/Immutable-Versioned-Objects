@@ -24,8 +24,11 @@ namespace TestHarness
             //pr.TestAsynqQuery();
             //pr.TestPersistBlob();
             //pr.TestQueryBlobs();
+
             TreeID rootid = pr.TestPersistTree();
             pr.TestRetrieveTreeRecursively(rootid);
+
+            pr.TestCreateCommit(rootid);
 
             Console.WriteLine("Press a key.");
             Console.ReadLine();
@@ -59,7 +62,7 @@ namespace TestHarness
                 pTreeID: tr.ID,
                 pCommitter: "James Dunne <james.jdunne@gmail.com>",
                 pAuthor: "James Dunne <james.jdunne@gmail.com>",
-                pDateCommitted: DateTimeOffset.UtcNow.Date,
+                pDateCommitted: DateTimeOffset.Now,
                 pMessage: "A commit message here."
             );
             Console.WriteLine(cm.ID.ToString());
@@ -361,7 +364,7 @@ namespace TestHarness
         {
             var db = getDataContext();
 
-            TreeID rootid = id ?? new TreeID("85cfe62db1cedba5e7c3a056c636c1df8557a305");
+            TreeID rootid = id ?? new TreeID("a1fe342751e09fda968cfd0f1a1755e386f494f8");
             Console.WriteLine("Retrieving TreeID {0} recursively...", rootid);
 
             ITreeRepository repo = new TreeRepository(db);
@@ -374,9 +377,26 @@ namespace TestHarness
             RecursivePrint(trees, treeTask.Result.Item1, String.Empty);
         }
 
-        void TestCreateCommit()
+        void TestCreateCommit(TreeID? id)
         {
+            TreeID rootid = id ?? new TreeID("a1fe342751e09fda968cfd0f1a1755e386f494f8");
+            
+            Commit cm = new Commit.Builder(
+                pParents:       new List<CommitID>(0),
+                pTreeID:        rootid,
+                pCommitter:     "James Dunne <james.jdunne@gmail.com>",
+                pAuthor:        "James Dunne <james.jdunne@gmail.com>",
+                pDateCommitted: DateTimeOffset.Now,
+                pMessage:       "Initial commit."
+            );
 
+            var db = getDataContext();
+
+            ICommitRepository repo = new CommitRepository(db);
+            var commitTask = repo.PersistCommit(cm);
+            commitTask.Wait();
+
+            Console.WriteLine("CommitID {0}", cm.ID);
         }
 
         static void RecursivePrint(TreeContainer trees, TreeID treeID, string treeName, int depth = 1)

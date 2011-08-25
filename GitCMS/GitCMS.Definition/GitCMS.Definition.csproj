@@ -42,6 +42,7 @@
       <DependentUpon>Containers.tt</DependentUpon>
     </Compile>
     <Compile Include="Functional.cs" />
+    <Compile Include="Repositories\ICommitRepository.cs" />
     <Compile Include="Repositories\ITreeRepository.cs" />
     <None Include="Containers\Containers.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

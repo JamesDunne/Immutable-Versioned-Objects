@@ -54,12 +54,12 @@ namespace GitCMS.Data
             return prm;
         }
 
-        internal static SqlParameter AddInParameter(this SqlCommand cmd, string name, SqlDateTime value)
+        internal static SqlParameter AddInParameter(this SqlCommand cmd, string name, DateTimeOffset value)
         {
             var prm = cmd.CreateParameter();
             prm.Direction = ParameterDirection.Input;
             prm.ParameterName = name;
-            prm.SqlDbType = SqlDbType.DateTime2;
+            prm.SqlDbType = SqlDbType.DateTimeOffset;
             prm.SqlValue = value;
             cmd.Parameters.Add(prm);
             return prm;

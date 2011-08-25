@@ -19,8 +19,8 @@ namespace GitCMS.Data.Queries
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
             string cmdText = String.Format(
-@"SELECT {0} FROM {1}{2}{3} WHERE [commitid] = @id;
-SELECT [parent_commitid] FROM [dbo].[CommitParents] WHERE [commitid] = @id;",
+@"SELECT {0} FROM {1}{2}{3} WHERE [commitid] = @commitid;
+SELECT [parent_commitid] FROM [dbo].[CommitParents] WHERE [commitid] = @commitid;",
                 Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList(),
                 Tables.TableName_Commit,
                 "", // no alias
@@ -28,7 +28,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParents] WHERE [commitid] = @id;",
             );
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@id", new SqlBinary((byte[])_id));
+            cmd.AddInParameter("@commitid", new SqlBinary((byte[])_id));
             return cmd;
         }
 

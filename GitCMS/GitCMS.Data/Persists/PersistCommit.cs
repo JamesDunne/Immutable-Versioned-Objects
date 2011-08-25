@@ -30,7 +30,7 @@ namespace GitCMS.Data.Persists
             cmd.AddInParameter("@treeid", new SqlBinary((byte[])_cm.TreeID));
             cmd.AddInParameter("@committer", new SqlString(_cm.Committer));
             cmd.AddInParameter("@author", new SqlString(_cm.Author));
-            cmd.AddInParameter("@date_committed", new SqlDateTime(_cm.DateCommitted.UtcDateTime));
+            cmd.AddInParameter("@date_committed", _cm.DateCommitted);
             cmd.AddInParameter("@message", new SqlString(_cm.Message));
             return cmd;
         }

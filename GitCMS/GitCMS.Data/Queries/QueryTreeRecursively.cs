@@ -24,7 +24,7 @@ namespace GitCMS.Data.Queries
             string pkName = Tables.TablePKs_Tree.Single();
             string cmdText =
 @";WITH Trees AS (
-    SELECT      CONVERT(binary(20), NULL) AS treeid, tr.treeid AS linked_treeid, CONVERT(nvarchar(128), NULL) AS name
+    SELECT      CONVERT(binary(20), NULL) AS treeid, tr.treeid AS linked_treeid, CONVERT(nvarchar(128), NULL) COLLATE SQL_Latin1_General_CP1_CS_AS AS name
     FROM        [dbo].[Tree] tr
     WHERE       tr.treeid = @treeid
     UNION ALL
