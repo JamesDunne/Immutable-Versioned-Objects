@@ -10,6 +10,7 @@ using GitCMS.Data.Persists;
 using GitCMS.Definition.Containers;
 using GitCMS.Definition.Repositories;
 using GitCMS.Implementation.SQL;
+using System.Diagnostics;
 
 namespace TestHarness
 {
@@ -274,6 +275,7 @@ namespace TestHarness
 
             var db = getDataContext();
 
+#if false
             // Start queries to check what exists already:
             var existBlobs = db.AsynqMulti(new QueryBlobsExist(blobs.Keys), expectedCapacity: blobs.Count);
             var existTrees = db.AsynqMulti(new QueryTreesExist(trees.Keys), expectedCapacity: trees.Count);
@@ -344,9 +346,18 @@ namespace TestHarness
                 Console.WriteLine("Waiting for tree persists...");
                 runner.Wait();
             }
+#else
+            ITreeRepository trrepo = new TreeRepository(db);
+            
+            // Persist the tree and its blobs:
+            var wait = trrepo.PersistTree(trRoot.ID, trees, blobs);
+            wait.Wait();
 
-            Console.WriteLine("Complete");
+            // Make sure we got back what's expected of the API:
+            Debug.Assert(trRoot.ID == wait.Result.ID);
+#endif
 
+            Console.WriteLine("Tree persistence complete.");
             Console.WriteLine("Root TreeID = {0}", trRoot.ID);
 
             return trRoot.ID;
@@ -386,23 +397,25 @@ namespace TestHarness
             IRefRepository rfrepo = new RefRepository(db);
 
             var taskHead = cmrepo.GetCommitByRef("HEAD");
-            taskHead.Wait();
-            Commit parent = taskHead.Result;
+            taskHead.ContinueWith((gotHead) =>
+            {
+                Commit parent = taskHead.Result;
 
-            Commit cm = new Commit.Builder(
-                pParents:       parent == null ? new List<CommitID>(0) : new List<CommitID> { parent.ID },
-                pTreeID:        rootid,
-                pCommitter:     "James Dunne <james.jdunne@gmail.com>",
-                pDateCommitted: DateTimeOffset.Now,
-                pMessage:       "Initial commit."
-            );
+                Commit cm = new Commit.Builder(
+                    pParents: parent == null ? new List<CommitID>(0) : new List<CommitID> { parent.ID },
+                    pTreeID: rootid,
+                    pCommitter: "James Dunne <james.jdunne@gmail.com>",
+                    pDateCommitted: DateTimeOffset.Now,
+                    pMessage: "Initial commit."
+                );
 
-            Console.WriteLine("CommitID {0}", cm.ID);
+                Console.WriteLine("CommitID {0}", cm.ID);
 
-            // Persist the commit:
-            Task<Commit> commitTask = cmrepo.PersistCommit(cm);
-            // Then update the "HEAD" to point to the new commit:
-            commitTask.ContinueWith(t => rfrepo.PersistRef(new Ref.Builder("HEAD", cm.ID))).Wait();
+                // Persist the commit:
+                Task<Commit> commitTask = cmrepo.PersistCommit(cm);
+                // Then update the "HEAD" to point to the new commit:
+                return commitTask.ContinueWith(t => rfrepo.PersistRef(new Ref.Builder("HEAD", cm.ID)));
+            }).Wait();
         }
 
         static void RecursivePrint(TreeContainer trees, TreeID treeID, string treeName, int depth = 1)
