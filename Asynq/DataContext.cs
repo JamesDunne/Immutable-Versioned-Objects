@@ -164,7 +164,7 @@ namespace Asynq
             cn.Open();
 
             return factory.FromAsync(
-                cmd.BeginExecuteReader(CommandBehavior.CloseConnection | CommandBehavior.SingleRow),
+                cmd.BeginExecuteReader(CommandBehavior.CloseConnection),
                 ar =>
                 {
                     try
