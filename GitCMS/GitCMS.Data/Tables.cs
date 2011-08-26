@@ -16,7 +16,6 @@ namespace GitCMS.Data
         {
             "treeid",
             "committer",
-            "author",
             "date_committed",
             "message",
         };
@@ -81,8 +80,10 @@ namespace GitCMS.Data
         internal static readonly string[] TablePKs_Tag = new string[1] { "tagid" };
         internal static readonly string[] ColumnNames_Tag = new string[]
         {
+            "name",
             "commitid",
-            // TODO: add timestamp?
+            "tagger",
+            "date_tagged",
             "message",
         };
 

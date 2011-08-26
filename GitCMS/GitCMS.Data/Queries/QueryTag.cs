@@ -61,8 +61,11 @@ namespace GitCMS.Data.Queries
             TagID id = (TagID) dr.GetSqlBinary(0).Value;
 
             Tag.Builder b = new Tag.Builder(
-                pCommitID:  (CommitID)dr.GetSqlBinary(1).Value,
-                pMessage:   dr.GetSqlString(2).Value
+                pName:          dr.GetSqlString(0).Value,
+                pCommitID:      (CommitID)dr.GetSqlBinary(1).Value,
+                pTagger:        dr.GetSqlString(2).Value,
+                pDateTagged:    dr.GetDateTimeOffset(3),
+                pMessage:       dr.GetSqlString(4).Value
             );
 
             Tag tg = b;

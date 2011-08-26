@@ -15,7 +15,6 @@ namespace GitCMS.Definition.Models
         public CommitID[] Parents { get; private set; }
         public TreeID TreeID { get; private set; }
         public string Committer { get; private set; }
-        public string Author { get; private set; }
         public DateTimeOffset DateCommitted { get; private set; }
         public string Message { get; private set; }
 
@@ -25,7 +24,6 @@ namespace GitCMS.Definition.Models
             this.Parents = (b.Parents).ToArray();
             this.TreeID = b.TreeID;
             this.Committer = b.Committer;
-            this.Author = b.Author;
             this.DateCommitted = b.DateCommitted;
             this.Message = b.Message;
         }
@@ -35,7 +33,6 @@ namespace GitCMS.Definition.Models
             public List<CommitID> Parents { get; set; }
             public TreeID TreeID { get; set; }
             public string Committer { get; set; }
-            public string Author { get; set; }
             public DateTimeOffset DateCommitted { get; set; }
             public string Message { get; set; }
 
@@ -45,7 +42,6 @@ namespace GitCMS.Definition.Models
                 List<CommitID> pParents
                ,TreeID pTreeID
                ,string pCommitter
-               ,string pAuthor
                ,DateTimeOffset pDateCommitted
                ,string pMessage
             )
@@ -53,7 +49,6 @@ namespace GitCMS.Definition.Models
                 this.Parents = pParents;
                 this.TreeID = pTreeID;
                 this.Committer = pCommitter;
-                this.Author = pAuthor;
                 this.DateCommitted = pDateCommitted;
                 this.Message = pMessage;
             }
@@ -224,29 +219,44 @@ namespace GitCMS.Definition.Models
     public sealed partial class Tag
     {
         public TagID ID { get; private set; }
+        public string Name { get; private set; }
         public CommitID CommitID { get; private set; }
+        public string Tagger { get; private set; }
+        public DateTimeOffset DateTagged { get; private set; }
         public string Message { get; private set; }
 
         public Tag(Builder b)
         {
             this.ID = computeID(b);
+            this.Name = b.Name;
             this.CommitID = b.CommitID;
+            this.Tagger = b.Tagger;
+            this.DateTagged = b.DateTagged;
             this.Message = b.Message;
         }
 
         public sealed class Builder
         {
+            public string Name { get; set; }
             public CommitID CommitID { get; set; }
+            public string Tagger { get; set; }
+            public DateTimeOffset DateTagged { get; set; }
             public string Message { get; set; }
 
             public Builder() { }
 
             public Builder(
-                CommitID pCommitID
+                string pName
+               ,CommitID pCommitID
+               ,string pTagger
+               ,DateTimeOffset pDateTagged
                ,string pMessage
             )
             {
+                this.Name = pName;
                 this.CommitID = pCommitID;
+                this.Tagger = pTagger;
+                this.DateTagged = pDateTagged;
                 this.Message = pMessage;
             }
         }

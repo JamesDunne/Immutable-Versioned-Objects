@@ -13,7 +13,6 @@
                 new { name = "Parents",         type = "CommitID[]",        bType = "List<CommitID>", convert = "({0}).ToArray()" },
                 new { name = "TreeID",          type = "TreeID",            bType = (string)null, convert = (string)null },
                 new { name = "Committer",       type = "string",            bType = (string)null, convert = (string)null },
-                new { name = "Author",          type = "string",            bType = (string)null, convert = (string)null },
                 new { name = "DateCommitted",   type = "DateTimeOffset",    bType = (string)null, convert = (string)null },
                 new { name = "Message",         type = "string",            bType = (string)null, convert = (string)null },
             }
@@ -63,9 +62,11 @@
             comment = "An immutable tag that points to a specific commit.",
             idType = "TagID",
             members = new [] {
-                new { name = "CommitID",    type = "CommitID",  bType = (string)null, convert = (string)null },
-                // TODO: add timestamp?
-                new { name = "Message",     type = "string",    bType = (string)null, convert = (string)null },
+                new { name = "Name",        type = "string",            bType = (string)null, convert = (string)null },
+                new { name = "CommitID",    type = "CommitID",          bType = (string)null, convert = (string)null },
+                new { name = "Tagger",      type = "string",            bType = (string)null, convert = (string)null },
+                new { name = "DateTagged",  type = "DateTimeOffset",    bType = (string)null, convert = (string)null },
+                new { name = "Message",     type = "string",            bType = (string)null, convert = (string)null },
             }
         },
 

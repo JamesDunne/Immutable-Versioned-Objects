@@ -16,10 +16,11 @@ namespace GitCMS.Definition.Models
             using (var ms = new MemoryStream(initialCapacity))
             using (var bw = new BinaryWriter(ms, Encoding.UTF8))
             {
-                bw.WriteRaw("commit ");
-                bw.Write((byte[])b.CommitID);
-                // TODO: include timestamp?
-                // TODO: include name?
+                bw.WriteRaw(String.Format("commit {0}\n", b.CommitID));
+                bw.WriteRaw(String.Format("name {0}\n", b.Name));
+                bw.WriteRaw(String.Format("tagger {0}\n", b.Tagger));
+                bw.WriteRaw(string.Format("date {0}\n\n", b.DateTagged.ToString("u")));
+
                 if (!String.IsNullOrEmpty(b.Message))
                 {
                     bw.WriteRaw(b.Message);
@@ -40,11 +41,10 @@ namespace GitCMS.Definition.Models
         {
             // Calculate a quick-and-dirty expected capacity:
             int initialCapacity =
-                m.Parents == null || m.Parents.Count == 0 ? 0 : "parents ".Length + m.Parents.Sum(t => CommitID.ByteArrayLength + 1) + 1
-              + "tree ".Length + TreeID.ByteArrayLength + 1
-              + "author ".Length + m.Author.Length + 1
+                m.Parents == null || m.Parents.Count == 0 ? 0 : m.Parents.Sum(t => "parent ".Length + CommitID.ByteArrayLength * 2 + 1)
+              + "tree ".Length + TreeID.ByteArrayLength * 2 + 1
               + "committer ".Length + m.Committer.Length + 1
-              + "date ".Length + sizeof(long) + 1
+              + "date ".Length + 20 + 1
               + m.Message.Length;
 
             using (var ms = new MemoryStream(initialCapacity))
@@ -52,8 +52,6 @@ namespace GitCMS.Definition.Models
             {
                 if (m.Parents != null && m.Parents.Count > 0)
                 {
-                    bw.WriteRaw("parents ");
-
                     // Sort parent CommitIDs in order:
                     CommitID[] parents = new CommitID[m.Parents.Count];
                     for (int i = 0; i < parents.Length; ++i)
@@ -62,25 +60,13 @@ namespace GitCMS.Definition.Models
                     
                     for (int i = 0; i < parents.Length; ++i)
                     {
-                        if (i != 0) bw.Write(',');
-                        bw.Write((byte[])parents[i]);
+                        bw.WriteRaw(String.Format("parent {0}\n", parents[i]));
                     }
-                    bw.Write('\n');
                 }
 
-                bw.WriteRaw("tree ");
-                bw.Write((byte[])m.TreeID);
-                bw.Write('\n');
-                bw.WriteRaw("author ");
-                bw.WriteRaw(m.Author);
-                bw.Write('\n');
-                bw.WriteRaw("committer ");
-                bw.WriteRaw(m.Committer);
-                bw.Write('\n');
-                bw.WriteRaw("date ");
-                // FIXME: sensitive to host byte-order!??
-                bw.Write(BitConverter.GetBytes(m.DateCommitted.Ticks));
-                bw.Write('\n');
+                bw.WriteRaw(String.Format("tree {0}\n", m.TreeID));
+                bw.WriteRaw(String.Format("committer {0}\n", m.Committer));
+                bw.WriteRaw(String.Format("date {0}\n\n", m.DateCommitted.ToString("u")));
                 bw.WriteRaw(m.Message);
                 bw.Flush();
 

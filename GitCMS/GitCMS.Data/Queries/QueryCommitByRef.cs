@@ -51,9 +51,8 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
                 pParents:       new System.Collections.Generic.List<CommitID>(10),
                 pTreeID:        (TreeID)dr.GetSqlBinary(1).Value,
                 pCommitter:     dr.GetSqlString(2).Value,
-                pAuthor:        dr.GetSqlString(3).Value,
-                pDateCommitted: dr.GetDateTimeOffset(4),
-                pMessage:       dr.GetSqlString(5).Value
+                pDateCommitted: dr.GetDateTimeOffset(3),
+                pMessage:       dr.GetSqlString(4).Value
             );
 
             // Read the parent commit ids from the second result:

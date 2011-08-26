@@ -61,7 +61,6 @@ namespace TestHarness
                 pParents: new List<CommitID>(0),
                 pTreeID: tr.ID,
                 pCommitter: "James Dunne <james.jdunne@gmail.com>",
-                pAuthor: "James Dunne <james.jdunne@gmail.com>",
                 pDateCommitted: DateTimeOffset.Now,
                 pMessage: "A commit message here."
             );
@@ -394,7 +393,6 @@ namespace TestHarness
                 pParents:       parent == null ? new List<CommitID>(0) : new List<CommitID> { parent.ID },
                 pTreeID:        rootid,
                 pCommitter:     "James Dunne <james.jdunne@gmail.com>",
-                pAuthor:        "James Dunne <james.jdunne@gmail.com>",
                 pDateCommitted: DateTimeOffset.Now,
                 pMessage:       "Initial commit."
             );
