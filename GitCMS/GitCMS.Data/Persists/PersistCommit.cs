@@ -20,6 +20,7 @@ namespace GitCMS.Data.Persists
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
             StringBuilder sbCmd = new StringBuilder();
+            sbCmd.AppendLine(@"BEGIN TRAN");
             sbCmd.AppendFormat(
                 @"INSERT INTO {0} ({1}) VALUES ({2})",
                 Tables.TableName_Commit,
@@ -30,6 +31,7 @@ namespace GitCMS.Data.Persists
             {
                 sbCmd.AppendFormat(@"INSERT INTO [dbo].[CommitParent] (commitid, parent_commitid) VALUES (@commitid,@pc{0})", i.ToString());
             }
+            sbCmd.AppendLine(@"COMMIT TRAN");
 
             var cmd = new SqlCommand(sbCmd.ToString(), cn);
             cmd.AddInParameter("@commitid", new SqlBinary((byte[])_cm.ID));

@@ -30,7 +30,7 @@ namespace GitCMS.Implementation.SQL
 
         public Task<Commit> GetCommit(CommitID id)
         {
-            throw new NotImplementedException();
+            return db.AsynqSingle(new QueryCommit(id));
         }
 
         public Task<Commit> GetCommitByTag(TagID id)

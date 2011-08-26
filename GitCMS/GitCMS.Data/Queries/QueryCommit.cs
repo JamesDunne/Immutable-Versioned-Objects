@@ -20,7 +20,7 @@ namespace GitCMS.Data.Queries
         {
             string cmdText = String.Format(
 @"SELECT {0} FROM {1}{2}{3} WHERE [commitid] = @commitid;
-SELECT [parent_commitid] FROM [dbo].[CommitParents] WHERE [commitid] = @commitid;",
+SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;",
                 Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList(),
                 Tables.TableName_Commit,
                 "", // no alias
@@ -55,6 +55,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParents] WHERE [commitid] = @commitid
                 {
                     b.Parents.Add((CommitID)dr.GetSqlBinary(0).Value);
                 }
+                b.Parents.Sort(new CommitID.Comparer());
             }
 
             Commit cm = b;
