@@ -30,8 +30,7 @@ namespace GitCMS.Implementation.SQL
 
         public Task<Ref> GetRef(string name)
         {
-            //return db.AsynqSingle(new QueryRef(name));
-            throw new NotImplementedException();
+            return db.AsynqSingle(new QueryRef(name));
         }
     }
 }

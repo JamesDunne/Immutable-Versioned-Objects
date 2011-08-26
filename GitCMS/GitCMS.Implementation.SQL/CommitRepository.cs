@@ -45,7 +45,7 @@ namespace GitCMS.Implementation.SQL
 
         public Task<Commit> GetCommitByRef(string refName)
         {
-            throw new NotImplementedException();
+            return db.AsynqSingle(new QueryCommitByRef(refName));
         }
 
     }

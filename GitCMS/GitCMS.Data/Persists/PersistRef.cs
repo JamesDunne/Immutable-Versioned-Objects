@@ -20,7 +20,7 @@ namespace GitCMS.Data.Persists
         {
             // Insert or update:
             var cmdText = String.Format(
-@"IF (NOT EXISTS(SELECT 1 FROM {0} WHERE [name] = @name)
+@"IF (NOT EXISTS(SELECT [name] FROM {0} WHERE [name] = @name))
 BEGIN
   INSERT INTO {0} ({1}) VALUES ({2});
 END ELSE BEGIN

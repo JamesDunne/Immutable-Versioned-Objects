@@ -56,6 +56,8 @@ namespace GitCMS.Definition.Models
 
                     // Sort parent CommitIDs in order:
                     CommitID[] parents = new CommitID[m.Parents.Count];
+                    for (int i = 0; i < parents.Length; ++i)
+                        parents[i] = m.Parents[i];
                     Array.Sort(parents, new CommitID.Comparer());
                     
                     for (int i = 0; i < parents.Length; ++i)

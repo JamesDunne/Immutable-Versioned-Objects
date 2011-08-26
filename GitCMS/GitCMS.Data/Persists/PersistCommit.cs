@@ -4,6 +4,7 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using GitCMS.Definition.Models;
+using System.Text;
 
 namespace GitCMS.Data.Persists
 {
@@ -18,20 +19,27 @@ namespace GitCMS.Data.Persists
 
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
-            var cmdText = String.Format(
+            StringBuilder sbCmd = new StringBuilder();
+            sbCmd.AppendFormat(
                 @"INSERT INTO {0} ({1}) VALUES ({2})",
                 Tables.TableName_Commit,
                 Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList(),
                 Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).ParameterList()
             );
+            for (int i = 0; i < _cm.Parents.Length; ++i)
+            {
+                sbCmd.AppendFormat(@"INSERT INTO [dbo].[CommitParent] (commitid, parent_commitid) VALUES (@commitid,@pc{0})", i.ToString());
+            }
 
-            var cmd = new SqlCommand(cmdText, cn);
+            var cmd = new SqlCommand(sbCmd.ToString(), cn);
             cmd.AddInParameter("@commitid", new SqlBinary((byte[])_cm.ID));
             cmd.AddInParameter("@treeid", new SqlBinary((byte[])_cm.TreeID));
             cmd.AddInParameter("@committer", new SqlString(_cm.Committer));
             cmd.AddInParameter("@author", new SqlString(_cm.Author));
             cmd.AddInParameter("@date_committed", _cm.DateCommitted);
             cmd.AddInParameter("@message", new SqlString(_cm.Message));
+            for (int i = 0; i < _cm.Parents.Length; ++i)
+                cmd.AddInParameter("@pc" + i.ToString(), new SqlBinary((byte[])_cm.Parents[i]));
             return cmd;
         }
 

@@ -381,8 +381,17 @@ namespace TestHarness
         {
             TreeID rootid = id ?? new TreeID("a1fe342751e09fda968cfd0f1a1755e386f494f8");
             
+            var db = getDataContext();
+
+            ICommitRepository cmrepo = new CommitRepository(db);
+            IRefRepository rfrepo = new RefRepository(db);
+
+            var taskHead = cmrepo.GetCommitByRef("HEAD");
+            taskHead.Wait();
+            Commit parent = taskHead.Result;
+
             Commit cm = new Commit.Builder(
-                pParents:       new List<CommitID>(0),
+                pParents:       parent == null ? new List<CommitID>(0) : new List<CommitID> { parent.ID },
                 pTreeID:        rootid,
                 pCommitter:     "James Dunne <james.jdunne@gmail.com>",
                 pAuthor:        "James Dunne <james.jdunne@gmail.com>",
@@ -392,15 +401,10 @@ namespace TestHarness
 
             Console.WriteLine("CommitID {0}", cm.ID);
 
-            var db = getDataContext();
-
-            ICommitRepository cmrepo = new CommitRepository(db);
-            IRefRepository rfrepo = new RefRepository(db);
-
             // Persist the commit:
             Task<Commit> commitTask = cmrepo.PersistCommit(cm);
-            // Then update the "refs/HEAD" to point to the new commit:
-            commitTask.ContinueWith(t => rfrepo.PersistRef(new Ref.Builder("refs/HEAD", cm.ID))).Wait();
+            // Then update the "HEAD" to point to the new commit:
+            commitTask.ContinueWith(t => rfrepo.PersistRef(new Ref.Builder("HEAD", cm.ID))).Wait();
         }
 
         static void RecursivePrint(TreeContainer trees, TreeID treeID, string treeName, int depth = 1)

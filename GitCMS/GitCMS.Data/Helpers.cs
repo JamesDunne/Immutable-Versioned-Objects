@@ -17,7 +17,12 @@ namespace GitCMS.Data
 
         internal static string NameList(this IEnumerable<string> columnNames, string tableAlias)
         {
-            return String.Join(",", columnNames.Select(c => String.Concat("[", tableAlias, "].[", c, "] AS [", tableAlias, "_", c, "]")).ToArray());
+            return String.Join(",", columnNames.Select(c => String.Concat("[", tableAlias, "].[", c, "]")).ToArray());
+        }
+
+        internal static string NameList(this IEnumerable<string> columnNames, string tableAlias, string prefix)
+        {
+            return String.Join(",", columnNames.Select(c => String.Concat("[", tableAlias, "].[", c, "] AS [", prefix, c, "]")).ToArray());
         }
 
         internal static string ParameterList(this IEnumerable<string> columnNames, string prefix = null, string suffix = null)
@@ -30,6 +35,17 @@ namespace GitCMS.Data
         internal static string CommaList(this IEnumerable<string> columnNames)
         {
             return String.Join(",", columnNames.ToArray());
+        }
+
+        internal static SqlParameter AddOutParameter(this SqlCommand cmd, string name, SqlDbType type, int size)
+        {
+            var prm = cmd.CreateParameter();
+            prm.Direction = ParameterDirection.Output;
+            prm.ParameterName = name;
+            prm.SqlDbType = type;
+            prm.Size = size;
+            cmd.Parameters.Add(prm);
+            return prm;
         }
 
         internal static SqlParameter AddInParameter(this SqlCommand cmd, string name, SqlBinary value)

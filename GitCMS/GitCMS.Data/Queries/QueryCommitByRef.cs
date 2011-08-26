@@ -7,28 +7,36 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Queries
 {
-    public sealed class QueryCommit : IComplexDataQuery<Commit>
+    public sealed class QueryCommitByRef : IComplexDataQuery<Commit>
     {
-        private CommitID _id;
+        private string _refName;
 
-        public QueryCommit(CommitID id)
+        public QueryCommitByRef(string refName)
         {
-            this._id = id;
+            this._refName = refName;
         }
 
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
             string cmdText = String.Format(
-@"SELECT {0} FROM {1}{2}{3} WHERE [commitid] = @commitid;
-SELECT [parent_commitid] FROM [dbo].[CommitParents] WHERE [commitid] = @commitid;",
-                Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList(),
+@"SELECT @commitid = {0} FROM {2}{3}{4}
+JOIN {5}{6}{7} ON {3}.[commitid] = {6}.[commitid]
+WHERE {6}.[name] = @refname;
+SELECT {0}, {1} FROM {2}{3}{4} WHERE {3}.[commitid] = @commitid;
+SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;",
+                Tables.TablePKs_Commit.NameList("cm"),
+                Tables.ColumnNames_Commit.NameList("cm"),
                 Tables.TableName_Commit,
-                "", // no alias
-                Tables.TableFromHint_Commit
+                "cm", // no alias
+                Tables.TableFromHint_Commit,
+                Tables.TableName_Ref,
+                "rf",
+                Tables.TableFromHint_Ref
             );
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@commitid", new SqlBinary((byte[])_id));
+            cmd.AddInParameter("@refname", new SqlString(this._refName));
+            cmd.AddOutParameter("@commitid", System.Data.SqlDbType.Binary, 20);
             return cmd;
         }
 
@@ -55,6 +63,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParents] WHERE [commitid] = @commitid
                 {
                     b.Parents.Add((CommitID)dr.GetSqlBinary(0).Value);
                 }
+                b.Parents.Sort(new CommitID.Comparer());
             }
 
             Commit cm = b;
