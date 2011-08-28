@@ -25,7 +25,7 @@ namespace GitCMS.Implementation.SQL
 
         public Task<Commit> PersistCommit(Commit cm)
         {
-            return db.AsynqNonQuery(new PersistCommit(cm));
+            return db.ExecuteNonQueryAsync(new PersistCommit(cm));
         }
 
         public Task<CommitID> DeleteCommit(CommitID id)
@@ -35,22 +35,22 @@ namespace GitCMS.Implementation.SQL
 
         public Task<Commit> GetCommit(CommitID id)
         {
-            return db.AsynqSingle(new QueryCommit(id));
+            return db.ExecuteSingleQueryAsync(new QueryCommit(id));
         }
 
         public Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id)
         {
-            return db.AsynqSingle(new QueryCommitByTagID(id));
+            return db.ExecuteSingleQueryAsync(new QueryCommitByTagID(id));
         }
 
         public Task<Tuple<Tag, Commit>> GetCommitByTagName(string tagName)
         {
-            return db.AsynqSingle(new QueryCommitByTagName(tagName));
+            return db.ExecuteSingleQueryAsync(new QueryCommitByTagName(tagName));
         }
 
         public Task<Tuple<Ref, Commit>> GetCommitByRef(string refName)
         {
-            return db.AsynqSingle(new QueryCommitByRefName(refName));
+            return db.ExecuteSingleQueryAsync(new QueryCommitByRefName(refName));
         }
     }
 }

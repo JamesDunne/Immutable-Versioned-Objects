@@ -27,8 +27,8 @@ namespace GitCMS.Implementation.SQL
         public Task<Tree> PersistTree(TreeID rootid, TreeContainer trees, BlobContainer blobs)
         {
             // Start queries to check what exists already:
-            var existBlobs = db.AsynqMulti(new QueryBlobsExist(blobs.Keys), expectedCapacity: blobs.Count);
-            var existTrees = db.AsynqMulti(new QueryTreesExist(trees.Keys), expectedCapacity: trees.Count);
+            var existBlobs = db.ExecuteListQueryAsync(new QueryBlobsExist(blobs.Keys), expectedCapacity: blobs.Count);
+            var existTrees = db.ExecuteListQueryAsync(new QueryTreesExist(trees.Keys), expectedCapacity: trees.Count);
 
             Debug.WriteLine("{0,3}: Awaiting existBlobs...", Task.CurrentId);
             return existBlobs.ContinueWith((blTask) =>
@@ -46,7 +46,7 @@ namespace GitCMS.Implementation.SQL
                     BlobID id = blobIDsToPersist[i];
 
                     Debug.WriteLine("{0,3}: PERSIST blob {1}", Task.CurrentId, id.ToString());
-                    waiters[i] = db.AsynqNonQuery(new PersistBlob(blobs[id]));
+                    waiters[i] = db.ExecuteNonQueryAsync(new PersistBlob(blobs[id]));
                 }
 
                 // Also wait for the existTrees query to come back:
@@ -92,8 +92,8 @@ namespace GitCMS.Implementation.SQL
 
                         Debug.WriteLine("{0,3}: PERSIST tree {1}", Task.CurrentId, id.ToString());
 
-                        if (runner == null) waiter = runner = db.AsynqNonQuery(new PersistTree(trees[id]));
-                        else runner = runner.ContinueWith(r => db.AsynqNonQuery(new PersistTree(trees[id]))).Unwrap();
+                        if (runner == null) waiter = runner = db.ExecuteNonQueryAsync(new PersistTree(trees[id]));
+                        else runner = runner.ContinueWith(r => db.ExecuteNonQueryAsync(new PersistTree(trees[id]))).Unwrap();
                     }
 
                     if (runner != null)
@@ -111,7 +111,7 @@ namespace GitCMS.Implementation.SQL
 
         public Task<Tuple<TreeID, TreeContainer>> RetrieveTreeRecursively(TreeID rootid)
         {
-            return db.AsynqMulti(new QueryTreeRecursively(rootid));
+            return db.ExecuteListQueryAsync(new QueryTreeRecursively(rootid));
         }
 
         public Task<TreeID> DeleteTreeRecursively(TreeID rootid)

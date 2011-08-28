@@ -40,7 +40,7 @@ namespace Asynq
         /// <param name="expectedCapacity"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<List<T>> AsynqMulti<T>(ISimpleDataQuery<T> query, int expectedCapacity = 10, TaskFactory<List<T>> factory = null)
+        public Task<List<T>> ExecuteListQueryAsync<T>(ISimpleDataQuery<T> query, int expectedCapacity = 10, TaskFactory<List<T>> factory = null)
         {
             if (expectedCapacity < 0) expectedCapacity = 0;
             if (factory == null) factory = new TaskFactory<List<T>>();
@@ -83,7 +83,7 @@ namespace Asynq
         /// <param name="expectedCapacity"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<T> AsynqMulti<T>(IComplexDataQuery<T> query, int expectedCapacity = 10, TaskFactory<T> factory = null)
+        public Task<T> ExecuteListQueryAsync<T>(IComplexDataQuery<T> query, int expectedCapacity = 10, TaskFactory<T> factory = null)
         {
             if (expectedCapacity < 0) expectedCapacity = 0;
             if (factory == null) factory = new TaskFactory<T>();
@@ -117,7 +117,7 @@ namespace Asynq
         /// <param name="query"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<T> AsynqSingle<T>(ISimpleDataQuery<T> query, TaskFactory<T> factory = null)
+        public Task<T> ExecuteSingleQueryAsync<T>(ISimpleDataQuery<T> query, TaskFactory<T> factory = null)
         {
             if (factory == null) factory = new TaskFactory<T>();
 
@@ -155,7 +155,7 @@ namespace Asynq
         /// <param name="query"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<T> AsynqSingle<T>(IComplexDataQuery<T> query, TaskFactory<T> factory = null)
+        public Task<T> ExecuteSingleQueryAsync<T>(IComplexDataQuery<T> query, TaskFactory<T> factory = null)
         {
             if (factory == null) factory = new TaskFactory<T>();
 
@@ -189,7 +189,7 @@ namespace Asynq
         /// <param name="op"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<T> AsynqNonQuery<T>(IDataOperation<T> op, TaskFactory<T> factory = null)
+        public Task<T> ExecuteNonQueryAsync<T>(IDataOperation<T> op, TaskFactory<T> factory = null)
         {
             if (factory == null) factory = new TaskFactory<T>();
 

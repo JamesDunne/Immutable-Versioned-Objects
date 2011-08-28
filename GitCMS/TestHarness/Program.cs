@@ -147,7 +147,7 @@ namespace TestHarness
             for (int i = 0; i < max; ++i)
             {
                 // Asynchronously execute the query:
-                results[i] = db.AsynqMulti(q);
+                results[i] = db.ExecuteListQueryAsync(q);
             }
 
             for (int i = 0; i < max; ++i)
@@ -165,7 +165,7 @@ namespace TestHarness
             var db = getDataContext();
 
             // Check if the Blob exists by this ID:
-            var getBlob = db.AsynqSingle(new QueryBlob(bl.ID));
+            var getBlob = db.ExecuteSingleQueryAsync(new QueryBlob(bl.ID));
             getBlob.Wait();
 
             if (getBlob.Result == null)
@@ -173,7 +173,7 @@ namespace TestHarness
                 // It does not, persist it:
                 Console.WriteLine("PERSIST {0}", bl.ID);
 
-                var persistBlob = db.AsynqNonQuery(new PersistBlob(bl));
+                var persistBlob = db.ExecuteNonQueryAsync(new PersistBlob(bl));
                 persistBlob.Wait();
 
                 Console.WriteLine("{0} rows affected", persistBlob.Result);
@@ -185,7 +185,7 @@ namespace TestHarness
                 // Destroy the blob:
                 Console.WriteLine("DELETE {0}", getBlob.Result.ID);
 
-                var destroyBlob = db.AsynqNonQuery(new DestroyBlob(getBlob.Result.ID));
+                var destroyBlob = db.ExecuteNonQueryAsync(new DestroyBlob(getBlob.Result.ID));
                 destroyBlob.Wait();
 
                 Console.WriteLine("{0} rows affected", destroyBlob.Result);
@@ -205,7 +205,7 @@ namespace TestHarness
             var db = getDataContext();
 
             // Check which blobs exist already:
-            var qBlobs = db.AsynqMulti(new QueryBlobsExist(bl0.ID, bl1.ID), expectedCapacity: blobs.Count);
+            var qBlobs = db.ExecuteListQueryAsync(new QueryBlobsExist(bl0.ID, bl1.ID), expectedCapacity: blobs.Count);
             qBlobs.Wait();
 
             // Find the blobs to persist:
@@ -218,7 +218,7 @@ namespace TestHarness
                 BlobID id = blobIDsToPersist[i];
 
                 Console.WriteLine("PERSIST {0}", id.ToString());
-                persists[i] = db.AsynqNonQuery(new PersistBlob(blobs[id]));
+                persists[i] = db.ExecuteNonQueryAsync(new PersistBlob(blobs[id]));
             }
 
             Console.WriteLine("Waiting for persists...");

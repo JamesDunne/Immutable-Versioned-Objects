@@ -25,12 +25,12 @@ namespace GitCMS.Implementation.SQL
 
         public Task<Ref> PersistRef(Ref rf)
         {
-            return db.AsynqNonQuery(new PersistRef(rf));
+            return db.ExecuteNonQueryAsync(new PersistRef(rf));
         }
 
         public Task<Ref> GetRef(string name)
         {
-            return db.AsynqSingle(new QueryRef(name));
+            return db.ExecuteSingleQueryAsync(new QueryRef(name));
         }
     }
 }

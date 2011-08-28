@@ -25,27 +25,27 @@ namespace GitCMS.Implementation.SQL
 
         public Task<Tag> PersistTag(Tag tg)
         {
-            return db.AsynqNonQuery(new PersistTag(tg));
+            return db.ExecuteNonQueryAsync(new PersistTag(tg));
         }
 
         public Task<Tag> GetTag(TagID id)
         {
-            return db.AsynqSingle(new QueryTag(id));
+            return db.ExecuteSingleQueryAsync(new QueryTag(id));
         }
 
         public Task<Tag> GetTagByName(string tagName)
         {
-            return db.AsynqSingle(new QueryTag(tagName));
+            return db.ExecuteSingleQueryAsync(new QueryTag(tagName));
         }
 
         public Task<TagID> DeleteTag(TagID id)
         {
-            return db.AsynqNonQuery(new DestroyTag(id));
+            return db.ExecuteNonQueryAsync(new DestroyTag(id));
         }
 
         public Task<TagID> DeleteTagByName(string tagName)
         {
-            return db.AsynqNonQuery(new DestroyTagByName(tagName));
+            return db.ExecuteNonQueryAsync(new DestroyTagByName(tagName));
         }
     }
 }
