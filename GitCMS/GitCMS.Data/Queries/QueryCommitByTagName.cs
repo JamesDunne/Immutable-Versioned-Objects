@@ -20,8 +20,7 @@ namespace GitCMS.Data.Queries
         {
             string cmdText = String.Format(
 @"SELECT @commitid = {0} FROM {2} {3}{4} JOIN {5} {6}{7} ON {3}.[commitid] = {6}.[commitid] WHERE {6}.[name] = @tagname;
-SELECT {8} FROM {5} {6}{7} WHERE {6}.[name] = @tagname;
-SELECT {1} FROM {2} {3}{4} WHERE {3}.[commitid] = @commitid;
+SELECT {8},{1} FROM {2} {3}{4} JOIN {5} {6}{7} ON {3}.[commitid] = {6}.[commitid] WHERE {6}.[name] = @tagname;
 SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;",
                 Tables.TablePKs_Commit.NameList("cm"),
                 Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList("cm", "cm_"),

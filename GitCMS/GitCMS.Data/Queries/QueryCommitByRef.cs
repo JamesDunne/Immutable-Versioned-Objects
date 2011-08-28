@@ -20,8 +20,7 @@ namespace GitCMS.Data.Queries
         {
             string cmdText = String.Format(
 @"SELECT @commitid = {0} FROM {2} {3}{4} JOIN {5} {6}{7} ON {3}.[commitid] = {6}.[commitid] WHERE {6}.[name] = @refname;
-SELECT {8} FROM {5} {6}{7} WHERE {6}.[name] = @refname;
-SELECT {1} FROM {2} {3}{4} WHERE {3}.[commitid] = @commitid;
+SELECT {8},{1} FROM {2} {3}{4} JOIN {5} {6}{7} ON {3}.[commitid] = {6}.[commitid] WHERE {6}.[name] = @refname;
 SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;",
                 Tables.TablePKs_Commit.NameList("cm"),
                 Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList("cm", "cm_"),
@@ -46,40 +45,38 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             if (!dr.Read()) return null;
 
             Ref.Builder rfb = new Ref.Builder(
-                pName:      dr.GetSqlString(0).Value,
-                pCommitID:  (CommitID)dr.GetSqlBinary(1).Value
+                pName: dr.GetSqlString(0).Value,
+                pCommitID: (CommitID)dr.GetSqlBinary(1).Value
             );
 
             Ref rf = rfb;
 
-            Commit cm = null;
-            if (dr.NextResult() && dr.Read())
+            const int offs = 2;
+
+            CommitID id = (CommitID)dr.GetSqlBinary(0 + offs).Value;
+
+            Commit.Builder cmb = new Commit.Builder(
+                pParents: new System.Collections.Generic.List<CommitID>(2),
+                pTreeID: (TreeID)dr.GetSqlBinary(1 + offs).Value,
+                pCommitter: dr.GetSqlString(2 + offs).Value,
+                pDateCommitted: dr.GetDateTimeOffset(3 + offs),
+                pMessage: dr.GetSqlString(4 + offs).Value
+            );
+
+            // Read the parent commit ids from the second result:
+            if (dr.NextResult())
             {
-                CommitID id = (CommitID)dr.GetSqlBinary(0).Value;
-
-                Commit.Builder cmb = new Commit.Builder(
-                    pParents: new System.Collections.Generic.List<CommitID>(10),
-                    pTreeID: (TreeID)dr.GetSqlBinary(1).Value,
-                    pCommitter: dr.GetSqlString(2).Value,
-                    pDateCommitted: dr.GetDateTimeOffset(3),
-                    pMessage: dr.GetSqlString(4).Value
-                );
-
-                // Read the parent commit ids from the second result:
-                if (dr.NextResult())
+                while (dr.Read())
                 {
-                    while (dr.Read())
-                    {
-                        cmb.Parents.Add((CommitID)dr.GetSqlBinary(0).Value);
-                    }
-                    cmb.Parents.Sort(new CommitID.Comparer());
+                    cmb.Parents.Add((CommitID)dr.GetSqlBinary(0).Value);
                 }
-
-                cm = cmb;
-                if (cm.ID != id) throw new InvalidOperationException();
+                cmb.Parents.Sort(new CommitID.Comparer());
             }
 
-            return new Tuple<Ref,Commit>(rf, cm);
+            Commit cm = cmb;
+            if (cm.ID != id) throw new InvalidOperationException();
+
+            return new Tuple<Ref, Commit>(rf, cm);
         }
     }
 }
