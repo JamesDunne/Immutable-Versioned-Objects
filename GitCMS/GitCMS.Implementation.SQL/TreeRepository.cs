@@ -98,7 +98,7 @@ namespace GitCMS.Implementation.SQL
 
                     if (runner != null)
                         // Return the last chained task and our final result is our root Tree:
-                        return runner.ContinueWith(x => trees[rootid]);
+                        return runner.ContinueWith(x => trees[rootid], TaskContinuationOptions.ExecuteSynchronously);
                     else
                     {
                         Task<Tree> dummy = new Task<Tree>(() => trees[rootid]);

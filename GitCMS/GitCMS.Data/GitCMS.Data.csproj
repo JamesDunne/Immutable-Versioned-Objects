@@ -45,6 +45,8 @@
     <Compile Include="Persists\PersistTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Persists\PersistBlob.cs" />
+    <Compile Include="Queries\QueryCommitByTagID.cs" />
+    <Compile Include="Queries\QueryCommitByTagName.cs" />
     <Compile Include="Queries\QueryCommitByRef.cs" />
     <Compile Include="Queries\QueryRef.cs" />
     <Compile Include="Queries\QueryTag.cs" />

@@ -7,13 +7,13 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Queries
 {
-    public sealed class QueryCommitByRefName : IComplexDataQuery<Commit>
+    public sealed class QueryCommitByTagName : IComplexDataQuery<Commit>
     {
-        private string _refName;
+        private string _tagName;
 
-        public QueryCommitByRefName(string refName)
+        public QueryCommitByTagName(string tagName)
         {
-            this._refName = refName;
+            this._tagName = tagName;
         }
 
         public SqlCommand ConstructCommand(SqlConnection cn)
@@ -21,7 +21,7 @@ namespace GitCMS.Data.Queries
             string cmdText = String.Format(
 @"SELECT @commitid = {0} FROM {2}{3}{4}
 JOIN {5}{6}{7} ON {3}.[commitid] = {6}.[commitid]
-WHERE {6}.[name] = @refname;
+WHERE {6}.[name] = @tagname;
 SELECT {0}, {1} FROM {2}{3}{4} WHERE {3}.[commitid] = @commitid;
 SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;",
                 Tables.TablePKs_Commit.NameList("cm"),
@@ -29,13 +29,13 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
                 Tables.TableName_Commit,
                 "cm", // no alias
                 Tables.TableFromHint_Commit,
-                Tables.TableName_Ref,
-                "rf",
-                Tables.TableFromHint_Ref
+                Tables.TableName_Tag,
+                "tg",
+                Tables.TableFromHint_Tag
             );
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@refname", new SqlString(this._refName));
+            cmd.AddInParameter("@tagname", new SqlString(this._tagName));
             cmd.AddOutParameter("@commitid", System.Data.SqlDbType.Binary, 20);
             return cmd;
         }

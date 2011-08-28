@@ -28,6 +28,11 @@ namespace GitCMS.Implementation.SQL
             return db.AsynqNonQuery(new PersistCommit(cm));
         }
 
+        public Task<CommitID> DeleteCommit(CommitID id)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<Commit> GetCommit(CommitID id)
         {
             return db.AsynqSingle(new QueryCommit(id));
@@ -35,18 +40,17 @@ namespace GitCMS.Implementation.SQL
 
         public Task<Commit> GetCommitByTag(TagID id)
         {
-            throw new NotImplementedException();
+            return db.AsynqSingle(new QueryCommitByTagID(id));
         }
 
         public Task<Commit> GetCommitByTagName(string tagName)
         {
-            throw new NotImplementedException();
+            return db.AsynqSingle(new QueryCommitByTagName(tagName));
         }
 
         public Task<Commit> GetCommitByRef(string refName)
         {
-            return db.AsynqSingle(new QueryCommitByRef(refName));
+            return db.AsynqSingle(new QueryCommitByRefName(refName));
         }
-
     }
 }

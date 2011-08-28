@@ -29,7 +29,8 @@ namespace TestHarness
             TreeID rootid = pr.TestPersistTree();
             pr.TestRetrieveTreeRecursively(rootid);
 
-            pr.TestCreateCommit(rootid);
+            CommitID cmid = pr.TestCreateCommit(rootid);
+            pr.TestCreateTag(cmid);
 
             Console.WriteLine("Press a key.");
             Console.ReadLine();
@@ -275,87 +276,14 @@ namespace TestHarness
 
             var db = getDataContext();
 
-#if false
-            // Start queries to check what exists already:
-            var existBlobs = db.AsynqMulti(new QueryBlobsExist(blobs.Keys), expectedCapacity: blobs.Count);
-            var existTrees = db.AsynqMulti(new QueryTreesExist(trees.Keys), expectedCapacity: trees.Count);
-
-            // First, persist blobs that don't exist:
-            Console.WriteLine("Waiting for blob exists...");
-            existBlobs.Wait();
-
-            BlobID[] blobIDsToPersist = blobs.Keys.Except(existBlobs.Result).ToArray();
-
-            // Blobs may be persisted in any order; there are no dependencies between blobs:
-            Task<Blob>[] blobPersists = new Task<Blob>[blobIDsToPersist.Length];
-            for (int i = 0; i < blobIDsToPersist.Length; ++i)
-            {
-                BlobID id = blobIDsToPersist[i];
-
-                Console.WriteLine("PERSIST blob {0}", id.ToString());
-                blobPersists[i] = db.AsynqNonQuery(new PersistBlob(blobs[id]));
-            }
-
-            if (blobPersists.Length > 0)
-            {
-                Console.WriteLine("Waiting for blob persists...");
-                Task.WaitAll(blobPersists);
-            }
-
-            // Next, persist trees that don't exist:
-            Console.WriteLine("Waiting for tree exists...");
-            existTrees.Wait();
-
-            // Trees must be created in dependency order!
-            HashSet<TreeID> treeIDsToPersistSet = new HashSet<TreeID>(trees.Keys.Except(existTrees.Result));
-            Stack<TreeID> treeIDsToPersist = new Stack<TreeID>(treeIDsToPersistSet.Count);
-
-            // Run through trees from root to leaf:
-            Queue<TreeID> treeQueue = new Queue<TreeID>();
-            treeQueue.Enqueue(trRoot.ID);
-            while (treeQueue.Count > 0)
-            {
-                TreeID trID = treeQueue.Dequeue();
-                if (treeIDsToPersistSet.Contains(trID))
-                    treeIDsToPersist.Push(trID);
-
-                Tree tr = trees[trID];
-                if (tr.Trees == null) continue;
-
-                foreach (TreeTreeReference r in tr.Trees)
-                {
-                    treeQueue.Enqueue(r.TreeID);
-                }
-            }
-
-            // Asynchronously persist the trees in dependency order:
-            // FIXME: asynchronous fan-out per depth level
-            Task<Tree> waiter = null, runner = null;
-            while (treeIDsToPersist.Count > 0)
-            {
-                TreeID id = treeIDsToPersist.Pop();
-
-                Console.WriteLine("PERSIST tree {0}", id.ToString());
-
-                if (runner == null) waiter = runner = db.AsynqNonQuery(new PersistTree(trees[id]));
-                else runner = runner.ContinueWith(r => db.AsynqNonQuery(new PersistTree(trees[id]))).Unwrap();
-            }
-
-            if (runner != null)
-            {
-                Console.WriteLine("Waiting for tree persists...");
-                runner.Wait();
-            }
-#else
             ITreeRepository trrepo = new TreeRepository(db);
-            
+
             // Persist the tree and its blobs:
             var wait = trrepo.PersistTree(trRoot.ID, trees, blobs);
             wait.Wait();
 
             // Make sure we got back what's expected of the API:
             Debug.Assert(trRoot.ID == wait.Result.ID);
-#endif
 
             Console.WriteLine("Tree persistence complete.");
             Console.WriteLine("Root TreeID = {0}", trRoot.ID);
@@ -387,17 +315,17 @@ namespace TestHarness
             RecursivePrint(trees, treeTask.Result.Item1, String.Empty);
         }
 
-        void TestCreateCommit(TreeID? id)
+        CommitID TestCreateCommit(TreeID? id)
         {
             TreeID rootid = id ?? new TreeID("a1fe342751e09fda968cfd0f1a1755e386f494f8");
-            
+
             var db = getDataContext();
 
             ICommitRepository cmrepo = new CommitRepository(db);
             IRefRepository rfrepo = new RefRepository(db);
 
             var taskHead = cmrepo.GetCommitByRef("HEAD");
-            taskHead.ContinueWith((gotHead) =>
+            var persistCommitTask = taskHead.ContinueWith((gotHead) =>
             {
                 Commit parent = taskHead.Result;
 
@@ -414,8 +342,45 @@ namespace TestHarness
                 // Persist the commit:
                 Task<Commit> commitTask = cmrepo.PersistCommit(cm);
                 // Then update the "HEAD" to point to the new commit:
-                return commitTask.ContinueWith(t => rfrepo.PersistRef(new Ref.Builder("HEAD", cm.ID)));
-            }).Wait();
+                return commitTask.ContinueWith(t => rfrepo.PersistRef(new Ref.Builder("HEAD", cm.ID))).ContinueWith(rf => cm.ID, TaskContinuationOptions.ExecuteSynchronously);
+            }).Unwrap();
+            persistCommitTask.Wait();
+
+            return persistCommitTask.Result;
+        }
+
+        void TestCreateTag(CommitID cmid)
+        {
+            var db = getDataContext();
+
+            ICommitRepository cmrepo = new CommitRepository(db);
+            ITagRepository tgrepo = new TagRepository(db);
+
+            var getCommitTask = cmrepo.GetCommitByTagName("v1.0");
+            getCommitTask.Wait();
+
+            if (getCommitTask.Result != null)
+            {
+                Console.WriteLine("v1.0 -> {0}", getCommitTask.Result.ID);
+
+            }
+
+            Tag tg = new Tag.Builder("v1.0", cmid, "James Dunne <james.jdunne@gmail.com>", DateTimeOffset.Now, "Tagged for version 1.0");
+
+            var testTask = tgrepo.PersistTag(tg)
+                .ContinueWith(t =>
+                {
+                    var getCommitTask2 = cmrepo.GetCommitByTagName("v1.0");
+                    return getCommitTask2.ContinueWith(tCommit =>
+                    {
+                        Debug.Assert(tCommit.Result.ID == cmid);
+                    });
+                }).Unwrap();
+
+            Console.WriteLine("Waiting...");
+            testTask.Wait();
+
+            Console.WriteLine("Completed.");
         }
 
         static void RecursivePrint(TreeContainer trees, TreeID treeID, string treeName, int depth = 1)
@@ -434,12 +399,12 @@ namespace TestHarness
                 var nref = kv.Value;
                 switch (nref.Which)
                 {
-                    case Either<TreeTreeReference,TreeBlobReference>.Selected.N1:
-                        Console.WriteLine("tree {1}: {0}{2}/", new string('_', depth * 2), nref.N1.TreeID.ToString().Substring(0, 12), nref.N1.Name);
-                        RecursivePrint(trees, nref.N1.TreeID, nref.N1.Name, depth + 1);
+                    case Either<TreeTreeReference, TreeBlobReference>.Selected.Left:
+                        Console.WriteLine("tree {1}: {0}{2}/", new string('_', depth * 2), nref.Left.TreeID.ToString().Substring(0, 12), nref.Left.Name);
+                        RecursivePrint(trees, nref.Left.TreeID, nref.Left.Name, depth + 1);
                         break;
-                    case Either<TreeTreeReference,TreeBlobReference>.Selected.N2:
-                        Console.WriteLine("blob {1}: {0}{2}", new string('_', depth * 2), nref.N2.BlobID.ToString().Substring(0, 12), nref.N2.Name);
+                    case Either<TreeTreeReference, TreeBlobReference>.Selected.Right:
+                        Console.WriteLine("blob {1}: {0}{2}", new string('_', depth * 2), nref.Right.BlobID.ToString().Substring(0, 12), nref.Right.Name);
                         break;
                 }
             }

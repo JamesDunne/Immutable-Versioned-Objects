@@ -11,6 +11,8 @@ namespace GitCMS.Definition.Repositories
     {
         Task<Commit> PersistCommit(Commit cm);
 
+        Task<CommitID> DeleteCommit(CommitID id);
+
         Task<Commit> GetCommit(CommitID id);
 
         Task<Commit> GetCommitByTag(TagID id);

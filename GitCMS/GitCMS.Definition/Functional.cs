@@ -29,46 +29,46 @@ namespace System
     /// <summary>
     /// A mutual exclusion container for two values.
     /// </summary>
-    /// <typeparam name="T1"></typeparam>
-    /// <typeparam name="T2"></typeparam>
-    public struct Either<T1, T2>
+    /// <typeparam name="TLeft"></typeparam>
+    /// <typeparam name="TRight"></typeparam>
+    public struct Either<TLeft, TRight>
     {
         public enum Selected
         {
-            N1,
-            N2
+            Left,
+            Right
         }
 
         private Selected _which;
         public Selected Which { get { return _which; } }
 
-        private T1 _n1;
-        public T1 N1 { get { if (_which == Selected.N2) throw new NullReferenceException(); return _n1; } }
-        private T2 _n2;
-        public T2 N2 { get { if (_which == Selected.N1) throw new NullReferenceException(); return _n2; } }
+        private TLeft _Left;
+        public TLeft Left { get { if (_which == Selected.Right) throw new NullReferenceException(); return _Left; } }
+        private TRight _Right;
+        public TRight Right { get { if (_which == Selected.Left) throw new NullReferenceException(); return _Right; } }
 
-        public Either(T1 n1)
+        public Either(TLeft left)
         {
-            _which = Selected.N1;
-            _n1 = n1;
-            _n2 = default(T2);
+            _which = Selected.Left;
+            _Left = left;
+            _Right = default(TRight);
         }
 
-        public Either(T2 n2)
+        public Either(TRight right)
         {
-            _which = Selected.N2;
-            _n1 = default(T1);
-            _n2 = n2;
+            _which = Selected.Right;
+            _Left = default(TLeft);
+            _Right = right;
         }
 
-        public static implicit operator Either<T1, T2>(T1 n1)
+        public static implicit operator Either<TLeft, TRight>(TLeft left)
         {
-            return new Either<T1, T2>(n1);
+            return new Either<TLeft, TRight>(left);
         }
 
-        public static implicit operator Either<T1, T2>(T2 n2)
+        public static implicit operator Either<TLeft, TRight>(TRight right)
         {
-            return new Either<T1, T2>(n2);
+            return new Either<TLeft, TRight>(right);
         }
     }
 

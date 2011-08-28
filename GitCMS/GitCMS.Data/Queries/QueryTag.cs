@@ -26,7 +26,7 @@ namespace GitCMS.Data.Queries
             string cmdText;
             switch (_idOrName.Which)
             {
-                case Either<TagID,string>.Selected.N1:
+                case Either<TagID,string>.Selected.Left:
                     cmdText = String.Format(
                         @"SELECT {0} FROM {1}{2}{3} WHERE [tagid] = @tagid",
                         Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameList(),
@@ -35,7 +35,7 @@ namespace GitCMS.Data.Queries
                         Tables.TableFromHint_Tag
                     );
                     break;
-                case Either<TagID,string>.Selected.N2:
+                case Either<TagID,string>.Selected.Right:
                     cmdText = String.Format(
                         @"SELECT {0} FROM {1}{2}{3} WHERE [name] = @name",
                         Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameList(),
@@ -49,10 +49,10 @@ namespace GitCMS.Data.Queries
             }
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            if (_idOrName.Which == Either<TagID,string>.Selected.N1)
-                cmd.AddInParameter("@tagid", new SqlBinary((byte[])_idOrName.N1));
+            if (_idOrName.Which == Either<TagID,string>.Selected.Left)
+                cmd.AddInParameter("@tagid", new SqlBinary((byte[])_idOrName.Left));
             else
-                cmd.AddInParameter("@name", new SqlString(_idOrName.N2));
+                cmd.AddInParameter("@name", new SqlString(_idOrName.Right));
             return cmd;
         }
 

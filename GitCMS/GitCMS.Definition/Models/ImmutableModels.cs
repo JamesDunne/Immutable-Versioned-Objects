@@ -124,15 +124,15 @@ namespace GitCMS.Definition.Models
                 {
                     switch (either.Which)
                     {
-                        case Either<TreeTreeReference, TreeBlobReference>.Selected.N1:
+                        case Either<TreeTreeReference, TreeBlobReference>.Selected.Left:
                             bw.WriteRaw("tree ");
-                            bw.Write((byte[])either.N1.TreeID);
-                            bw.WriteRaw(either.N1.Name);
+                            bw.Write((byte[])either.Left.TreeID);
+                            bw.WriteRaw(either.Left.Name);
                             break;
-                        case Either<TreeTreeReference, TreeBlobReference>.Selected.N2:
+                        case Either<TreeTreeReference, TreeBlobReference>.Selected.Right:
                             bw.WriteRaw("blob ");
-                            bw.Write((byte[])either.N2.BlobID);
-                            bw.WriteRaw(either.N2.Name);
+                            bw.Write((byte[])either.Right.BlobID);
+                            bw.WriteRaw(either.Right.Name);
                             break;
                     }
                     bw.Write('\n');
