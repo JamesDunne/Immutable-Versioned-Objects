@@ -7,7 +7,7 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Queries
 {
-    public sealed class QueryCommitByRefName : IComplexDataQuery<Commit>
+    public sealed class QueryCommitByRefName : IComplexDataQuery<Tuple<Ref, Commit>>
     {
         private string _refName;
 
@@ -19,19 +19,19 @@ namespace GitCMS.Data.Queries
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
             string cmdText = String.Format(
-@"SELECT @commitid = {0} FROM {2}{3}{4}
-JOIN {5}{6}{7} ON {3}.[commitid] = {6}.[commitid]
-WHERE {6}.[name] = @refname;
-SELECT {0}, {1} FROM {2}{3}{4} WHERE {3}.[commitid] = @commitid;
+@"SELECT @commitid = {0} FROM {2} {3}{4} JOIN {5} {6}{7} ON {3}.[commitid] = {6}.[commitid] WHERE {6}.[name] = @refname;
+SELECT {8} FROM {5} {6}{7} WHERE {6}.[name] = @refname;
+SELECT {1} FROM {2} {3}{4} WHERE {3}.[commitid] = @commitid;
 SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;",
                 Tables.TablePKs_Commit.NameList("cm"),
-                Tables.ColumnNames_Commit.NameList("cm"),
+                Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList("cm", "cm_"),
                 Tables.TableName_Commit,
-                "cm", // no alias
+                "cm",
                 Tables.TableFromHint_Commit,
                 Tables.TableName_Ref,
                 "rf",
-                Tables.TableFromHint_Ref
+                Tables.TableFromHint_Ref,
+                Tables.TablePKs_Ref.Concat(Tables.ColumnNames_Ref).NameList("rf", "rf_")
             );
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
@@ -40,35 +40,46 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return cmd;
         }
 
-        public Commit Retrieve(SqlDataReader dr, int expectedCapacity = 10)
+        public Tuple<Ref, Commit> Retrieve(SqlDataReader dr, int expectedCapacity = 10)
         {
             // If no result, return null:
             if (!dr.Read()) return null;
 
-            CommitID id = (CommitID)dr.GetSqlBinary(0).Value;
-
-            Commit.Builder b = new Commit.Builder(
-                pParents:       new System.Collections.Generic.List<CommitID>(10),
-                pTreeID:        (TreeID)dr.GetSqlBinary(1).Value,
-                pCommitter:     dr.GetSqlString(2).Value,
-                pDateCommitted: dr.GetDateTimeOffset(3),
-                pMessage:       dr.GetSqlString(4).Value
+            Ref.Builder rfb = new Ref.Builder(
+                pName:      dr.GetSqlString(0).Value,
+                pCommitID:  (CommitID)dr.GetSqlBinary(1).Value
             );
 
-            // Read the parent commit ids from the second result:
-            if (dr.NextResult())
+            Ref rf = rfb;
+
+            Commit cm = null;
+            if (dr.NextResult() && dr.Read())
             {
-                while (dr.Read())
+                CommitID id = (CommitID)dr.GetSqlBinary(0).Value;
+
+                Commit.Builder cmb = new Commit.Builder(
+                    pParents: new System.Collections.Generic.List<CommitID>(10),
+                    pTreeID: (TreeID)dr.GetSqlBinary(1).Value,
+                    pCommitter: dr.GetSqlString(2).Value,
+                    pDateCommitted: dr.GetDateTimeOffset(3),
+                    pMessage: dr.GetSqlString(4).Value
+                );
+
+                // Read the parent commit ids from the second result:
+                if (dr.NextResult())
                 {
-                    b.Parents.Add((CommitID)dr.GetSqlBinary(0).Value);
+                    while (dr.Read())
+                    {
+                        cmb.Parents.Add((CommitID)dr.GetSqlBinary(0).Value);
+                    }
+                    cmb.Parents.Sort(new CommitID.Comparer());
                 }
-                b.Parents.Sort(new CommitID.Comparer());
+
+                cm = cmb;
+                if (cm.ID != id) throw new InvalidOperationException();
             }
 
-            Commit cm = b;
-            if (cm.ID != id) throw new InvalidOperationException();
-
-            return cm;
+            return new Tuple<Ref,Commit>(rf, cm);
         }
     }
 }

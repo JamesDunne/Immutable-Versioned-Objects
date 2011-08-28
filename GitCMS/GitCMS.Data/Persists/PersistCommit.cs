@@ -44,7 +44,7 @@ namespace GitCMS.Data.Persists
             return cmd;
         }
 
-        public Commit Return(int rowsAffected)
+        public Commit Return(SqlCommand cmd, int rowsAffected)
         {
             return this._cm;
         }

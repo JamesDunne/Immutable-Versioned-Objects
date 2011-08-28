@@ -35,7 +35,7 @@ namespace GitCMS.Data.Persists
             return cmd;
         }
 
-        public Tag Return(int rowsAffected)
+        public Tag Return(SqlCommand cmd, int rowsAffected)
         {
             return this._tg;
         }

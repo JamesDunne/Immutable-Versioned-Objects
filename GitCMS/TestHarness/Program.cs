@@ -327,14 +327,14 @@ namespace TestHarness
             var taskHead = cmrepo.GetCommitByRef("HEAD");
             var persistCommitTask = taskHead.ContinueWith((gotHead) =>
             {
-                Commit parent = taskHead.Result;
+                Tuple<Ref, Commit> parent = taskHead.Result;
 
                 Commit cm = new Commit.Builder(
-                    pParents: parent == null ? new List<CommitID>(0) : new List<CommitID> { parent.ID },
-                    pTreeID: rootid,
-                    pCommitter: "James Dunne <james.jdunne@gmail.com>",
+                    pParents:       parent == null ? new List<CommitID>(0) : new List<CommitID> { parent.Item2.ID },
+                    pTreeID:        rootid,
+                    pCommitter:     "James Dunne <james.jdunne@gmail.com>",
                     pDateCommitted: DateTimeOffset.Now,
-                    pMessage: "Initial commit."
+                    pMessage:       "Initial commit."
                 );
 
                 Console.WriteLine("CommitID {0}", cm.ID);
@@ -361,8 +361,9 @@ namespace TestHarness
 
             if (getCommitTask.Result != null)
             {
-                Console.WriteLine("v1.0 -> {0}", getCommitTask.Result.ID);
-
+                Console.WriteLine("v1.0 was {0}", getCommitTask.Result.Item2.ID);
+                Console.WriteLine("Deleting Tag by ID {0}", getCommitTask.Result.Item1.ID);
+                tgrepo.DeleteTag(getCommitTask.Result.Item1.ID).Wait();
             }
 
             Tag tg = new Tag.Builder("v1.0", cmid, "James Dunne <james.jdunne@gmail.com>", DateTimeOffset.Now, "Tagged for version 1.0");
@@ -373,7 +374,7 @@ namespace TestHarness
                     var getCommitTask2 = cmrepo.GetCommitByTagName("v1.0");
                     return getCommitTask2.ContinueWith(tCommit =>
                     {
-                        Debug.Assert(tCommit.Result.ID == cmid);
+                        Debug.Assert(tCommit.Result.Item2.ID == cmid);
                     });
                 }).Unwrap();
 

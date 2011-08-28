@@ -18,6 +18,6 @@ namespace Asynq
         /// </summary>
         /// <param name="rowsAffected"></param>
         /// <returns></returns>
-        TResult Return(int rowsAffected);
+        TResult Return(SqlCommand cmd, int rowsAffected);
     }
 }

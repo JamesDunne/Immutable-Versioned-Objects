@@ -40,12 +40,12 @@ namespace GitCMS.Implementation.SQL
 
         public Task<TagID> DeleteTag(TagID id)
         {
-            throw new NotImplementedException();
+            return db.AsynqNonQuery(new DestroyTag(id));
         }
 
         public Task<TagID> DeleteTagByName(string tagName)
         {
-            throw new NotImplementedException();
+            return db.AsynqNonQuery(new DestroyTagByName(tagName));
         }
     }
 }

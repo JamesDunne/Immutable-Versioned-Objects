@@ -15,10 +15,10 @@ namespace GitCMS.Definition.Repositories
 
         Task<Commit> GetCommit(CommitID id);
 
-        Task<Commit> GetCommitByTag(TagID id);
+        Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id);
 
-        Task<Commit> GetCommitByTagName(string tagName);
+        Task<Tuple<Tag, Commit>> GetCommitByTagName(string tagName);
 
-        Task<Commit> GetCommitByRef(string refName);
+        Task<Tuple<Ref, Commit>> GetCommitByRef(string refName);
     }
 }

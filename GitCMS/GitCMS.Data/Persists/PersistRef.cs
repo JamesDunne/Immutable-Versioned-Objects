@@ -37,7 +37,7 @@ END",
             return cmd;
         }
 
-        public Ref Return(int rowsAffected)
+        public Ref Return(SqlCommand cmd, int rowsAffected)
         {
             return this._rf;
         }

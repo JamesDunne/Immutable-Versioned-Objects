@@ -38,17 +38,17 @@ namespace GitCMS.Implementation.SQL
             return db.AsynqSingle(new QueryCommit(id));
         }
 
-        public Task<Commit> GetCommitByTag(TagID id)
+        public Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id)
         {
             return db.AsynqSingle(new QueryCommitByTagID(id));
         }
 
-        public Task<Commit> GetCommitByTagName(string tagName)
+        public Task<Tuple<Tag, Commit>> GetCommitByTagName(string tagName)
         {
             return db.AsynqSingle(new QueryCommitByTagName(tagName));
         }
 
-        public Task<Commit> GetCommitByRef(string refName)
+        public Task<Tuple<Ref, Commit>> GetCommitByRef(string refName)
         {
             return db.AsynqSingle(new QueryCommitByRefName(refName));
         }

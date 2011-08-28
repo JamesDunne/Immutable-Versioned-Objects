@@ -205,7 +205,7 @@ namespace Asynq
                     {
                         int rc = cmd.EndExecuteNonQuery(ar);
 
-                        return op.Return(rc);
+                        return op.Return(cmd, rc);
                     }
                     finally
                     {

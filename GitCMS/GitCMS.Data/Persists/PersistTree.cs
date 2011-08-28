@@ -73,7 +73,7 @@ namespace GitCMS.Data.Persists
             return cmd;
         }
 
-        public Tree Return(int rowsAffected)
+        public Tree Return(SqlCommand cmd, int rowsAffected)
         {
             return this._tr;
         }

@@ -31,7 +31,7 @@ namespace GitCMS.Data.Persists
             return cmd;
         }
 
-        public Blob Return(int rowsAffected)
+        public Blob Return(SqlCommand cmd, int rowsAffected)
         {
             return this._bl;
         }

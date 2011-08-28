@@ -7,21 +7,21 @@ using GitCMS.Definition.Models;
 
 namespace GitCMS.Data.Persists
 {
-    public sealed class DestroyBlob : IDataOperation<BlobID>
+    public sealed class DestroyTag : IDataOperation<TagID>
     {
-        private BlobID _id;
+        private TagID _id;
 
-        public DestroyBlob(BlobID id)
+        public DestroyTag(TagID id)
         {
             this._id = id;
         }
 
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
-            string pkName = Tables.TablePKs_Blob.Single();
+            string pkName = Tables.TablePKs_Tag.Single();
             var cmdText = String.Format(
                 @"DELETE FROM {0} WHERE [{1}] = @{1}",
-                Tables.TableName_Blob,
+                Tables.TableName_Tag,
                 pkName
             );
 
@@ -30,7 +30,7 @@ namespace GitCMS.Data.Persists
             return cmd;
         }
 
-        public BlobID Return(SqlCommand cmd, int rowsAffected)
+        public TagID Return(SqlCommand cmd, int rowsAffected)
         {
             return this._id;
         }
