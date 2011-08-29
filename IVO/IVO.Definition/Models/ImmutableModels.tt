@@ -1,0 +1,211 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core.dll" #>
+<#@ import namespace="System.Linq" #>
+<#@ output extension=".generated.cs" #><#
+    // Describe the immutable model types to generate:
+    var types = new[] {
+
+        new {
+            name = "Commit",
+            comment = "A commit object.",
+            idType = "CommitID",
+            members = new[] {
+                new { name = "Parents",         type = "CommitID[]",        bType = "List<CommitID>", convert = "({0}).ToArray()" },
+                new { name = "TreeID",          type = "TreeID",            bType = (string)null, convert = (string)null },
+                new { name = "Committer",       type = "string",            bType = (string)null, convert = (string)null },
+                new { name = "DateCommitted",   type = "DateTimeOffset",    bType = (string)null, convert = (string)null },
+                new { name = "Message",         type = "string",            bType = (string)null, convert = (string)null },
+            }
+        },
+
+        new {
+            name = "TreeTreeReference",
+            comment = "A tree's named reference to another tree.",
+            idType = (string)null,
+            members = new[] {
+                new { name = "Name",    type = "string",    bType = (string)null, convert = (string)null },
+                new { name = "TreeID",  type = "TreeID",    bType = (string)null, convert = (string)null },
+            }
+        },
+
+        new {
+            name = "TreeBlobReference",
+            comment = "A tree's named reference to a blob.",
+            idType = (string)null,
+            members = new[] {
+                new { name = "Name",    type = "string",    bType = (string)null, convert = (string)null },
+                new { name = "BlobID",  type = "BlobID",    bType = (string)null, convert = (string)null },
+            }
+        },
+
+        new {
+            name = "Tree",
+            comment = "A tree object.",
+            idType = "TreeID",
+            members = new[] {
+                new { name = "Trees", type = "TreeTreeReference[]", bType = "List<TreeTreeReference>", convert = "({0}).ToArray()" },
+                new { name = "Blobs", type = "TreeBlobReference[]", bType = "List<TreeBlobReference>", convert = "({0}).ToArray()" },
+            }
+        },
+
+        new {
+            name = "Blob",
+            comment = "An immutable blob.",
+            idType = "BlobID",
+            members = new[] {
+                new { name = "Contents",    type = "byte[]",    bType = (string)null, convert = (string)null },
+            }
+        },
+
+        new {
+            name = "Tag",
+            comment = "An immutable tag that points to a specific commit.",
+            idType = "TagID",
+            members = new [] {
+                new { name = "Name",        type = "string",            bType = (string)null, convert = (string)null },
+                new { name = "CommitID",    type = "CommitID",          bType = (string)null, convert = (string)null },
+                new { name = "Tagger",      type = "string",            bType = (string)null, convert = (string)null },
+                new { name = "DateTagged",  type = "DateTimeOffset",    bType = (string)null, convert = (string)null },
+                new { name = "Message",     type = "string",            bType = (string)null, convert = (string)null },
+            }
+        },
+
+        new {
+            name = "Ref",
+            comment = "A mutable reference that points to a specific commit; usable for tracking branch heads.",
+            idType = (string)null,
+            members = new [] {
+                new { name = "Name",        type = "string",    bType = (string)null, convert = (string)null },
+                new { name = "CommitID",    type = "CommitID",  bType = (string)null, convert = (string)null },
+            }
+        }
+    };
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Security.Cryptography;
+
+namespace IVO.Definition.Models
+{
+<#
+    for (int i = 0; i < types.Length; ++i)
+    {
+        var ty = types[i];
+        if (i != 0)
+        {
+#>
+
+<#
+        } // if (i != 0)
+
+        if (ty.comment != (string)null)
+        {
+#>
+    /// <summary>
+    /// <#= ty.comment #>
+    /// </summary>
+<#
+        } // if (ty.comment != (string)null)
+#>
+    public sealed partial class <#= ty.name #>
+    {
+<#
+        if (ty.idType != (string)null)
+        {
+#>
+        public <#= ty.idType #> ID { get; private set; }
+<#
+        } // if (ty.idType != (string)null)
+#>
+<#
+        // Public read-only properties:
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+        public <#= mbr.type #> <#= mbr.name #> { get; private set; }
+<#
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+
+        public <#= ty.name #>(Builder b)
+        {
+<#
+        if (ty.idType != (string)null)
+        {
+#>
+            this.ID = computeID(b);
+<#
+        } // if (ty.idType != (string)null)
+        // Property assignment statements:
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+            this.<#= mbr.name #> = <#= mbr.convert == null ? "b." + mbr.name : String.Format(mbr.convert, "b." + mbr.name, mbr.type, mbr.bType) #>;
+<#
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+        }
+
+        public sealed class Builder
+        {
+<#
+        // Public read-write properties:
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+            public <#= mbr.bType ?? mbr.type #> <#= mbr.name #> { get; set; }
+<#
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+
+            public Builder() { }
+
+            public Builder(
+<#
+        bool doComma = false;
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+               <#= doComma ? "," : " " #><#= mbr.bType ?? mbr.type #> p<#= mbr.name #>
+<#
+            doComma = true;
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+            )
+            {
+<#
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+                this.<#= mbr.name #> = p<#= mbr.name #>;
+<#
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+            }
+        }
+<#
+        if (ty.idType != (string)null)
+        {
+#>
+
+        //private static <#= ty.idType #> computeID(Builder b);
+<#
+        } // if (ty.idType != (string)null)
+#>
+
+        public static implicit operator <#= ty.name #>(Builder b)
+        {
+            return new <#= ty.name #>(b);
+        }
+    }
+<#
+    } // for (int i = 0; i < types.Length; ++i)
+#>
+}
