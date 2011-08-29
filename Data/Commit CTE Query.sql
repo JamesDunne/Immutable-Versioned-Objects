@@ -1,4 +1,4 @@
-USE [GitCMS];
+USE [IVO];
 GO
 
 DECLARE @commitid binary(20);
@@ -19,4 +19,4 @@ SELECT  [cm].[commitid]
        ,[cm].[parent_commitid]
        , cm.treeid, cm.committer, cm.date_committed, cm.[message]
 FROM    Commits cm
-WHERE   cm.reclvl BETWEEN 2 AND 10
+WHERE   cm.reclvl <= 10

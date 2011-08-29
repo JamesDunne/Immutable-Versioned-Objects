@@ -41,6 +41,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommitRepository.cs" />
+    <Compile Include="Destroyers\DestroyBlob.cs" />
+    <Compile Include="Destroyers\DestroyCommit.cs" />
+    <Compile Include="Destroyers\DestroyTag.cs" />
+    <Compile Include="Destroyers\DestroyTagByName.cs" />
+    <Compile Include="Helpers.cs" />
+    <Compile Include="Persists\PersistBlob.cs" />
+    <Compile Include="Persists\PersistCommit.cs" />
+    <Compile Include="Persists\PersistRef.cs" />
+    <Compile Include="Persists\PersistTag.cs" />
+    <Compile Include="Persists\PersistTree.cs" />
+    <Compile Include="Queries\QueryBlob.cs" />
+    <Compile Include="Queries\QueryBlobsExist.cs" />
+    <Compile Include="Queries\QueryCommit.cs" />
+    <Compile Include="Queries\QueryCommitByRef.cs" />
+    <Compile Include="Queries\QueryCommitByTagID.cs" />
+    <Compile Include="Queries\QueryCommitByTagName.cs" />
+    <Compile Include="Queries\QueryCommitsRecursively.cs" />
+    <Compile Include="Queries\QueryRef.cs" />
+    <Compile Include="Queries\QueryTag.cs" />
+    <Compile Include="Queries\QueryTreeRecursively.cs" />
+    <Compile Include="Queries\QueryTreesExist.cs" />
+    <Compile Include="Tables.cs" />
     <Compile Include="TagRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RefRepository.cs" />
@@ -50,10 +72,6 @@
     <ProjectReference Include="..\..\Asynq\Asynq.csproj">
       <Project>{42EFAFD3-5939-492C-8B93-DFD1969BA925}</Project>
       <Name>Asynq</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\IVO.Data\IVO.Data.csproj">
-      <Project>{118C63D8-9380-4934-B024-674874388904}</Project>
-      <Name>GitCMS.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\IVO.Definition\IVO.Definition.csproj">
       <Project>{29D4825B-A343-45AA-99FB-CE6671E78178}</Project>

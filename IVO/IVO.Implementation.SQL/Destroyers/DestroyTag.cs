@@ -5,23 +5,23 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
 
-namespace IVO.Data.Persists
+namespace IVO.Implementation.SQL.Persists
 {
-    public sealed class DestroyCommit : IDataOperation<CommitID>
+    public sealed class DestroyTag : IDataOperation<TagID>
     {
-        private CommitID _id;
+        private TagID _id;
 
-        public DestroyCommit(CommitID id)
+        public DestroyTag(TagID id)
         {
             this._id = id;
         }
 
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
-            string pkName = Tables.TablePKs_Commit.Single();
+            string pkName = Tables.TablePKs_Tag.Single();
             var cmdText = String.Format(
                 @"DELETE FROM {0} WHERE [{1}] = @{1}",
-                Tables.TableName_Commit,
+                Tables.TableName_Tag,
                 pkName
             );
 
@@ -30,7 +30,7 @@ namespace IVO.Data.Persists
             return cmd;
         }
 
-        public CommitID Return(SqlCommand cmd, int rowsAffected)
+        public TagID Return(SqlCommand cmd, int rowsAffected)
         {
             return this._id;
         }

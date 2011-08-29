@@ -5,7 +5,7 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
 
-namespace IVO.Data.Persists
+namespace IVO.Implementation.SQL.Persists
 {
     public sealed class PersistTag : IDataOperation<Tag>
     {

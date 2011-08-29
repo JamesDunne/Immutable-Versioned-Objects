@@ -1,4 +1,4 @@
-USE [GitCMS];
+USE [IVO];
 GO
 
 EXEC sp_executesql N'SELECT @commitid = [cm].[commitid] FROM [dbo].[Commit]cm WITH (NOLOCK)

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using IVO.Definition.Containers;
 using System.Diagnostics;
 
-namespace IVO.Data.Queries
+namespace IVO.Implementation.SQL.Queries
 {
     public class QueryCommitsRecursively : IComplexDataQuery<Tuple<CommitID, CommitContainer>>
     {

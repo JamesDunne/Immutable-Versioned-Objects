@@ -5,7 +5,7 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
 
-namespace IVO.Data.Queries
+namespace IVO.Implementation.SQL.Queries
 {
     public sealed class QueryTag : ISimpleDataQuery<Tag>
     {

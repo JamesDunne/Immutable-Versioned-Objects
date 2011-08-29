@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IVO.Data", "IVO\IVO.Data\IVO.Data.csproj", "{118C63D8-9380-4934-B024-674874388904}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IVO.Definition", "IVO\IVO.Definition\IVO.Definition.csproj", "{29D4825B-A343-45AA-99FB-CE6671E78178}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asynq", "Asynq\Asynq.csproj", "{42EFAFD3-5939-492C-8B93-DFD1969BA925}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IVO.TestHarness", "IVO\TestHarness\TestHarness.csproj", "{69CE2DF8-0997-472B-AA39-566E4F1E80D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHarness", "IVO\TestHarness\TestHarness.csproj", "{69CE2DF8-0997-472B-AA39-566E4F1E80D7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IVO.Implementation.SQL", "IVO\IVO.Implementation.SQL\IVO.Implementation.SQL.csproj", "{BCD16F4B-3915-43B7-B1C8-5A9132D97615}"
 EndProject
@@ -21,16 +19,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{118C63D8-9380-4934-B024-674874388904}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{118C63D8-9380-4934-B024-674874388904}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{118C63D8-9380-4934-B024-674874388904}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{118C63D8-9380-4934-B024-674874388904}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{118C63D8-9380-4934-B024-674874388904}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{118C63D8-9380-4934-B024-674874388904}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{118C63D8-9380-4934-B024-674874388904}.Release|Any CPU.Build.0 = Release|Any CPU
-		{118C63D8-9380-4934-B024-674874388904}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{118C63D8-9380-4934-B024-674874388904}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{118C63D8-9380-4934-B024-674874388904}.Release|x86.ActiveCfg = Release|Any CPU
 		{29D4825B-A343-45AA-99FB-CE6671E78178}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{29D4825B-A343-45AA-99FB-CE6671E78178}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29D4825B-A343-45AA-99FB-CE6671E78178}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

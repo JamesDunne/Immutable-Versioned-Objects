@@ -6,7 +6,7 @@ using Asynq;
 using IVO.Definition.Models;
 using System.Text;
 
-namespace IVO.Data.Persists
+namespace IVO.Implementation.SQL.Persists
 {
     /// <summary>
     /// Persists a single Tree instance with its TreeTree and TreeBlob records.

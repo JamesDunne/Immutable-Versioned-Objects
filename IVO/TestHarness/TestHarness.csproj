@@ -50,10 +50,6 @@
       <Project>{42EFAFD3-5939-492C-8B93-DFD1969BA925}</Project>
       <Name>Asynq</Name>
     </ProjectReference>
-    <ProjectReference Include="..\IVO.Data\IVO.Data.csproj">
-      <Project>{118C63D8-9380-4934-B024-674874388904}</Project>
-      <Name>GitCMS.Data</Name>
-    </ProjectReference>
     <ProjectReference Include="..\IVO.Definition\IVO.Definition.csproj">
       <Project>{29D4825B-A343-45AA-99FB-CE6671E78178}</Project>
       <Name>GitCMS.Definition</Name>

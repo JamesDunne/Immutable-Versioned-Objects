@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using IVO.Data.Queries;
-using IVO.Definition.Models;
-using Asynq;
 using System.Threading.Tasks;
-using IVO.Data.Persists;
+using Asynq;
 using IVO.Definition.Containers;
+using IVO.Definition.Models;
 using IVO.Definition.Repositories;
 using IVO.Implementation.SQL;
-using System.Diagnostics;
+using IVO.Implementation.SQL.Persists;
+using IVO.Implementation.SQL.Queries;
 
 namespace TestHarness
 {

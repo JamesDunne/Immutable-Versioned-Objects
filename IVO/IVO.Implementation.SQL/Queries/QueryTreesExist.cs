@@ -6,30 +6,30 @@ using Asynq;
 using IVO.Definition.Models;
 using System.Collections.Generic;
 
-namespace IVO.Data.Queries
+namespace IVO.Implementation.SQL.Queries
 {
-    public sealed class QueryBlobsExist : ISimpleDataQuery<BlobID>
+    public sealed class QueryTreesExist : ISimpleDataQuery<TreeID>
     {
-        private BlobID[] _ids;
+        private TreeID[] _ids;
 
-        public QueryBlobsExist(params BlobID[] ids)
+        public QueryTreesExist(params TreeID[] ids)
         {
             this._ids = ids;
         }
 
-        public QueryBlobsExist(IEnumerable<BlobID> ids)
+        public QueryTreesExist(IEnumerable<TreeID> ids)
         {
             this._ids = ids.ToArray();
         }
 
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
-            string pkName = Tables.TablePKs_Blob.Single();
+            string pkName = Tables.TablePKs_Tree.Single();
             string cmdText = String.Format(
                 @"SELECT [{0}] FROM {1}{2} WHERE [{0}] IN ({3})",
                 pkName,
-                Tables.TableName_Blob,
-                Tables.TableFromHint_Blob,
+                Tables.TableName_Tree,
+                Tables.TableFromHint_Tree,
                 _ids.Select(id => String.Format("0x{0}", id.ToString())).CommaList()
             );
 
@@ -37,10 +37,9 @@ namespace IVO.Data.Queries
             return cmd;
         }
 
-        public BlobID Project(SqlDataReader dr)
+        public TreeID Project(SqlDataReader dr)
         {
-            BlobID id = (BlobID) dr.GetSqlBinary(0).Value;
-
+            TreeID id = (TreeID)dr.GetSqlBinary(0).Value;
             return id;
         }
     }

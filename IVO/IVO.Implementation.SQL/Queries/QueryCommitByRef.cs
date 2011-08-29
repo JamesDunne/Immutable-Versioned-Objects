@@ -5,63 +5,54 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
 
-namespace IVO.Data.Queries
+namespace IVO.Implementation.SQL.Queries
 {
-    public sealed class QueryCommitByTagID : IComplexDataQuery<Tuple<Tag, Commit>>
+    public sealed class QueryCommitByRefName : IComplexDataQuery<Tuple<Ref, Commit>>
     {
-        private TagID _id;
+        private string _refName;
 
-        public QueryCommitByTagID(TagID id)
+        public QueryCommitByRefName(string refName)
         {
-            this._id = id;
+            this._refName = refName;
         }
 
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
             string cmdText = String.Format(
-@"SELECT @commitid = {0} FROM {2} {3}{4} JOIN {5} {6}{7} ON {3}.[commitid] = {6}.[commitid] WHERE {6}.[tagid] = @tagid;
-SELECT {8},{1} FROM {2} {3}{4} JOIN {5} {6}{7} ON {3}.[commitid] = {6}.[commitid] WHERE {6}.[tagid] = @tagid;
+@"SELECT @commitid = {0} FROM {2} {3}{4} JOIN {5} {6}{7} ON {3}.[commitid] = {6}.[commitid] WHERE {6}.[name] = @refname;
+SELECT {8},{1} FROM {2} {3}{4} JOIN {5} {6}{7} ON {3}.[commitid] = {6}.[commitid] WHERE {6}.[name] = @refname;
 SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;",
                 Tables.TablePKs_Commit.NameList("cm"),
                 Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList("cm", "cm_"),
                 Tables.TableName_Commit,
                 "cm",
                 Tables.TableFromHint_Commit,
-                Tables.TableName_Tag,
-                "tg",
-                Tables.TableFromHint_Tag,
-                Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameList("tg", "tg_")
+                Tables.TableName_Ref,
+                "rf",
+                Tables.TableFromHint_Ref,
+                Tables.TablePKs_Ref.Concat(Tables.ColumnNames_Ref).NameList("rf", "rf_")
             );
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@tagid", new SqlBinary((byte[])this._id));
+            cmd.AddInParameter("@refname", new SqlString(this._refName));
             cmd.AddOutParameter("@commitid", System.Data.SqlDbType.Binary, 20);
             return cmd;
         }
 
-        public Tuple<Tag, Commit> Retrieve(SqlDataReader dr, int expectedCapacity = 10)
-        {
-            return retrieve(dr);
-        }
-
-        internal static Tuple<Tag, Commit> retrieve(SqlDataReader dr)
+        public Tuple<Ref, Commit> Retrieve(SqlDataReader dr, int expectedCapacity = 10)
         {
             // If no result, return null:
             if (!dr.Read()) return null;
 
-            TagID tgid = (TagID)dr.GetSqlBinary(0).Value;
-            Tag.Builder tgb = new Tag.Builder(
-                pName: dr.GetSqlString(1).Value,
-                pCommitID: (CommitID)dr.GetSqlBinary(2).Value,
-                pTagger: dr.GetSqlString(3).Value,
-                pDateTagged: dr.GetDateTimeOffset(4),
-                pMessage: dr.GetSqlString(5).Value
+            Ref.Builder rfb = new Ref.Builder(
+                pName: dr.GetSqlString(0).Value,
+                pCommitID: (CommitID)dr.GetSqlBinary(1).Value
             );
 
-            Tag tg = tgb;
-            if (tg.ID != tgid) throw new InvalidOperationException();
+            Ref rf = rfb;
 
-            const int offs = 6;
+            const int offs = 2;
+
             CommitID id = (CommitID)dr.GetSqlBinary(0 + offs).Value;
 
             Commit.Builder cmb = new Commit.Builder(
@@ -85,7 +76,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             Commit cm = cmb;
             if (cm.ID != id) throw new InvalidOperationException();
 
-            return new Tuple<Tag, Commit>(tg, cm);
+            return new Tuple<Ref, Commit>(rf, cm);
         }
     }
 }

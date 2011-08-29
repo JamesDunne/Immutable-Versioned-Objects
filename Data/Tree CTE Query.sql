@@ -1,4 +1,4 @@
-USE [GitCMS];
+USE [IVO];
 GO
 
 DECLARE @treeid binary(20);

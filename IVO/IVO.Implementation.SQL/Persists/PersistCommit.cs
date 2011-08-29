@@ -6,7 +6,7 @@ using Asynq;
 using IVO.Definition.Models;
 using System.Text;
 
-namespace IVO.Data.Persists
+namespace IVO.Implementation.SQL.Persists
 {
     public sealed class PersistCommit : IDataOperation<Commit>
     {

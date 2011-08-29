@@ -5,23 +5,23 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
 
-namespace IVO.Data.Persists
+namespace IVO.Implementation.SQL.Persists
 {
-    public sealed class DestroyTag : IDataOperation<TagID>
+    public sealed class DestroyBlob : IDataOperation<BlobID>
     {
-        private TagID _id;
+        private BlobID _id;
 
-        public DestroyTag(TagID id)
+        public DestroyBlob(BlobID id)
         {
             this._id = id;
         }
 
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
-            string pkName = Tables.TablePKs_Tag.Single();
+            string pkName = Tables.TablePKs_Blob.Single();
             var cmdText = String.Format(
                 @"DELETE FROM {0} WHERE [{1}] = @{1}",
-                Tables.TableName_Tag,
+                Tables.TableName_Blob,
                 pkName
             );
 
@@ -30,7 +30,7 @@ namespace IVO.Data.Persists
             return cmd;
         }
 
-        public TagID Return(SqlCommand cmd, int rowsAffected)
+        public BlobID Return(SqlCommand cmd, int rowsAffected)
         {
             return this._id;
         }

@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Data.SqlTypes;
 
-namespace IVO.Data
+namespace IVO.Implementation.SQL
 {
     internal static class Helpers
     {
