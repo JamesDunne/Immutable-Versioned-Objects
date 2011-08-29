@@ -56,7 +56,7 @@ namespace IVO.Implementation.SQL.Queries
             return cmd;
         }
 
-        public Tag Project(SqlDataReader dr)
+        public Tag Project(SqlCommand cmd, SqlDataReader dr)
         {
             TagID id = (TagID) dr.GetSqlBinary(0).Value;
 

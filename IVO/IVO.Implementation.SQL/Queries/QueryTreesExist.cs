@@ -37,7 +37,7 @@ namespace IVO.Implementation.SQL.Queries
             return cmd;
         }
 
-        public TreeID Project(SqlDataReader dr)
+        public TreeID Project(SqlCommand cmd, SqlDataReader dr)
         {
             TreeID id = (TreeID)dr.GetSqlBinary(0).Value;
             return id;

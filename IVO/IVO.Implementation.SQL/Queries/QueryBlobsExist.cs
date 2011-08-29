@@ -37,7 +37,7 @@ namespace IVO.Implementation.SQL.Queries
             return cmd;
         }
 
-        public BlobID Project(SqlDataReader dr)
+        public BlobID Project(SqlCommand cmd, SqlDataReader dr)
         {
             BlobID id = (BlobID) dr.GetSqlBinary(0).Value;
 

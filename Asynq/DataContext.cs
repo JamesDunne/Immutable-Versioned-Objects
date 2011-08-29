@@ -61,7 +61,7 @@ namespace Asynq
                         List<T> results = new List<T>(expectedCapacity);
                         while (dr.Read())
                         {
-                            var row = query.Project(dr);
+                            var row = query.Project(cmd, dr);
                             results.Add(row);
                         }
 
@@ -100,7 +100,7 @@ namespace Asynq
                     {
                         var dr = cmd.EndExecuteReader(ar);
 
-                        return query.Retrieve(dr, expectedCapacity);
+                        return query.Retrieve(cmd, dr, expectedCapacity);
                     }
                     finally
                     {
@@ -136,7 +136,7 @@ namespace Asynq
                         // If no row read, return the default:
                         if (!dr.Read()) return default(T);
 
-                        var row = query.Project(dr);
+                        var row = query.Project(cmd, dr);
 
                         return row;
                     }
@@ -171,7 +171,7 @@ namespace Asynq
                     {
                         var dr = cmd.EndExecuteReader(ar);
 
-                        var row = query.Retrieve(dr);
+                        var row = query.Retrieve(cmd, dr);
 
                         return row;
                     }

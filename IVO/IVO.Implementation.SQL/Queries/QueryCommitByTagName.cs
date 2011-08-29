@@ -39,9 +39,9 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return cmd;
         }
 
-        public Tuple<Tag, Commit> Retrieve(SqlDataReader dr, int expectedCapacity = 10)
+        public Tuple<Tag, Commit> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return QueryCommitByTagID.retrieve(dr);
+            return QueryCommitByTagID.retrieve(cmd, dr);
         }
     }
 }

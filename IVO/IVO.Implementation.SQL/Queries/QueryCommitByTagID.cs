@@ -39,12 +39,12 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return cmd;
         }
 
-        public Tuple<Tag, Commit> Retrieve(SqlDataReader dr, int expectedCapacity = 10)
+        public Tuple<Tag, Commit> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return retrieve(dr);
+            return retrieve(cmd, dr);
         }
 
-        internal static Tuple<Tag, Commit> retrieve(SqlDataReader dr)
+        internal static Tuple<Tag, Commit> retrieve(SqlCommand cmd, SqlDataReader dr)
         {
             // If no result, return null:
             if (!dr.Read()) return null;

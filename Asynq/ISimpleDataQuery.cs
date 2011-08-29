@@ -2,6 +2,10 @@
 
 namespace Asynq
 {
+    /// <summary>
+    /// Represents a simple (i.e. single- or multi-record list via direct row-to-record relation) query.
+    /// </summary>
+    /// <typeparam name="T">The type of object to return results with.</typeparam>
     public interface ISimpleDataQuery<T>
     {
         /// <summary>
@@ -14,8 +18,13 @@ namespace Asynq
         /// <summary>
         /// Project a row from the SqlDataReader to an instance of type <typeparamref name="T"/>.
         /// </summary>
-        /// <param name="dr"></param>
+        /// <param name="cmd">The executed command, useful for obtaining output parameter values.</param>
+        /// <param name="dr">The DataReader obtained by executing the command.</param>
+        /// <remarks>
+        /// Implementation MUST NOT call Read() or NextResult() on the DataReader; this will break the
+        /// interface contract. To support these complex scenarios, implement IComplexDataQuery instead.
+        /// </remarks>
         /// <returns></returns>
-        T Project(SqlDataReader dr);
+        T Project(SqlCommand cmd, SqlDataReader dr);
     }
 }

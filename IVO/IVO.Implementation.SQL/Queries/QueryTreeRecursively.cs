@@ -45,7 +45,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
             return cmd;
         }
 
-        public Tuple<TreeID, TreeContainer> Retrieve(SqlDataReader dr, int expectedCount)
+        public Tuple<TreeID, TreeContainer> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             Dictionary<TreeID, Tree.Builder> trees = new Dictionary<TreeID, Tree.Builder>(expectedCount);
 

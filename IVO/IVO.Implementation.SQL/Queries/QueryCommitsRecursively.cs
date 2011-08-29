@@ -44,7 +44,7 @@ WHERE   cm.reclvl <= @depth";
             return cmd;
         }
 
-        public Tuple<CommitID, CommitContainer> Retrieve(SqlDataReader dr, int expectedCount)
+        public Tuple<CommitID, CommitContainer> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             Dictionary<CommitID, Commit.Builder> commits = new Dictionary<CommitID, Commit.Builder>(expectedCount);
 

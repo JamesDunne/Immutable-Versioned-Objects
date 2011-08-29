@@ -31,7 +31,7 @@ namespace IVO.Implementation.SQL.Queries
             return cmd;
         }
 
-        public Ref Project(SqlDataReader dr)
+        public Ref Project(SqlCommand cmd, SqlDataReader dr)
         {
             Ref.Builder b = new Ref.Builder(
                 pName:      dr.GetSqlString(0).Value,
