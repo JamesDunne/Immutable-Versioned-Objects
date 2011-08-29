@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GitCMS.Definition.Models;
+using GitCMS.Definition.Containers;
 
 namespace GitCMS.Definition.Repositories
 {
@@ -20,5 +21,7 @@ namespace GitCMS.Definition.Repositories
         Task<Tuple<Tag, Commit>> GetCommitByTagName(string tagName);
 
         Task<Tuple<Ref, Commit>> GetCommitByRef(string refName);
+
+        Task<Tuple<CommitID, CommitContainer>> GetCommitTree(CommitID id, int depth = 10);
     }
 }

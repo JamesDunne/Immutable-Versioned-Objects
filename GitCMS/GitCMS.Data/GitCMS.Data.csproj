@@ -38,6 +38,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Destroyers\DestroyCommit.cs" />
     <Compile Include="Destroyers\DestroyTagByName.cs" />
     <Compile Include="Destroyers\DestroyTag.cs" />
     <Compile Include="Destroyers\DestroyBlob.cs" />
@@ -47,6 +48,7 @@
     <Compile Include="Persists\PersistTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Persists\PersistBlob.cs" />
+    <Compile Include="Queries\QueryCommitsRecursively.cs" />
     <Compile Include="Queries\QueryCommitByTagID.cs" />
     <Compile Include="Queries\QueryCommitByTagName.cs" />
     <Compile Include="Queries\QueryCommitByRef.cs" />

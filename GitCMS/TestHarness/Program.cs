@@ -356,14 +356,20 @@ namespace TestHarness
             ICommitRepository cmrepo = new CommitRepository(db);
             ITagRepository tgrepo = new TagRepository(db);
 
+            Console.WriteLine("Get commit by tag 'v1.0'");
             var getCommitTask = cmrepo.GetCommitByTagName("v1.0");
             getCommitTask.Wait();
 
             if (getCommitTask.Result != null)
             {
                 Console.WriteLine("v1.0 was {0}", getCommitTask.Result.Item2.ID);
+#if false
                 Console.WriteLine("Deleting Tag by ID {0}", getCommitTask.Result.Item1.ID);
                 tgrepo.DeleteTag(getCommitTask.Result.Item1.ID).Wait();
+#else
+                Console.WriteLine("Deleting Tag by name 'v1.0'");
+                tgrepo.DeleteTagByName("v1.0").Wait();
+#endif
             }
 
             Tag tg = new Tag.Builder("v1.0", cmid, "James Dunne <james.jdunne@gmail.com>", DateTimeOffset.Now, "Tagged for version 1.0");

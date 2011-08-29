@@ -30,7 +30,7 @@ namespace GitCMS.Implementation.SQL
 
         public Task<CommitID> DeleteCommit(CommitID id)
         {
-            throw new NotImplementedException();
+            return db.ExecuteNonQueryAsync(new DestroyCommit(id));
         }
 
         public Task<Commit> GetCommit(CommitID id)
@@ -51,6 +51,11 @@ namespace GitCMS.Implementation.SQL
         public Task<Tuple<Ref, Commit>> GetCommitByRef(string refName)
         {
             return db.ExecuteSingleQueryAsync(new QueryCommitByRefName(refName));
+        }
+
+        public Task<Tuple<CommitID, CommitContainer>> GetCommitTree(CommitID id, int depth = 10)
+        {
+            throw new NotImplementedException();
         }
     }
 }

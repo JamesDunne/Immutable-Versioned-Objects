@@ -70,6 +70,17 @@ namespace GitCMS.Data
             return prm;
         }
 
+        internal static SqlParameter AddInParameter(this SqlCommand cmd, string name, SqlInt32 value)
+        {
+            var prm = cmd.CreateParameter();
+            prm.Direction = ParameterDirection.Input;
+            prm.ParameterName = name;
+            prm.SqlDbType = SqlDbType.Int;
+            prm.SqlValue = value;
+            cmd.Parameters.Add(prm);
+            return prm;
+        }
+
         internal static SqlParameter AddInParameter(this SqlCommand cmd, string name, DateTimeOffset value)
         {
             var prm = cmd.CreateParameter();
