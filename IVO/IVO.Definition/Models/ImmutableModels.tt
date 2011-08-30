@@ -4,13 +4,27 @@
 <#@ output extension=".generated.cs" #><#
     // Describe the immutable model types to generate:
     var types = new[] {
-
+        // A complete Commit record:
         new {
             name = "Commit",
-            comment = "A commit object.",
+            comment = "A complete commit object.",
             idType = "CommitID",
             members = new[] {
                 new { name = "Parents",         type = "CommitID[]",        bType = "List<CommitID>", convert = "({0}).ToArray()" },
+                new { name = "TreeID",          type = "TreeID",            bType = (string)null, convert = (string)null },
+                new { name = "Committer",       type = "string",            bType = (string)null, convert = (string)null },
+                new { name = "DateCommitted",   type = "DateTimeOffset",    bType = (string)null, convert = (string)null },
+                new { name = "Message",         type = "string",            bType = (string)null, convert = (string)null },
+            }
+        },
+
+        // A partial Commit record missing its parent CommitIDs:
+        new {
+            name = "CommitPartial",
+            comment = "A partial commit object that is missing its parent CommitIDs.",
+            idType = (string)null,
+            members = new[] {
+                new { name = "ID",              type = "CommitID",          bType = (string)null, convert = (string)null },
                 new { name = "TreeID",          type = "TreeID",            bType = (string)null, convert = (string)null },
                 new { name = "Committer",       type = "string",            bType = (string)null, convert = (string)null },
                 new { name = "DateCommitted",   type = "DateTimeOffset",    bType = (string)null, convert = (string)null },
@@ -118,8 +132,7 @@ namespace IVO.Definition.Models
         public <#= ty.idType #> ID { get; private set; }
 <#
         } // if (ty.idType != (string)null)
-#>
-<#
+
         // Public read-only properties:
         for (int j = 0; j < ty.members.Length; ++j)
         {

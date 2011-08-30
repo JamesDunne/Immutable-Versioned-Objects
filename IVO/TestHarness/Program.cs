@@ -26,11 +26,15 @@ namespace TestHarness
             //pr.TestPersistBlob();
             //pr.TestQueryBlobs();
 
+#if false
             TreeID rootid = pr.TestPersistTree();
             pr.TestRetrieveTreeRecursively(rootid);
 
             CommitID cmid = pr.TestCreateCommit(rootid);
             pr.TestCreateTag(cmid);
+#else
+            pr.TestGetCommitTree();
+#endif
 
             Console.WriteLine("Press a key.");
             Console.ReadLine();
@@ -310,9 +314,7 @@ namespace TestHarness
             treeTask.Wait();
 
             // Recursively display trees:
-            TreeContainer trees = treeTask.Result.Item2;
-
-            RecursivePrint(trees, treeTask.Result.Item1, String.Empty);
+            RecursivePrint(treeTask.Result.Item1, treeTask.Result.Item2);
         }
 
         CommitID TestCreateCommit(TreeID? id)
@@ -390,7 +392,7 @@ namespace TestHarness
             Console.WriteLine("Completed.");
         }
 
-        static void RecursivePrint(TreeContainer trees, TreeID treeID, string treeName, int depth = 1)
+        static void RecursivePrint(TreeID treeID, TreeContainer trees, int depth = 1)
         {
             var tr = trees[treeID];
             if (depth == 1)
@@ -408,12 +410,53 @@ namespace TestHarness
                 {
                     case Either<TreeTreeReference, TreeBlobReference>.Selected.Left:
                         Console.WriteLine("tree {1}: {0}{2}/", new string('_', depth * 2), nref.Left.TreeID.ToString().Substring(0, 12), nref.Left.Name);
-                        RecursivePrint(trees, nref.Left.TreeID, nref.Left.Name, depth + 1);
+                        RecursivePrint(nref.Left.TreeID, trees, depth + 1);
                         break;
                     case Either<TreeTreeReference, TreeBlobReference>.Selected.Right:
                         Console.WriteLine("blob {1}: {0}{2}", new string('_', depth * 2), nref.Right.BlobID.ToString().Substring(0, 12), nref.Right.Name);
                         break;
                 }
+            }
+        }
+
+        void TestGetCommitTree()
+        {
+            var db = getDataContext();
+
+            IRefRepository rfrepo = new RefRepository(db);
+            ICommitRepository cmrepo = new CommitRepository(db);
+            
+            var task = rfrepo.GetRef("HEAD").ContinueWith(rfTask =>
+            {
+                if (rfTask.Result == null)
+                {
+                    // TODO
+                }
+
+                return cmrepo.GetCommitTree(rfTask.Result.CommitID, depth: 10).ContinueWith(cmTree =>
+                {
+                    RecursivePrint(cmTree.Result.Item1, cmTree.Result.Item2);
+                });
+            }).Unwrap();
+
+            task.Wait();
+        }
+
+        static void RecursivePrint(CommitID cmID, ICommitContainer commits, int depth = 1)
+        {
+            ICommit cm = commits[cmID];
+
+            if (cm.IsComplete)
+            {
+                Console.WriteLine("{0}complete {1}:  ({2})", new string(' ', (depth - 1) * 2), cm.ID.ToString().Substring(0, 14), String.Join(",", cm.Parents.Select(id => id.ToString().Substring(0, 14))));
+                foreach (CommitID parentID in cm.Parents)
+                {
+                    RecursivePrint(parentID, commits, depth + 1);
+                }
+            }
+            else
+            {
+                Console.WriteLine("{0}partial  {1}:  ?", new string(' ', (depth - 1) * 2), cm.ID.ToString().Substring(0, 14));
             }
         }
     }

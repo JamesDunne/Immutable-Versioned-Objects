@@ -53,9 +53,9 @@ namespace IVO.Implementation.SQL
             return db.ExecuteSingleQueryAsync(new QueryCommitByRefName(refName));
         }
 
-        public Task<Tuple<CommitID, CommitContainer>> GetCommitTree(CommitID id, int depth = 10)
+        public Task<Tuple<CommitID, ICommitContainer>> GetCommitTree(CommitID id, int depth = 10)
         {
-            throw new NotImplementedException();
+            return db.ExecuteListQueryAsync(new QueryCommitsRecursively(id, depth));
         }
     }
 }

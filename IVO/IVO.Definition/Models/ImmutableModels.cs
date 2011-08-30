@@ -35,8 +35,38 @@ namespace IVO.Definition.Models
         }
     }
 
-    public sealed partial class Commit
+    public interface ICommit
     {
+        CommitID ID { get; }
+        CommitID[] Parents { get; }
+        TreeID TreeID { get; }
+        string Committer { get; }
+        DateTimeOffset DateCommitted { get; }
+        string Message { get; }
+
+        bool IsComplete { get; }
+    }
+
+    public sealed partial class CommitPartial : ICommit
+    {
+        public CommitID[] Parents
+        {
+            get { throw new NotSupportedException(); }
+        }
+
+        public bool IsComplete
+        {
+            get { return false; }
+        }
+    }
+
+    public sealed partial class Commit : ICommit
+    {
+        public bool IsComplete
+        {
+            get { return true; }
+        }
+
         private static CommitID computeID(Builder m)
         {
             // Calculate a quick-and-dirty expected capacity:

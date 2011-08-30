@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 namespace IVO.Definition.Models
 {
     /// <summary>
-    /// A commit object.
+    /// A complete commit object.
     /// </summary>
     public sealed partial class Commit
     {
@@ -59,6 +59,58 @@ namespace IVO.Definition.Models
         public static implicit operator Commit(Builder b)
         {
             return new Commit(b);
+        }
+    }
+
+    /// <summary>
+    /// A partial commit object that is missing its parent CommitIDs.
+    /// </summary>
+    public sealed partial class CommitPartial
+    {
+        public CommitID ID { get; private set; }
+        public TreeID TreeID { get; private set; }
+        public string Committer { get; private set; }
+        public DateTimeOffset DateCommitted { get; private set; }
+        public string Message { get; private set; }
+
+        public CommitPartial(Builder b)
+        {
+            this.ID = b.ID;
+            this.TreeID = b.TreeID;
+            this.Committer = b.Committer;
+            this.DateCommitted = b.DateCommitted;
+            this.Message = b.Message;
+        }
+
+        public sealed class Builder
+        {
+            public CommitID ID { get; set; }
+            public TreeID TreeID { get; set; }
+            public string Committer { get; set; }
+            public DateTimeOffset DateCommitted { get; set; }
+            public string Message { get; set; }
+
+            public Builder() { }
+
+            public Builder(
+                CommitID pID
+               ,TreeID pTreeID
+               ,string pCommitter
+               ,DateTimeOffset pDateCommitted
+               ,string pMessage
+            )
+            {
+                this.ID = pID;
+                this.TreeID = pTreeID;
+                this.Committer = pCommitter;
+                this.DateCommitted = pDateCommitted;
+                this.Message = pMessage;
+            }
+        }
+
+        public static implicit operator CommitPartial(Builder b)
+        {
+            return new CommitPartial(b);
         }
     }
 

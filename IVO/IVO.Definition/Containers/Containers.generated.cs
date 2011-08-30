@@ -109,26 +109,26 @@ namespace IVO.Definition.Containers
         public IEnumerable<Tree> Values { get { return _container.Values; } }
     }
 
-    public sealed class CommitContainer
+    public sealed class ICommitContainer
     {
-        private Dictionary<CommitID, Commit> _container;
+        private Dictionary<CommitID, ICommit> _container;
 
-        public CommitContainer(params Commit[] items)
+        public ICommitContainer(params ICommit[] items)
         {
             _container = items.ToDictionary(e => e.ID);
         }
 
-        public CommitContainer(IEnumerable<Commit> items)
+        public ICommitContainer(IEnumerable<ICommit> items)
         {
             _container = items.ToDictionary(e => e.ID);
         }
 
-        public CommitContainer(IDictionary<CommitID, Commit> items)
+        public ICommitContainer(IDictionary<CommitID, ICommit> items)
         {
-            _container = new Dictionary<CommitID, Commit>(items);
+            _container = new Dictionary<CommitID, ICommit>(items);
         }
 
-        public Commit this[CommitID id]
+        public ICommit this[CommitID id]
         {
             get { return _container[id]; }
         }
@@ -138,25 +138,25 @@ namespace IVO.Definition.Containers
             return _container.ContainsKey(id);
         }
 
-        public bool TryGetValue(CommitID id, out Commit value)
+        public bool TryGetValue(CommitID id, out ICommit value)
         {
             return _container.TryGetValue(id, out value);
         }
 
-        public Maybe<Commit> MaybeGet(CommitID id)
+        public Maybe<ICommit> MaybeGet(CommitID id)
         {
-            Commit value;
+            ICommit value;
             
             if (_container.TryGetValue(id, out value))
-                return new Maybe<Commit>(value);
+                return new Maybe<ICommit>(value);
 
-            return Maybe<Commit>.Nothing;
+            return Maybe<ICommit>.Nothing;
         }
 
         public int Count { get { return _container.Count; } }
 
         public IEnumerable<CommitID> Keys { get { return _container.Keys; } }
 
-        public IEnumerable<Commit> Values { get { return _container.Values; } }
+        public IEnumerable<ICommit> Values { get { return _container.Values; } }
     }
 }

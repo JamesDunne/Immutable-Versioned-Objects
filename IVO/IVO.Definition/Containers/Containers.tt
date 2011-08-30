@@ -6,7 +6,7 @@
     {
         new { objType = "Blob",     idType = "BlobID" },
         new { objType = "Tree",     idType = "TreeID" },
-        new { objType = "Commit",   idType = "CommitID" },
+        new { objType = "ICommit",  idType = "CommitID" },
     };
 #>
 using System;
