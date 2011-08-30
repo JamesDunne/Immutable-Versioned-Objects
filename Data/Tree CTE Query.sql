@@ -3,7 +3,8 @@ GO
 
 DECLARE @treeid binary(20);
 
-SET @treeid = 0xa1fe342751e09fda968cfd0f1a1755e386f494f8;
+SET @treeid = 0xff4b3c975207d3849abdc50c041288d6cc2aaec7;
+--SET @treeid = 0xa1fe342751e09fda968cfd0f1a1755e386f494f8;
 --SET @treeid = 0x85cfe62db1cedba5e7c3a056c636c1df8557a305;
 --SET @treeid = 0x837166ec9e3168a3c11fc8eb461dac014e153ed0;
 --SET @treeid = 0xF0452FB5E6C849F63AD02745F4E0D25461D53F24;
@@ -25,3 +26,6 @@ SELECT  [tr].[treeid] AS tr_treeid
        ,[bl].[name] AS trbl_name
 FROM    Trees tr
 LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid
+
+select * from treetree where treeid = 0xff4b3c975207d3849abdc50c041288d6cc2aaec7
+select * from treeblob where treeid = 0xff4b3c975207d3849abdc50c041288d6cc2aaec7

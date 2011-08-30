@@ -21,6 +21,7 @@ namespace Asynq
         /// </summary>
         /// <param name="cmd">The executed command, useful for obtaining output parameter values.</param>
         /// <param name="dr">The DataReader obtained by executing the command.</param>
+        /// <param name="expectedCapacity">The parameter passed through from the DataContext execute method.</param>
         /// <remarks>
         /// Implementation must call Read() on the DataReader and may also use NextResult() if multiple
         /// result-sets are queried. For simplistic row-to-record mapping, implement ISimpleDataQuery

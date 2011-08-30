@@ -85,14 +85,14 @@ namespace IVO.Implementation.SQL
 
                     // Asynchronously persist the trees in dependency order:
                     // FIXME: asynchronous fan-out per depth level
-                    Task<Tree> waiter = null, runner = null;
+                    Task<Tree> runner = null;
                     while (treeIDsToPersist.Count > 0)
                     {
                         TreeID id = treeIDsToPersist.Pop();
 
                         Debug.WriteLine("{0,3}: PERSIST tree {1}", Task.CurrentId, id.ToString());
 
-                        if (runner == null) waiter = runner = db.ExecuteNonQueryAsync(new PersistTree(trees[id]));
+                        if (runner == null) runner = db.ExecuteNonQueryAsync(new PersistTree(trees[id]));
                         else runner = runner.ContinueWith(r => db.ExecuteNonQueryAsync(new PersistTree(trees[id]))).Unwrap();
                     }
 

@@ -74,7 +74,7 @@ namespace IVO.Definition.Models
                 m.Parents == null || m.Parents.Count == 0 ? 0 : m.Parents.Sum(t => "parent ".Length + CommitID.ByteArrayLength * 2 + 1)
               + "tree ".Length + TreeID.ByteArrayLength * 2 + 1
               + "committer ".Length + m.Committer.Length + 1
-              + "date ".Length + 20 + 1
+              + "date ".Length + 25 + 1
               + m.Message.Length;
 
             using (var ms = new MemoryStream(initialCapacity))
@@ -143,8 +143,8 @@ namespace IVO.Definition.Models
 
             // Calculate a quick-and-dirty expected capacity:
             int initialCapacity =
-                m.Trees.Sum(t => "tree ".Length + t.Name.Length + TreeID.ByteArrayLength)
-              + m.Blobs.Sum(b => "blob ".Length + b.Name.Length + BlobID.ByteArrayLength);
+                m.Trees.Sum(t => "tree ".Length + t.Name.Length + 1 + TreeID.ByteArrayLength * 2 + 1)
+              + m.Blobs.Sum(b => "blob ".Length + b.Name.Length + 1 + BlobID.ByteArrayLength * 2 + 1);
 
             using (var ms = new MemoryStream(initialCapacity))
             using (var bw = new BinaryWriter(ms, Encoding.UTF8))
@@ -155,17 +155,20 @@ namespace IVO.Definition.Models
                     switch (either.Which)
                     {
                         case Either<TreeTreeReference, TreeBlobReference>.Selected.Left:
-                            bw.WriteRaw("tree ");
-                            bw.Write((byte[])either.Left.TreeID);
-                            bw.WriteRaw(either.Left.Name);
+                            bw.WriteRaw(String.Format(
+                                "tree {0} {1}\n",
+                                either.Left.TreeID,
+                                either.Left.Name
+                            ));
                             break;
                         case Either<TreeTreeReference, TreeBlobReference>.Selected.Right:
-                            bw.WriteRaw("blob ");
-                            bw.Write((byte[])either.Right.BlobID);
-                            bw.WriteRaw(either.Right.Name);
+                            bw.WriteRaw(String.Format(
+                                "blob {0} {1}\n",
+                                either.Right.BlobID,
+                                either.Right.Name
+                            ));
                             break;
                     }
-                    bw.Write('\n');
                 }
                 bw.Flush();
 

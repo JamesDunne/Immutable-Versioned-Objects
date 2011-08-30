@@ -55,8 +55,8 @@ USING (SELECT {1}) AS nt ON {2}
 WHEN NOT MATCHED THEN INSERT ({3}) VALUES ({4});
 ",
                     Tables.TableName_TreeTree,
-                    trtrCols.NameCustomList(",", c => String.Format("@tt_{0}{1} AS [{0}]", c, i.ToString())),
-                    trtrCols.NameCustomList(" AND ", c => String.Format("(ct.[{0}] = nt.[{0}])", c)),
+                    "@treeid AS [treeid]," + trtrCols.NameCustomList(",", c => String.Format("@tt_{0}{1} AS [{0}]", c, i.ToString())),
+                    Tables.ColumnNames_TreeTree.NameCustomList(" AND ", c => String.Format("(ct.[{0}] = nt.[{0}])", c)),
                     Tables.ColumnNames_TreeTree.NameCommaList(),
                     "@treeid," + trtrCols.NameCustomList(",", c => String.Format("@tt_{0}{1}", c, i.ToString()))
                 );
@@ -71,8 +71,8 @@ USING (SELECT {1}) AS nt ON {2}
 WHEN NOT MATCHED THEN INSERT ({3}) VALUES ({4});
 ",
                     Tables.TableName_TreeBlob,
-                    trblCols.NameCustomList(",", c => String.Format("@tb_{0}{1} AS [{0}]", c, i.ToString())),
-                    trblCols.NameCustomList(" AND ", c => String.Format("(ct.[{0}] = nt.[{0}])", c)),
+                    "@treeid AS [treeid]," + trblCols.NameCustomList(",", c => String.Format("@tb_{0}{1} AS [{0}]", c, i.ToString())),
+                    Tables.ColumnNames_TreeBlob.NameCustomList(" AND ", c => String.Format("(ct.[{0}] = nt.[{0}])", c)),
                     Tables.ColumnNames_TreeBlob.NameCommaList(),
                     "@treeid," + trblCols.NameCustomList(",", c => String.Format("@tb_{0}{1}", c, i.ToString()))
                 );
