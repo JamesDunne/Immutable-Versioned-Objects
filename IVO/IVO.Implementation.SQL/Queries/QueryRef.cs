@@ -20,7 +20,7 @@ namespace IVO.Implementation.SQL.Queries
         {
             string cmdText = String.Format(
                 @"SELECT {0} FROM {1}{2}{3} WHERE [name] = @name",
-                Tables.ColumnNames_Ref.NameList(),
+                Tables.ColumnNames_Ref.NameCommaList(),
                 Tables.TableName_Ref,
                 "", // no alias
                 Tables.TableFromHint_Ref

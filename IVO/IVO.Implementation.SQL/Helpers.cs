@@ -10,26 +10,38 @@ namespace IVO.Implementation.SQL
 {
     internal static class Helpers
     {
-        internal static string NameList(this IEnumerable<string> columnNames)
+        internal static string NameCommaList(this IEnumerable<string> columnNames)
         {
             return String.Join(",", columnNames.Select(c => String.Concat("[", c, "]")).ToArray());
         }
 
-        internal static string NameList(this IEnumerable<string> columnNames, string tableAlias)
+        internal static string NameCommaList(this IEnumerable<string> columnNames, string tableAlias)
         {
             return String.Join(",", columnNames.Select(c => String.Concat("[", tableAlias, "].[", c, "]")).ToArray());
         }
 
-        internal static string NameList(this IEnumerable<string> columnNames, string tableAlias, string prefix)
+        internal static string NameCommaListAs(this IEnumerable<string> columnNames, string tableAlias, string prefix)
         {
             return String.Join(",", columnNames.Select(c => String.Concat("[", tableAlias, "].[", c, "] AS [", prefix, c, "]")).ToArray());
         }
 
-        internal static string ParameterList(this IEnumerable<string> columnNames, string prefix = null, string suffix = null)
+        internal static string NameCustomList(this IEnumerable<string> columnNames, string delim, Func<string, string> formatColumn)
+        {
+            return String.Join(delim, columnNames.Select(c => formatColumn(c)).ToArray());
+        }
+
+        internal static string ParameterCommaList(this IEnumerable<string> columnNames, string prefix = null, string suffix = null)
         {
             string realPrefix = prefix ?? String.Empty;
             string realSuffix = suffix ?? String.Empty;
             return String.Join(",", columnNames.Select(c => String.Concat("@", realPrefix, c, realSuffix)).ToArray());
+        }
+
+        internal static string ParameterCommaListAs(this IEnumerable<string> columnNames, string prefix = null, string suffix = null)
+        {
+            string realPrefix = prefix ?? String.Empty;
+            string realSuffix = suffix ?? String.Empty;
+            return String.Join(",", columnNames.Select(c => String.Concat("@", realPrefix, c, realSuffix, " AS [", realPrefix, c, realSuffix, "]")).ToArray());
         }
 
         internal static string CommaList(this IEnumerable<string> columnNames)

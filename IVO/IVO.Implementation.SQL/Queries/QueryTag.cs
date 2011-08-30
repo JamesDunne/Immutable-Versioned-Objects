@@ -29,7 +29,7 @@ namespace IVO.Implementation.SQL.Queries
                 case Either<TagID,string>.Selected.Left:
                     cmdText = String.Format(
                         @"SELECT {0} FROM {1}{2}{3} WHERE [tagid] = @tagid",
-                        Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameList(),
+                        Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameCommaList(),
                         Tables.TableName_Tag,
                         "", // no alias
                         Tables.TableFromHint_Tag
@@ -38,7 +38,7 @@ namespace IVO.Implementation.SQL.Queries
                 case Either<TagID,string>.Selected.Right:
                     cmdText = String.Format(
                         @"SELECT {0} FROM {1}{2}{3} WHERE [name] = @name",
-                        Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameList(),
+                        Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameCommaList(),
                         Tables.TableName_Tag,
                         "", // no alias
                         Tables.TableFromHint_Tag

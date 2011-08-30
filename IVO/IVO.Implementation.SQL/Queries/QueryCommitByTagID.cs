@@ -22,15 +22,15 @@ namespace IVO.Implementation.SQL.Queries
 @"SELECT @commitid = {0} FROM {2} {3}{4} JOIN {5} {6}{7} ON {3}.[commitid] = {6}.[commitid] WHERE {6}.[tagid] = @tagid;
 SELECT {8},{1} FROM {2} {3}{4} JOIN {5} {6}{7} ON {3}.[commitid] = {6}.[commitid] WHERE {6}.[tagid] = @tagid;
 SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;",
-                Tables.TablePKs_Commit.NameList("cm"),
-                Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList("cm", "cm_"),
+                Tables.TablePKs_Commit.NameCommaList("cm"),
+                Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameCommaListAs("cm", "cm_"),
                 Tables.TableName_Commit,
                 "cm",
                 Tables.TableFromHint_Commit,
                 Tables.TableName_Tag,
                 "tg",
                 Tables.TableFromHint_Tag,
-                Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameList("tg", "tg_")
+                Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameCommaListAs("tg", "tg_")
             );
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);

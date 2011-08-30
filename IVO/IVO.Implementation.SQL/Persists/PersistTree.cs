@@ -29,33 +29,57 @@ namespace IVO.Implementation.SQL.Persists
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
             StringBuilder sbCmd = new StringBuilder();
-            sbCmd.AppendLine(@"BEGIN TRAN");
-            sbCmd.AppendFormat(@"INSERT INTO {0} ({1}) VALUES ({2});",
-                Tables.TableName_Tree,
-                Tables.TablePKs_Tree.Concat(Tables.ColumnNames_Tree).NameList(),
-                Tables.TablePKs_Tree.Concat(Tables.ColumnNames_Tree).ParameterList()
+
+            sbCmd.AppendLine(@"SET NOCOUNT, XACT_ABORT ON;");
+            
+            // MERGE .. WHEN NOT MATCHED is used in SQL2008 to avoid primary key constraint race condition
+            // when INSERTing records with duplicate SHA-1 ids.
+            sbCmd.AppendFormat(
+@"MERGE {0} WITH (HOLDLOCK) AS ct
+USING (SELECT {3} AS {1}) AS nt ON ct.{1} = nt.{1}
+WHEN NOT MATCHED THEN INSERT ({2}) VALUES ({4});
+",
+                Tables.TableName_Tree,  // 0
+                Tables.TablePKs_Tree.Single(),  // 1
+                Tables.TablePKs_Tree.Concat(Tables.ColumnNames_Tree).NameCommaList(),    // 2
+                "@" + Tables.TablePKs_Tree.Single(),    // 3
+                Tables.TablePKs_Tree.Concat(Tables.ColumnNames_Tree).ParameterCommaList()    // 4
             );
 
+            var trtrCols = Tables.ColumnNames_TreeTree.Except(new string[1] { "treeid" }).ToArray();
             for (int i = 0; i < _tr.Trees.Length; ++i)
             {
-                sbCmd.AppendFormat(@"INSERT INTO {0} ({1}) VALUES (@treeid,{2});",
+                sbCmd.AppendFormat(
+@"MERGE {0} WITH (HOLDLOCK) AS ct
+USING (SELECT {1}) AS nt ON {2}
+WHEN NOT MATCHED THEN INSERT ({3}) VALUES ({4});
+",
                     Tables.TableName_TreeTree,
-                    Tables.ColumnNames_TreeTree.NameList(),
-                    Tables.ColumnNames_TreeTree.Except(new string[1] { "treeid" }).ParameterList(prefix: "trtr_", suffix: i.ToString())
+                    trtrCols.NameCustomList(",", c => String.Format("@trtr_{0}{1} AS [{0}]", c, i.ToString())),
+                    trtrCols.NameCustomList(" AND ", c => String.Format("(ct.[{0}] = nt.[{0}])", c)),
+                    Tables.ColumnNames_TreeTree.NameCommaList(),
+                    "@treeid," + trtrCols.NameCustomList(",", c => String.Format("@trtr_{0}{1}", c, i.ToString()))
                 );
             }
 
+            var trblCols = Tables.ColumnNames_TreeBlob.Except(new string[1] { "treeid" }).ToArray();
             for (int i = 0; i < _tr.Blobs.Length; ++i)
             {
-                sbCmd.AppendFormat(@"INSERT INTO {0} ({1}) VALUES (@treeid,{2});",
+                sbCmd.AppendFormat(
+@"MERGE {0} WITH (HOLDLOCK) AS ct
+USING (SELECT {1}) AS nt ON {2}
+WHEN NOT MATCHED THEN INSERT ({3}) VALUES ({4});
+",
                     Tables.TableName_TreeBlob,
-                    Tables.ColumnNames_TreeBlob.NameList(),
-                    Tables.ColumnNames_TreeBlob.Except(new string[1] { "treeid" }).ParameterList(prefix: "trbl_", suffix: i.ToString())
+                    trblCols.NameCustomList(",", c => String.Format("@trbl_{0}{1} AS [{0}]", c, i.ToString())),
+                    trblCols.NameCustomList(" AND ", c => String.Format("(ct.[{0}] = nt.[{0}])", c)),
+                    Tables.ColumnNames_TreeBlob.NameCommaList(),
+                    "@treeid," + trblCols.NameCustomList(",", c => String.Format("@trbl_{0}{1}", c, i.ToString()))
                 );
             }
-            sbCmd.AppendLine(@"COMMIT TRAN");
 
-            var cmd = new SqlCommand(sbCmd.ToString(), cn);
+            string cmdText = sbCmd.ToString();
+            var cmd = new SqlCommand(cmdText, cn);
 
             // Add parameters:
             cmd.AddInParameter("@treeid", new SqlBinary((byte[])_tr.ID));

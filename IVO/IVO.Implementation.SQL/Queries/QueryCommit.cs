@@ -21,7 +21,7 @@ namespace IVO.Implementation.SQL.Queries
             string cmdText = String.Format(
 @"SELECT {0} FROM {1}{2}{3} WHERE [commitid] = @commitid;
 SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;",
-                Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList(),
+                Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameCommaList(),
                 Tables.TableName_Commit,
                 "", // no alias
                 Tables.TableFromHint_Commit

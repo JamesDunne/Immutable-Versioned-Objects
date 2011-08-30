@@ -27,8 +27,8 @@ END ELSE BEGIN
   UPDATE {0} SET [commitid] = @commitid WHERE [name] = @name;
 END",
                 Tables.TableName_Ref,
-                Tables.TablePKs_Ref.Concat(Tables.ColumnNames_Ref).NameList(),
-                Tables.TablePKs_Ref.Concat(Tables.ColumnNames_Ref).ParameterList()
+                Tables.TablePKs_Ref.Concat(Tables.ColumnNames_Ref).NameCommaList(),
+                Tables.TablePKs_Ref.Concat(Tables.ColumnNames_Ref).ParameterCommaList()
             );
 
             var cmd = new SqlCommand(cmdText, cn);

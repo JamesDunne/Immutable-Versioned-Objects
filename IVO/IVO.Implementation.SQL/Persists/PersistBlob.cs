@@ -18,11 +18,18 @@ namespace IVO.Implementation.SQL.Persists
 
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
+            // MERGE .. WHEN NOT MATCHED is used in SQL2008 to avoid primary key constraint race condition
+            // when INSERTing records with duplicate SHA-1 ids.
             var cmdText = String.Format(
-                @"INSERT INTO {0} ({1}) VALUES ({2})",
-                Tables.TableName_Blob,
-                Tables.TablePKs_Blob.Concat(Tables.ColumnNames_Blob).NameList(),
-                Tables.TablePKs_Blob.Concat(Tables.ColumnNames_Blob).ParameterList()
+@"SET NOCOUNT, XACT_ABORT ON;
+MERGE {0} WITH (HOLDLOCK) AS curr_blob
+USING (SELECT {3} AS {1}) AS new_blob ON curr_blob.{1} = new_blob.{1}
+WHEN NOT MATCHED THEN INSERT ({2}) VALUES ({4});",
+                Tables.TableName_Blob,  // 0
+                Tables.TablePKs_Blob.Single(),  // 1
+                Tables.TablePKs_Blob.Concat(Tables.ColumnNames_Blob).NameCommaList(),    // 2
+                "@" + Tables.TablePKs_Blob.Single(),    // 3
+                Tables.TablePKs_Blob.Concat(Tables.ColumnNames_Blob).ParameterCommaList()    // 4
             );
 
             var cmd = new SqlCommand(cmdText, cn);

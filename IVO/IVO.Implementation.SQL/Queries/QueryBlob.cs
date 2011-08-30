@@ -20,7 +20,7 @@ namespace IVO.Implementation.SQL.Queries
         {
             string cmdText = String.Format(
                 @"SELECT {0} FROM {1}{2}{3} WHERE blobid = @blobid",
-                Tables.TablePKs_Blob.Concat(Tables.ColumnNames_Blob).NameList(),
+                Tables.TablePKs_Blob.Concat(Tables.ColumnNames_Blob).NameCommaList(),
                 Tables.TableName_Blob,
                 "", // no alias
                 Tables.TableFromHint_Blob

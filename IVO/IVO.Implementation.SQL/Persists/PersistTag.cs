@@ -21,8 +21,8 @@ namespace IVO.Implementation.SQL.Persists
             var cmdText = String.Format(
                 @"INSERT INTO {0} ({1}) VALUES ({2})",
                 Tables.TableName_Tag,
-                Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameList(),
-                Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).ParameterList()
+                Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameCommaList(),
+                Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).ParameterCommaList()
             );
 
             var cmd = new SqlCommand(cmdText, cn);

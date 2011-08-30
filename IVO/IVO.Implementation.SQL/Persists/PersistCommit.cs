@@ -24,8 +24,8 @@ namespace IVO.Implementation.SQL.Persists
             sbCmd.AppendFormat(
                 @"INSERT INTO {0} ({1}) VALUES ({2})",
                 Tables.TableName_Commit,
-                Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameList(),
-                Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).ParameterList()
+                Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).NameCommaList(),
+                Tables.TablePKs_Commit.Concat(Tables.ColumnNames_Commit).ParameterCommaList()
             );
             for (int i = 0; i < _cm.Parents.Length; ++i)
             {
