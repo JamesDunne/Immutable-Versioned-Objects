@@ -4,8 +4,8 @@ GO
 DECLARE @commitid binary(20);
 DECLARE @depth int;
 
-SET @commitid = 0x30ede38fc7d0b28dcbfa0a51b73d113241e53ad3;
-SET @depth = 10;
+SET @commitid = 0x16c30968fce99e543b9d71503bd3bb79f4397094;
+SET @depth = 12;
 
 ;WITH cmtree AS (
     SELECT      CAST(NULL AS binary(20)) AS commitid, cm.commitid AS parent_commitid, cm.treeid, cm.committer, cm.date_committed, cm.[message], 1 AS depth
@@ -17,6 +17,6 @@ SET @depth = 10;
     JOIN        [dbo].[Commit] cm WITH (NOLOCK) ON cp.parent_commitid = cm.commitid
     JOIN        cmtree parent ON parent.parent_commitid = cp.commitid
 )
-SELECT  cm.[commitid], cm.[parent_commitid], cm.treeid, cm.committer, cm.date_committed, cm.[message]
+SELECT  cm.[commitid], cm.[parent_commitid], cm.treeid, cm.committer, cm.date_committed, cm.[message], cm.depth
 FROM    cmtree cm
 WHERE   cm.depth <= @depth

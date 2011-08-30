@@ -433,7 +433,7 @@ namespace TestHarness
                     // TODO
                 }
 
-                return cmrepo.GetCommitTree(rfTask.Result.CommitID, depth: 10).ContinueWith(cmTree =>
+                return cmrepo.GetCommitTree(rfTask.Result.CommitID, depth: 13).ContinueWith(cmTree =>
                 {
                     RecursivePrint(cmTree.Result.Item1, cmTree.Result.Item2);
                 });
