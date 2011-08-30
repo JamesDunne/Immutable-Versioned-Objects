@@ -36,9 +36,10 @@ namespace IVO.Implementation.SQL.Persists
             var cmd = new SqlCommand(sbCmd.ToString(), cn);
             cmd.AddInParameter("@commitid", new SqlBinary((byte[])_cm.ID));
             cmd.AddInParameter("@treeid", new SqlBinary((byte[])_cm.TreeID));
-            cmd.AddInParameter("@committer", new SqlString(_cm.Committer));
+            cmd.AddInParameter("@committer", new SqlString(_cm.Committer), size: 512);
             cmd.AddInParameter("@date_committed", _cm.DateCommitted);
-            cmd.AddInParameter("@message", new SqlString(_cm.Message));
+            // TODO: chunked xactional update to [message] in multiples of 8040 bytes.
+            cmd.AddInParameter("@message", new SqlString(_cm.Message), size: ((_cm.Message.Length / 8040) + (_cm.Message.Length % 8040 > 0 ? 1 : 0)) * 8040);
             for (int i = 0; i < _cm.Parents.Length; ++i)
                 cmd.AddInParameter("@pc" + i.ToString(), new SqlBinary((byte[])_cm.Parents[i]));
             return cmd;

@@ -55,10 +55,10 @@ USING (SELECT {1}) AS nt ON {2}
 WHEN NOT MATCHED THEN INSERT ({3}) VALUES ({4});
 ",
                     Tables.TableName_TreeTree,
-                    trtrCols.NameCustomList(",", c => String.Format("@trtr_{0}{1} AS [{0}]", c, i.ToString())),
+                    trtrCols.NameCustomList(",", c => String.Format("@tt_{0}{1} AS [{0}]", c, i.ToString())),
                     trtrCols.NameCustomList(" AND ", c => String.Format("(ct.[{0}] = nt.[{0}])", c)),
                     Tables.ColumnNames_TreeTree.NameCommaList(),
-                    "@treeid," + trtrCols.NameCustomList(",", c => String.Format("@trtr_{0}{1}", c, i.ToString()))
+                    "@treeid," + trtrCols.NameCustomList(",", c => String.Format("@tt_{0}{1}", c, i.ToString()))
                 );
             }
 
@@ -71,10 +71,10 @@ USING (SELECT {1}) AS nt ON {2}
 WHEN NOT MATCHED THEN INSERT ({3}) VALUES ({4});
 ",
                     Tables.TableName_TreeBlob,
-                    trblCols.NameCustomList(",", c => String.Format("@trbl_{0}{1} AS [{0}]", c, i.ToString())),
+                    trblCols.NameCustomList(",", c => String.Format("@tb_{0}{1} AS [{0}]", c, i.ToString())),
                     trblCols.NameCustomList(" AND ", c => String.Format("(ct.[{0}] = nt.[{0}])", c)),
                     Tables.ColumnNames_TreeBlob.NameCommaList(),
-                    "@treeid," + trblCols.NameCustomList(",", c => String.Format("@trbl_{0}{1}", c, i.ToString()))
+                    "@treeid," + trblCols.NameCustomList(",", c => String.Format("@tb_{0}{1}", c, i.ToString()))
                 );
             }
 
@@ -85,13 +85,13 @@ WHEN NOT MATCHED THEN INSERT ({3}) VALUES ({4});
             cmd.AddInParameter("@treeid", new SqlBinary((byte[])_tr.ID));
             for (int i = 0; i < _tr.Trees.Length; ++i)
             {
-                cmd.AddInParameter(String.Format("@trtr_linked_treeid{0}", i.ToString()), new SqlBinary((byte[])_tr.Trees[i].TreeID));
-                cmd.AddInParameter(String.Format("@trtr_name{0}", i.ToString()), new SqlString(_tr.Trees[i].Name));
+                cmd.AddInParameter(String.Format("@tt_linked_treeid{0}", i.ToString()), new SqlBinary((byte[])_tr.Trees[i].TreeID));
+                cmd.AddInParameter(String.Format("@tt_name{0}", i.ToString()), new SqlString(_tr.Trees[i].Name));
             }
             for (int i = 0; i < _tr.Blobs.Length; ++i)
             {
-                cmd.AddInParameter(String.Format("@trbl_linked_blobid{0}", i.ToString()), new SqlBinary((byte[])_tr.Blobs[i].BlobID));
-                cmd.AddInParameter(String.Format("@trbl_name{0}", i.ToString()), new SqlString(_tr.Blobs[i].Name));
+                cmd.AddInParameter(String.Format("@tb_linked_blobid{0}", i.ToString()), new SqlBinary((byte[])_tr.Blobs[i].BlobID));
+                cmd.AddInParameter(String.Format("@tb_name{0}", i.ToString()), new SqlString(_tr.Blobs[i].Name));
             }
 
             return cmd;

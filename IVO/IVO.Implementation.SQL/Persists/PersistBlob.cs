@@ -34,7 +34,8 @@ WHEN NOT MATCHED THEN INSERT ({2}) VALUES ({4});",
 
             var cmd = new SqlCommand(cmdText, cn);
             cmd.AddInParameter("@blobid", new SqlBinary((byte[])_bl.ID));
-            cmd.AddInParameter("@contents", new SqlBinary(_bl.Contents));
+            // TODO: chunked xactional update to [contents] in multiples of 8040 bytes.
+            cmd.AddInParameter("@contents", new SqlBinary(_bl.Contents), size: ((_bl.Contents.Length / 8040) + (_bl.Contents.Length % 8040 > 0 ? 1 : 0)) * 8040);
             return cmd;
         }
 

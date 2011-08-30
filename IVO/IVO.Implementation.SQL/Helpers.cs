@@ -60,18 +60,31 @@ namespace IVO.Implementation.SQL
             return prm;
         }
 
-        internal static SqlParameter AddInParameter(this SqlCommand cmd, string name, SqlBinary value)
+        internal static SqlParameter AddInParameter(this SqlCommand cmd, string name, SqlBinary value, int size = 20)
         {
             var prm = cmd.CreateParameter();
             prm.Direction = ParameterDirection.Input;
             prm.ParameterName = name;
             prm.SqlDbType = SqlDbType.Binary;
             prm.SqlValue = value;
+            prm.Size = size;
             cmd.Parameters.Add(prm);
             return prm;
         }
 
-        internal static SqlParameter AddInParameter(this SqlCommand cmd, string name, SqlString value)
+        internal static SqlParameter AddInParameterExactSized(this SqlCommand cmd, string name, SqlBinary value)
+        {
+            var prm = cmd.CreateParameter();
+            prm.Direction = ParameterDirection.Input;
+            prm.ParameterName = name;
+            prm.SqlDbType = SqlDbType.Binary;
+            prm.SqlValue = value;
+            prm.Size = value.Length;
+            cmd.Parameters.Add(prm);
+            return prm;
+        }
+
+        internal static SqlParameter AddInParameter(this SqlCommand cmd, string name, SqlString value, int size = 128)
         {
             var prm = cmd.CreateParameter();
             prm.Direction = ParameterDirection.Input;
