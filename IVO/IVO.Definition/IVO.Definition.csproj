@@ -41,7 +41,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Containers.tt</DependentUpon>
     </Compile>
+    <Compile Include="Exceptions\InvalidRelativePathException.cs" />
+    <Compile Include="Exceptions\InvalidAbsolutePathException.cs" />
     <Compile Include="Functional.cs" />
+    <Compile Include="Models\AbsolutePath.cs" />
+    <Compile Include="Models\RelativePath.cs" />
     <Compile Include="Repositories\IBlobRepository.cs" />
     <Compile Include="Repositories\ICommitRepository.cs" />
     <Compile Include="Repositories\IRefRepository.cs" />

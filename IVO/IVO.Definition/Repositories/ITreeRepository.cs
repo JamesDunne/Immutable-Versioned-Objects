@@ -19,17 +19,25 @@ namespace IVO.Definition.Repositories
         Task<Tree> PersistTree(TreeID rootid, TreeContainer trees);
 
         /// <summary>
-        /// Retrieves an entire tree structure starting from the root TreeID (<paramref name="rootid"/>).
-        /// </summary>
-        /// <param name="rootid">The TreeID of the tree's root to retrieve.</param>
-        /// <returns></returns>
-        Task<Tuple<TreeID, TreeContainer>> RetrieveTreeRecursively(TreeID rootid);
-
-        /// <summary>
         /// Deletes an entire tree structure starting from the root TreeID (<paramref name="rootid"/>).
         /// </summary>
         /// <param name="rootid">The TreeID of the tree's root to delete.</param>
         /// <returns></returns>
         Task<TreeID> DeleteTreeRecursively(TreeID rootid);
+
+        /// <summary>
+        /// Retrieves an entire tree structure starting from the root TreeID (<paramref name="rootid"/>).
+        /// </summary>
+        /// <param name="rootid">The TreeID of the tree's root to retrieve.</param>
+        /// <returns></returns>
+        Task<Tuple<TreeID, TreeContainer>> GetTreeRecursively(TreeID rootid);
+
+        /// <summary>
+        /// Gets a Tree object by its absolute path from the given root TreeID.
+        /// </summary>
+        /// <param name="rootid"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        Task<Tuple<TreeID, TreeContainer>> GetTreeRecursivelyFromPath(TreeID rootid, AbsolutePath path);
     }
 }

@@ -61,6 +61,7 @@
     <Compile Include="Queries\QueryCommitsRecursively.cs" />
     <Compile Include="Queries\QueryRef.cs" />
     <Compile Include="Queries\QueryTag.cs" />
+    <Compile Include="Queries\QueryTreeByPath.cs" />
     <Compile Include="Queries\QueryTreeRecursively.cs" />
     <Compile Include="Queries\QueryTreesExist.cs" />
     <Compile Include="Tables.cs" />

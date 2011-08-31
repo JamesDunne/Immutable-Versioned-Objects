@@ -9,19 +9,33 @@ using IVO.Definition.Models;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryTreeRecursively : IComplexDataQuery<Tuple<TreeID, TreeContainer>>
+    public class QueryTreeByPath : IComplexDataQuery<Tuple<TreeID, TreeContainer>>
     {
-        private TreeID _id;
+        private TreeID _rootid;
+        private AbsolutePath _path;
 
-        public QueryTreeRecursively(TreeID id)
+        public QueryTreeByPath(TreeID rootid, AbsolutePath path)
         {
-            this._id = id;
+            this._rootid = rootid;
+            this._path = path;
         }
 
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
             string pkName = Tables.TablePKs_Tree.Single();
             string cmdText =
+                // First, find the @treeid by path from the root TreeID:
+@";WITH rec AS (
+    SELECT      CONVERT(binary(20), NULL) AS treeid, tr.treeid AS linked_treeid, CONVERT(nvarchar(128), NULL) COLLATE SQL_Latin1_General_CP1_CS_AS AS name, CONVERT(NVARCHAR(256), N'/') COLLATE SQL_Latin1_General_CP1_CS_AS AS [path]
+    FROM        [dbo].[Tree] tr
+    WHERE       tr.treeid = @rootid
+    UNION ALL
+    SELECT      tr.treeid, tr.linked_treeid, tr.name, CONVERT(NVARCHAR(256), parent.[path] + tr.name + N'/') COLLATE SQL_Latin1_General_CP1_CS_AS AS [path]
+    FROM        [dbo].[TreeTree] tr
+    JOIN        rec parent ON parent.linked_treeid = tr.treeid
+)
+SELECT  @treeid = [tr].linked_treeid FROM rec tr WHERE tr.[path] = @path;" +
+                // Next, query the Tree recursively from there:
 @";WITH Trees AS (
     SELECT      CONVERT(binary(20), NULL) AS treeid, tr.treeid AS linked_treeid, CONVERT(nvarchar(128), NULL) COLLATE SQL_Latin1_General_CP1_CS_AS AS name
     FROM        [dbo].[Tree] tr
@@ -40,13 +54,17 @@ FROM    Trees tr
 LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@treeid", new SqlBinary((byte[])this._id));
+            cmd.AddInParameter("@rootid", new SqlBinary((byte[])this._rootid));
+            cmd.AddInParameter("@path", new SqlString(this._path.ToString() + AbsolutePath.PathSeparatorString));
+            cmd.AddOutParameter("@treeid", System.Data.SqlDbType.Binary, 20);
             return cmd;
         }
 
         public Tuple<TreeID, TreeContainer> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             Dictionary<TreeID, Tree.Builder> trees = new Dictionary<TreeID, Tree.Builder>(expectedCount);
+
+            TreeID? root = null;
 
             // Iterate through rows of the recursive query, assuming ordering of rows guarantees tree depth locality.
             while (dr.Read())
@@ -61,6 +79,9 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                 TreeID? linked_treeid = blinked_treeid.IsNull ? (TreeID?)null : (TreeID)blinked_treeid.Value;
 
                 TreeID pullFor = treeid.HasValue ? treeid.Value : linked_treeid.Value;
+
+                // Use the first row as the root:
+                if (!root.HasValue) root = linked_treeid.Value;
 
                 Tree.Builder curr;
                 if (!trees.TryGetValue(pullFor, out curr))
@@ -105,9 +126,12 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                     blobTree.Blobs.Add(new TreeBlobReference.Builder(blobname.Value, (BlobID)linked_blobid.Value));
             }
 
+            // If no root assigned, then no tree retrieved:
+            if (!root.HasValue) return null;
+
             // Return the final result with immutable objects:
             return new Tuple<TreeID, TreeContainer>(
-                this._id,
+                root.Value,
                 new TreeContainer(
                     trees.Select(kv =>
                         // Verify that the retrieved ID is equivalent to the constructed ID:

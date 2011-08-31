@@ -25,9 +25,7 @@ namespace TestHarness
             //pr.TestAsynqQuery();
             //pr.TestPersistBlob();
             //pr.TestQueryBlobs();
-            //pr.TestLargeBlobPersistence();
-
-#if true
+#if false
             // Create a 3-depth commit tree up from HEAD:
             for (int i= 0; i < 3; ++i)
             {
@@ -41,6 +39,8 @@ namespace TestHarness
             // Get the commit tree recursively:
             pr.TestGetCommitTree();
 #endif
+            //pr.TestLargeBlobPersistence();
+            pr.TestQueryByPath();
 
 #if false
             Console.WriteLine("Press a key.");
@@ -321,7 +321,7 @@ namespace TestHarness
             Console.WriteLine("Retrieving TreeID {0} recursively...", rootid);
 
             ITreeRepository repo = new TreeRepository(db);
-            var treeTask = repo.RetrieveTreeRecursively(rootid);
+            var treeTask = repo.GetTreeRecursively(rootid);
             treeTask.Wait();
 
             // Recursively display trees:
@@ -455,7 +455,7 @@ namespace TestHarness
 
             if (cm.IsComplete)
             {
-                Console.WriteLine("{0}complete {1}:  ({2})", new string(' ', (depth - 1) * 2), cm.ID.ToString().Substring(0, 14), String.Join(",", cm.Parents.Select(id => id.ToString().Substring(0, 14))));
+                Console.WriteLine("{0}c {1}:  ({2})", new string(' ', (depth - 1) * 2), cm.ID.ToString().Substring(0, 10), String.Join(",", cm.Parents.Select(id => id.ToString().Substring(0, 10))));
                 foreach (CommitID parentID in cm.Parents)
                 {
                     RecursivePrint(parentID, commits, depth + 1);
@@ -463,7 +463,7 @@ namespace TestHarness
             }
             else
             {
-                Console.WriteLine("{0}partial  {1}:  ?", new string(' ', (depth - 1) * 2), cm.ID.ToString().Substring(0, 14));
+                Console.WriteLine("{0}p  {1}:  ?", new string(' ', (depth - 1) * 2), cm.ID.ToString().Substring(0, 10));
             }
         }
 
@@ -497,6 +497,22 @@ namespace TestHarness
                 sw.ElapsedMilliseconds,
                 (double)count / (double)sw.ElapsedMilliseconds * 1000d,
                 (double)(count * 8040) / (double)sw.ElapsedMilliseconds * 1000d);
+        }
+
+        private void TestQueryByPath()
+        {
+            var db = getDataContext();
+            
+            ICommitRepository cmrepo = new CommitRepository(db);
+            ITreeRepository trrepo = new TreeRepository(db);
+            
+            var task = cmrepo.GetCommitByRef("HEAD").ContinueWith(tRef =>
+            {
+                return trrepo.GetTreeRecursivelyFromPath(tRef.Result.Item2.TreeID, new AbsolutePath("src", "Persists"));
+            }).Unwrap();
+
+            task.Wait();
+            RecursivePrint(task.Result.Item1, task.Result.Item2);
         }
     }
 }

@@ -80,7 +80,7 @@ namespace IVO.Implementation.SQL
                 }).Unwrap();
         }
 
-        public Task<Tuple<TreeID, TreeContainer>> RetrieveTreeRecursively(TreeID rootid)
+        public Task<Tuple<TreeID, TreeContainer>> GetTreeRecursively(TreeID rootid)
         {
             return db.ExecuteListQueryAsync(new QueryTreeRecursively(rootid));
         }
@@ -88,6 +88,11 @@ namespace IVO.Implementation.SQL
         public Task<TreeID> DeleteTreeRecursively(TreeID rootid)
         {
             throw new NotImplementedException();
+        }
+
+        public Task<Tuple<TreeID, TreeContainer>> GetTreeRecursivelyFromPath(TreeID rootid, AbsolutePath path)
+        {
+            return db.ExecuteSingleQueryAsync(new QueryTreeByPath(rootid, path));
         }
     }
 }
