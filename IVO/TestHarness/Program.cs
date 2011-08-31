@@ -465,10 +465,11 @@ namespace TestHarness
             var db = getDataContext();
             IBlobRepository blrepo = new BlobRepository(db);
 
-            Random rnd = new Random(0x5555AACC);
+            Random rnd = new Random(0x5555AAC1);
 
-            const int count = 100;
+            const int count = 2000;
 
+            Console.WriteLine("Constructing {0} blobs...", count);
             Blob[] bls = new Blob[count];
             for (int i = 0; i < count; ++i)
             {
@@ -479,10 +480,15 @@ namespace TestHarness
             }
 
             Console.WriteLine("Persisting {0} blobs...", count);
-            Task<Blob>[] tasks = blrepo.PersistBlobs(bls);
+            Stopwatch sw = Stopwatch.StartNew();
+            Task<Blob[]> task = blrepo.PersistBlobs(bls);
             Console.WriteLine("Waiting...");
-            Task.WaitAll(tasks);
-            Console.WriteLine("Complete");
+            task.Wait();
+            sw.Stop();
+            Console.WriteLine("Completed in {0} ms, {1} blobs/sec, {2} bytes/sec",
+                sw.ElapsedMilliseconds,
+                (double)count / (double)sw.ElapsedMilliseconds * 1000d,
+                (double)(count * 8040) / (double)sw.ElapsedMilliseconds * 1000d);
         }
     }
 }
