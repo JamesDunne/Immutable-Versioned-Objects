@@ -9,6 +9,11 @@ namespace IVO.Definition.Models
 {
     public sealed partial class Tag
     {
+        /// <summary>
+        /// TODO: determine if this is thread-safe?
+        /// </summary>
+        private static readonly SHA1 sha1 = SHA1.Create();
+
         private static TagID computeID(Builder b)
         {
             int initialCapacity = "commit ".Length + TagID.ByteArrayLength;
@@ -28,7 +33,7 @@ namespace IVO.Definition.Models
                 bw.Flush();
 
                 // SHA-1 the data:
-                var sha1 = SHA1.Create();
+                //var sha1 = SHA1.Create();
                 byte[] hash = sha1.ComputeHash(ms.ToArray());
                 return new TagID(hash);
             }
@@ -62,6 +67,11 @@ namespace IVO.Definition.Models
 
     public sealed partial class Commit : ICommit
     {
+        /// <summary>
+        /// TODO: determine if this is thread-safe?
+        /// </summary>
+        private static readonly SHA1 sha1 = SHA1.Create();
+
         public bool IsComplete
         {
             get { return true; }
@@ -101,7 +111,7 @@ namespace IVO.Definition.Models
                 bw.Flush();
 
                 // SHA-1 the data:
-                var sha1 = SHA1.Create();
+                //var sha1 = SHA1.Create();
                 byte[] hash = sha1.ComputeHash(ms.ToArray());
                 return new CommitID(hash);
             }
@@ -110,6 +120,11 @@ namespace IVO.Definition.Models
 
     public sealed partial class Tree
     {
+        /// <summary>
+        /// TODO: determine if this is thread-safe?
+        /// </summary>
+        private static readonly SHA1 sha1 = SHA1.Create();
+
         public static SortedList<string, Either<TreeTreeReference, TreeBlobReference>> ComputeChildList(IEnumerable<TreeTreeReference> treeRefs, IEnumerable<TreeBlobReference> blobRefs)
         {
             // Sort refs by name:
@@ -173,7 +188,7 @@ namespace IVO.Definition.Models
                 bw.Flush();
 
                 // SHA-1 the data:
-                var sha1 = SHA1.Create();
+                //var sha1 = SHA1.Create();
                 byte[] hash = sha1.ComputeHash(ms.ToArray());
                 return new TreeID(hash);
             }
@@ -182,13 +197,18 @@ namespace IVO.Definition.Models
 
     public sealed partial class Blob
     {
+        /// <summary>
+        /// TODO: determine if this is thread-safe?
+        /// </summary>
+        private static readonly SHA1 sha1 = SHA1.Create();
+
         private static BlobID computeID(Builder m)
         {
             // TODO: g-zip compress?
             byte[] buf = m.Contents;
 
             // SHA-1 the data:
-            var sha1 = SHA1.Create();
+            //var sha1 = SHA1.Create();
             byte[] hash = sha1.ComputeHash(buf);
             return new BlobID(hash);
         }

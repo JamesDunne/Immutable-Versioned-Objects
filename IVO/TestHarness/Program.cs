@@ -42,8 +42,10 @@ namespace TestHarness
             pr.TestGetCommitTree();
 #endif
 
+#if false
             Console.WriteLine("Press a key.");
             Console.ReadLine();
+#endif
         }
 
         DataContext getDataContext()
