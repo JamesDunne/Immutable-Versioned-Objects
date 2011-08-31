@@ -25,7 +25,9 @@ namespace TestHarness
             //pr.TestAsynqQuery();
             //pr.TestPersistBlob();
             //pr.TestQueryBlobs();
+            pr.TestLargeBlobPersistence();
 
+#if false
             // Create a 3-depth commit tree up from HEAD:
             for (int i= 0; i < 3; ++i)
             {
@@ -38,6 +40,7 @@ namespace TestHarness
 
             // Get the commit tree recursively:
             pr.TestGetCommitTree();
+#endif
 
             Console.WriteLine("Press a key.");
             Console.ReadLine();
@@ -455,6 +458,31 @@ namespace TestHarness
             {
                 Console.WriteLine("{0}partial  {1}:  ?", new string(' ', (depth - 1) * 2), cm.ID.ToString().Substring(0, 14));
             }
+        }
+
+        void TestLargeBlobPersistence()
+        {
+            var db = getDataContext();
+            IBlobRepository blrepo = new BlobRepository(db);
+
+            Random rnd = new Random(0x5555AACC);
+
+            const int count = 100;
+
+            Blob[] bls = new Blob[count];
+            for (int i = 0; i < count; ++i)
+            {
+                byte[] c = new byte[8040];
+                rnd.NextBytes(c);
+
+                bls[i] = new Blob.Builder(c);
+            }
+
+            Console.WriteLine("Persisting {0} blobs...", count);
+            Task<Blob>[] tasks = blrepo.PersistBlobs(bls);
+            Console.WriteLine("Waiting...");
+            Task.WaitAll(tasks);
+            Console.WriteLine("Complete");
         }
     }
 }

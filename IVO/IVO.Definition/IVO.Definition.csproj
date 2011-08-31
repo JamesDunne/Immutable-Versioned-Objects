@@ -42,6 +42,7 @@
       <DependentUpon>Containers.tt</DependentUpon>
     </Compile>
     <Compile Include="Functional.cs" />
+    <Compile Include="Repositories\IBlobRepository.cs" />
     <Compile Include="Repositories\ICommitRepository.cs" />
     <Compile Include="Repositories\IRefRepository.cs" />
     <Compile Include="Repositories\ITagRepository.cs" />
