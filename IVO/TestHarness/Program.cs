@@ -45,6 +45,8 @@ namespace TestHarness
 #if false
             Console.WriteLine("Press a key.");
             Console.ReadLine();
+#else
+            Console.WriteLine("Done.");
 #endif
         }
 
