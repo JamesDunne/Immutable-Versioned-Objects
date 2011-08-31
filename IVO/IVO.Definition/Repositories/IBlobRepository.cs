@@ -22,13 +22,13 @@ namespace IVO.Definition.Repositories
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        Task<BlobID>[] DeleteBlobs(params BlobID[] ids);
+        Task<BlobID[]> DeleteBlobs(params BlobID[] ids);
 
         /// <summary>
         /// Retrieves multiple Blobs by BlobIDs asynchronously.
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        Task<Blob>[] GetBlobs(params BlobID[] ids);
+        Task<Blob[]> GetBlobs(params BlobID[] ids);
     }
 }

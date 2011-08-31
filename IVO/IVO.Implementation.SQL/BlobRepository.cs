@@ -49,20 +49,20 @@ namespace IVO.Implementation.SQL
             return wait;
         }
 
-        public Task<BlobID>[] DeleteBlobs(params BlobID[] ids)
+        public Task<BlobID[]> DeleteBlobs(params BlobID[] ids)
         {
             Task<BlobID>[] tasks = new Task<BlobID>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
                 tasks[i] = db.ExecuteNonQueryAsync(new DestroyBlob(ids[i]));
-            return tasks;
+            return Task.Factory.ContinueWhenAll(tasks, ts => ts.Select(t => t.Result).ToArray(ids.Length));
         }
 
-        public Task<Blob>[] GetBlobs(params BlobID[] ids)
+        public Task<Blob[]> GetBlobs(params BlobID[] ids)
         {
             Task<Blob>[] tasks = new Task<Blob>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
                 tasks[i] = db.ExecuteSingleQueryAsync(new QueryBlob(ids[i]));
-            return tasks;
+            return Task.Factory.ContinueWhenAll(tasks, ts => ts.Select(t => t.Result).ToArray(ids.Length));
         }
     }
 }
