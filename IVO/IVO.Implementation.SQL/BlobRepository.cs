@@ -23,30 +23,27 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public Task<Blob[]> PersistBlobs(params Blob[] blobs)
+        public Task<BlobContainer> PersistBlobs(BlobContainer blobs)
         {
-            BlobID[] allIDs = blobs.Select(b => b.ID).ToArray(blobs.Length);
-            var blobLookup = blobs.ToDictionary(b => b.ID);
-
-            var wait = db.ExecuteListQueryAsync(new QueryBlobsExist(blobs.Select(b => b.ID)))
-                .ContinueWith((existBlobs) =>
+            return
+                db.ExecuteListQueryAsync(new QueryBlobsExist(blobs.Keys), expectedCapacity: blobs.Count)
+                .ContinueWith(existBlobs =>
                 {
                     // Find the BlobIDs to persist:
-                    var blobsToPersist = allIDs.Except(existBlobs.Result).ToList(allIDs.Length - existBlobs.Result.Count);
+                    var blobsToPersist = blobs.Keys.Except(existBlobs.Result).ToList(blobs.Count - existBlobs.Result.Count);
 
                     // Early-out case:
                     if (blobsToPersist.Count == 0)
-                        return Task.Factory.StartNew(() => new Blob[0]);
+                        return Task.Factory.StartNew(() => blobs);
                     
                     // Start persisting blobs:
                     Task<Blob>[] tasks = new Task<Blob>[blobsToPersist.Count];
                     for (int i = 0; i < blobsToPersist.Count; ++i)
-                        tasks[i] = db.ExecuteNonQueryAsync(new PersistBlob(blobLookup[blobsToPersist[i]]));
+                        tasks[i] = db.ExecuteNonQueryAsync(new PersistBlob(blobs[blobsToPersist[i]]));
 
                     // When all persists are complete, roll up the results from all the tasks into a single array:
-                    return Task.Factory.ContinueWhenAll(tasks, ts => ts.Select(t => t.Result).ToArray(blobsToPersist.Count));
+                    return Task.Factory.ContinueWhenAll(tasks, ts => blobs);
                 }).Unwrap();
-            return wait;
         }
 
         public Task<BlobID[]> DeleteBlobs(params BlobID[] ids)

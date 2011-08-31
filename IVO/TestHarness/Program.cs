@@ -25,9 +25,9 @@ namespace TestHarness
             //pr.TestAsynqQuery();
             //pr.TestPersistBlob();
             //pr.TestQueryBlobs();
-            pr.TestLargeBlobPersistence();
+            //pr.TestLargeBlobPersistence();
 
-#if false
+#if true
             // Create a 3-depth commit tree up from HEAD:
             for (int i= 0; i < 3; ++i)
             {
@@ -288,10 +288,15 @@ namespace TestHarness
 
             var db = getDataContext();
 
+            IBlobRepository blrepo = new BlobRepository(db);
             ITreeRepository trrepo = new TreeRepository(db);
 
             // Persist the tree and its blobs:
-            var wait = trrepo.PersistTree(trRoot.ID, trees, blobs);
+            var wait =
+                blrepo.PersistBlobs(blobs)
+                .ContinueWith(tBlobs => trrepo.PersistTree(trRoot.ID, trees))
+                .Unwrap();
+
             wait.Wait();
 
             // Make sure we got back what's expected of the API:
@@ -480,10 +485,11 @@ namespace TestHarness
 
                 bls[i] = new Blob.Builder(c);
             }
+            BlobContainer blobs = new BlobContainer(bls);
 
             Console.WriteLine("Persisting {0} blobs...", count);
             Stopwatch sw = Stopwatch.StartNew();
-            Task<Blob[]> task = blrepo.PersistBlobs(bls);
+            Task<BlobContainer> task = blrepo.PersistBlobs(blobs);
             Console.WriteLine("Waiting...");
             task.Wait();
             sw.Stop();

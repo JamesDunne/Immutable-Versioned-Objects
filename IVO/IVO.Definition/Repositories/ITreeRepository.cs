@@ -15,9 +15,8 @@ namespace IVO.Definition.Repositories
         /// </summary>
         /// <param name="rootid">The root TreeID to start persisting from.</param>
         /// <param name="trees">A container to find the Tree objects in.</param>
-        /// <param name="blobs">A container of new Blobs to persist per each Tree.</param>
-        /// <returns></returns>
-        Task<Tree> PersistTree(TreeID rootid, TreeContainer trees, BlobContainer blobs);
+        /// <returns>The root Tree object.</returns>
+        Task<Tree> PersistTree(TreeID rootid, TreeContainer trees);
 
         /// <summary>
         /// Retrieves an entire tree structure starting from the root TreeID (<paramref name="rootid"/>).

@@ -15,7 +15,7 @@ namespace IVO.Definition.Repositories
         /// </summary>
         /// <param name="blobs"></param>
         /// <returns></returns>
-        Task<Blob[]> PersistBlobs(params Blob[] blobs);
+        Task<BlobContainer> PersistBlobs(BlobContainer blobs);
 
         /// <summary>
         /// Deletes multiple Blobs by BlobIDs asynchronously.

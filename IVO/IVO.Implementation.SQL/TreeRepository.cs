@@ -24,41 +24,13 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public Task<Tree> PersistTree(TreeID rootid, TreeContainer trees, BlobContainer blobs)
+        public Task<Tree> PersistTree(TreeID rootid, TreeContainer trees)
         {
-            // Start queries to check what exists already:
-            var existBlobs = db.ExecuteListQueryAsync(new QueryBlobsExist(blobs.Keys), expectedCapacity: blobs.Count);
-            var existTrees = db.ExecuteListQueryAsync(new QueryTreesExist(trees.Keys), expectedCapacity: trees.Count);
-
-            Debug.WriteLine("{0,3}: Awaiting existBlobs...", Task.CurrentId);
-            return existBlobs.ContinueWith((blTask) =>
-            {
-                Debug.WriteLine("{0,3}: existBlobs complete...", Task.CurrentId);
-
-                // First, persist blobs that don't exist:
-                //Console.WriteLine("Waiting for blob exists...");
-                BlobID[] blobIDsToPersist = blobs.Keys.Except(blTask.Result).ToArray();
-
-                // Blobs may be persisted in any order; there are no dependencies between blobs:
-                Task[] waiters = new Task[blobIDsToPersist.Length + 1];
-                for (int i = 0; i < blobIDsToPersist.Length; ++i)
+            return
+                // Start a query to check what Trees exist already:
+                db.ExecuteListQueryAsync(new QueryTreesExist(trees.Keys), expectedCapacity: trees.Count)
+                .ContinueWith(existTrees =>
                 {
-                    BlobID id = blobIDsToPersist[i];
-
-                    Debug.WriteLine("{0,3}: PERSIST blob {1}", Task.CurrentId, id.ToString());
-                    waiters[i] = db.ExecuteNonQueryAsync(new PersistBlob(blobs[id]));
-                }
-
-                // Also wait for the existTrees query to come back:
-                waiters[waiters.Length - 1] = existTrees;
-
-                Debug.WriteLine("{0,3}: Awaiting existsTrees and any blob persists...", Task.CurrentId);
-                // When everything above completes, do this:
-                return Task.Factory.ContinueWhenAll(waiters, (tasks) =>
-                {
-                    // Next, persist trees that don't exist:
-                    Debug.WriteLine("{0,3}: existsTrees and blob persists complete.", Task.CurrentId);
-
                     // Trees must be created in dependency order!
                     HashSet<TreeID> treeIDsToPersistSet = new HashSet<TreeID>(trees.Keys.Except(existTrees.Result));
                     Stack<TreeID> treeIDsToPersist = new Stack<TreeID>(treeIDsToPersistSet.Count);
@@ -106,7 +78,6 @@ namespace IVO.Implementation.SQL
                         return dummy;
                     }
                 }).Unwrap();
-            }).Unwrap();
         }
 
         public Task<Tuple<TreeID, TreeContainer>> RetrieveTreeRecursively(TreeID rootid)
