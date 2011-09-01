@@ -6,6 +6,7 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Containers;
 using IVO.Definition.Models;
+using IVO.Definition.Exceptions;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -135,7 +136,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                 new TreeContainer(
                     trees.Select(kv =>
                         // Verify that the retrieved ID is equivalent to the constructed ID:
-                        ((Tree)kv.Value).With(tr => tr.Assert(kv.Key == tr.ID))
+                        ((Tree)kv.Value).Assert(tr => kv.Key == tr.ID, tr => new TreeIDMismatchException("Constructed TreeID {0} does not match retrieved TreeID {1}", tr.ID, kv.Key))
                     )
                 )
             );

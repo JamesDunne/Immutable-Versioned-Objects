@@ -12,16 +12,27 @@ namespace IVO.Definition.Models
         public const char PathSeparator = '/';
         public const string PathSeparatorString = "/";
 
+        public static readonly char[] InvalidNameCharacters = new char[] { PathSeparator, ':', '$', '|', '&', '?', '%' };
+        internal static readonly HashSet<char> invalidCharSet = new HashSet<char>(InvalidNameCharacters);
+
         private ReadOnlyCollection<string> _pathComponents;
 
         public AbsolutePath(params string[] pathComponents)
         {
-            this._pathComponents = pathComponents.ToList(pathComponents.Length).AsReadOnly();
+            this._pathComponents =
+                pathComponents
+                .Where(a => a.All(ch => !((!invalidCharSet.Contains(ch)).Assert(b => b, b => new InvalidAbsolutePathException("One of the path components, '{0}', contains an invalid character '{1}'", a, ch)))))
+                .ToList(pathComponents.Length)
+                .AsReadOnly();
         }
 
         public AbsolutePath(IEnumerable<string> pathComponents)
         {
-            this._pathComponents = pathComponents.ToList().AsReadOnly();
+            this._pathComponents =
+                pathComponents
+                .Where(a => a.All(ch => !((!invalidCharSet.Contains(ch)).Assert(b => b, b => new InvalidAbsolutePathException("One of the path components, '{0}', contains an invalid character '{1}'", a, ch)))))
+                .ToList()
+                .AsReadOnly();
         }
 
         public ReadOnlyCollection<string> GetPathComponents() { return this._pathComponents; }

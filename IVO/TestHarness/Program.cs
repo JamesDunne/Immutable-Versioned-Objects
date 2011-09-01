@@ -489,8 +489,18 @@ namespace TestHarness
             var rf = await cmrepo.GetCommitByRef("HEAD");
             if (rf == null) return;
 
-            var tree = await trrepo.GetTreeRecursivelyFromPath(rf.Item2.TreeID, new AbsolutePath("src", "Persists"));
-            RecursivePrint(tree.Item1, tree.Item2);
+            try
+            {
+                var tree = await trrepo.GetTreeRecursivelyFromPath(rf.Item2.TreeID, new AbsolutePath("src", "Persists"));
+                if (tree != null)
+                {
+                    RecursivePrint(tree.Item1, tree.Item2);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e);
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ using IVO.Definition.Models;
 using System.Collections.Generic;
 using IVO.Definition.Containers;
 using System.Diagnostics;
+using IVO.Definition.Exceptions;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -97,7 +98,7 @@ WHERE   cm.depth <= @depth";
                 new ICommitContainer(
                     commits.Select(kv =>
                         // Verify that the retrieved ID is equivalent to the constructed ID:
-                        (ICommit) ((Commit)kv.Value).With(cm => cm.Assert(kv.Key == cm.ID))
+                        (ICommit) ((Commit)kv.Value).Assert(cm => kv.Key == cm.ID, cm => new CommitIDMismatchException("Constructed CommitID {0} does not match retrieved CommitID {1}", cm.ID, kv.Key))
                     ).Concat(
                         // Add the partial commit if there is one:
                         (cmPartial == null)

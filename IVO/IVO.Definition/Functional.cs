@@ -94,9 +94,10 @@ namespace System
         /// <param name="value"></param>
         /// <param name="condition"></param>
         /// <returns></returns>
-        public static T Assert<T>(this T value, bool condition)
+        public static T Assert<T>(this T value, Func<T, bool> condition, Func<T, Exception> getException)
         {
-            if (!condition) throw new ArgumentException("test", "Assertion failure");
+            if (!condition(value))
+                throw getException(value);
             return value;
         }
     }

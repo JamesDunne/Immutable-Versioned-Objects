@@ -41,6 +41,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Containers.tt</DependentUpon>
     </Compile>
+    <Compile Include="Exceptions\CommitIDMistmatchException.cs" />
+    <Compile Include="Exceptions\TreeIDMistmatchException.cs" />
     <Compile Include="Exceptions\InvalidRelativePathException.cs" />
     <Compile Include="Exceptions\InvalidAbsolutePathException.cs" />
     <Compile Include="Functional.cs" />
