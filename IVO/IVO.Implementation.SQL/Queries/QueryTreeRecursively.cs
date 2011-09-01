@@ -112,7 +112,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                 new TreeContainer(
                     trees.Select(kv =>
                         // Verify that the retrieved ID is equivalent to the constructed ID:
-                        ((Tree)kv.Value).Assert(tr => kv.Key == tr.ID, tr => new TreeIDMismatchException("Constructed TreeID {0} does not match retrieved TreeID {1}", tr.ID, kv.Key))
+                        ((Tree)kv.Value).Assert(tr => kv.Key == tr.ID, tr => new TreeIDMismatchException(tr.ID, kv.Key))
                     )
                 )
             );

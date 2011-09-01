@@ -4,6 +4,7 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
+using IVO.Definition.Exceptions;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -40,7 +41,7 @@ namespace IVO.Implementation.SQL.Queries
             );
 
             Blob bl = b;
-            if (bl.ID != id) throw new InvalidOperationException();
+            if (bl.ID != id) throw new BlobIDMismatchException(bl.ID, id);
 
             return bl;
         }

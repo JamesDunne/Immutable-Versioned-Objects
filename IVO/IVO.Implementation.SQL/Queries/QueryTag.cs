@@ -4,6 +4,8 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
+using IVO.Definition.Exceptions;
+using IVO.Definition;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -69,7 +71,7 @@ namespace IVO.Implementation.SQL.Queries
             );
 
             Tag tg = b;
-            if (tg.ID != id) throw new InvalidOperationException();
+            if (tg.ID != id) throw new TagIDMismatchException(tg.ID, id);
 
             return tg;
         }

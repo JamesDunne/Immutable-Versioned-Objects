@@ -62,11 +62,9 @@ namespace IVO.Implementation.SQL
 
                 Debug.WriteLine("{0,3}: PERSIST tree {1}", Task.CurrentId, id.ToString());
 
-                if (runner == null) runner = db.ExecuteNonQueryAsync(new PersistTree(trees[id]));
-                else runner = runner.ContinueWith(r => db.ExecuteNonQueryAsync(new PersistTree(trees[id]))).Unwrap();
+                runner = db.ExecuteNonQueryAsync(new PersistTree(trees[id]));
+                await runner;
             }
-
-            if (runner != null) await runner;
 
             return trees[rootid];
         }

@@ -98,7 +98,7 @@ WHERE   cm.depth <= @depth";
                 new ICommitContainer(
                     commits.Select(kv =>
                         // Verify that the retrieved ID is equivalent to the constructed ID:
-                        (ICommit) ((Commit)kv.Value).Assert(cm => kv.Key == cm.ID, cm => new CommitIDMismatchException("Constructed CommitID {0} does not match retrieved CommitID {1}", cm.ID, kv.Key))
+                        (ICommit) ((Commit)kv.Value).Assert(cm => kv.Key == cm.ID, cm => new CommitIDMismatchException(cm.ID, kv.Key))
                     ).Concat(
                         // Add the partial commit if there is one:
                         (cmPartial == null)

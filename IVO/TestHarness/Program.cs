@@ -34,7 +34,7 @@ namespace TestHarness
             pr.TestLargeBlobPersistence().Wait();
             pr.TestQueryByPath().Wait();
 
-#if true
+#if false
             Console.WriteLine("Press a key.");
             Console.ReadLine();
 #else
@@ -455,7 +455,7 @@ namespace TestHarness
 
             Random rnd = new Random(0x5555AAC0);
 
-            const int count = 2000;
+            const int count = 4000;
 
             Console.WriteLine("Constructing {0} blobs...", count);
             Blob[] bls = new Blob[count];

@@ -23,43 +23,45 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public Task<BlobContainer> PersistBlobs(BlobContainer blobs)
+        public async Task<BlobContainer> PersistBlobs(BlobContainer blobs)
         {
-            return
-                db.ExecuteListQueryAsync(new QueryBlobsExist(blobs.Keys), expectedCapacity: blobs.Count)
-                .ContinueWith(existBlobs =>
-                {
-                    // Find the BlobIDs to persist:
-                    var blobsToPersist = blobs.Keys.Except(existBlobs.Result).ToList(blobs.Count - existBlobs.Result.Count);
+            var existBlobs = await db.ExecuteListQueryAsync(new QueryBlobsExist(blobs.Keys), expectedCapacity: blobs.Count);
 
-                    // Early-out case:
-                    if (blobsToPersist.Count == 0)
-                        return Task.Factory.StartNew(() => blobs);
-                    
-                    // Start persisting blobs:
-                    Task<Blob>[] tasks = new Task<Blob>[blobsToPersist.Count];
-                    for (int i = 0; i < blobsToPersist.Count; ++i)
-                        tasks[i] = db.ExecuteNonQueryAsync(new PersistBlob(blobs[blobsToPersist[i]]));
+            // Find the BlobIDs to persist:
+            var blobsToPersist = blobs.Keys.Except(existBlobs).ToList(blobs.Count - existBlobs.Count);
 
-                    // When all persists are complete, roll up the results from all the tasks into a single array:
-                    return Task.Factory.ContinueWhenAll(tasks, ts => blobs);
-                }).Unwrap();
+            // Early-out case:
+            if (blobsToPersist.Count == 0)
+                return blobs;
+
+            // Start persisting blobs:
+            Task<Blob>[] tasks = new Task<Blob>[blobsToPersist.Count];
+            for (int i = 0; i < blobsToPersist.Count; ++i)
+                tasks[i] = db.ExecuteNonQueryAsync(new PersistBlob(blobs[blobsToPersist[i]]));
+
+            // When all persists are complete, roll up the results from all the tasks into a single array:
+            await TaskEx.WhenAll(tasks);
+            return blobs;
         }
 
-        public Task<BlobID[]> DeleteBlobs(params BlobID[] ids)
+        public async Task<BlobID[]> DeleteBlobs(params BlobID[] ids)
         {
             Task<BlobID>[] tasks = new Task<BlobID>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
                 tasks[i] = db.ExecuteNonQueryAsync(new DestroyBlob(ids[i]));
-            return Task.Factory.ContinueWhenAll(tasks, ts => ts.Select(t => t.Result).ToArray(ids.Length));
+
+            var blobIDs = await TaskEx.WhenAll(tasks);
+            return blobIDs;
         }
 
-        public Task<Blob[]> GetBlobs(params BlobID[] ids)
+        public async Task<Blob[]> GetBlobs(params BlobID[] ids)
         {
             Task<Blob>[] tasks = new Task<Blob>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
                 tasks[i] = db.ExecuteSingleQueryAsync(new QueryBlob(ids[i]));
-            return Task.Factory.ContinueWhenAll(tasks, ts => ts.Select(t => t.Result).ToArray(ids.Length));
+
+            var blobs = await TaskEx.WhenAll(tasks);
+            return blobs;
         }
     }
 }

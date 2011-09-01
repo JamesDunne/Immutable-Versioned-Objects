@@ -42,6 +42,7 @@
       <DependentUpon>Containers.tt</DependentUpon>
     </Compile>
     <Compile Include="Exceptions\CommitIDMistmatchException.cs" />
+    <Compile Include="Exceptions\BlobIDMistmatchException.cs" />
     <Compile Include="Exceptions\TreeIDMistmatchException.cs" />
     <Compile Include="Exceptions\InvalidRelativePathException.cs" />
     <Compile Include="Exceptions\InvalidAbsolutePathException.cs" />
@@ -53,6 +54,7 @@
     <Compile Include="Repositories\IRefRepository.cs" />
     <Compile Include="Repositories\ITagRepository.cs" />
     <Compile Include="Repositories\ITreeRepository.cs" />
+    <Compile Include="Exceptions\TagIDMismatchException.cs" />
     <None Include="Containers\Containers.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Containers.generated.cs</LastGenOutput>

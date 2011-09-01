@@ -50,3 +50,16 @@ namespace System.Linq
         }
     }
 }
+
+namespace System.Collections.Generic
+{
+    public static class CollectionExtensions
+    {
+        public static Stack<T> StackOf<T>(this T value, int capacity = 10)
+        {
+            Stack<T> stk = new Stack<T>(capacity);
+            stk.Push(value);
+            return stk;
+        }
+    }
+}
