@@ -25,24 +25,16 @@ namespace TestHarness
             //pr.TestAsynqQuery();
             //pr.TestPersistBlob();
             //pr.TestQueryBlobs();
-#if false
-            // Create a 3-depth commit tree up from HEAD:
-            for (int i= 0; i < 3; ++i)
-            {
-                TreeID rootid = pr.TestPersistTree();
-                pr.TestRetrieveTreeRecursively(rootid);
 
-                CommitID cmid = pr.TestCreateCommit(rootid, i);
-                pr.TestCreateTag(cmid);
-            }
-
+            // Create a 3-level deep commit hierarchy:
+            pr.Create3DeepCommit().Wait();
             // Get the commit tree recursively:
-            pr.TestGetCommitTree();
-#endif
-            //pr.TestLargeBlobPersistence();
-            pr.TestQueryByPath();
+            pr.TestGetCommitTree().Wait();
 
-#if false
+            pr.TestLargeBlobPersistence().Wait();
+            pr.TestQueryByPath().Wait();
+
+#if true
             Console.WriteLine("Press a key.");
             Console.ReadLine();
 #else
@@ -240,7 +232,7 @@ namespace TestHarness
             Console.WriteLine("Complete.");
         }
 
-        TreeID TestPersistTree()
+        async Task<TreeID> TestPersistTree()
         {
             // Create a Blob:
             Blob bl = new Blob.Builder(Encoding.UTF8.GetBytes("Sample README content."));
@@ -294,15 +286,11 @@ namespace TestHarness
             ITreeRepository trrepo = new TreeRepository(db);
 
             // Persist the tree and its blobs:
-            var wait =
-                blrepo.PersistBlobs(blobs)
-                .ContinueWith(tBlobs => trrepo.PersistTree(trRoot.ID, trees))
-                .Unwrap();
-
-            wait.Wait();
+            await blrepo.PersistBlobs(blobs);
+            var ptr = await trrepo.PersistTree(trRoot.ID, trees);
 
             // Make sure we got back what's expected of the API:
-            Debug.Assert(trRoot.ID == wait.Result.ID);
+            Debug.Assert(trRoot.ID == ptr.ID);
 
             Console.WriteLine("Root TreeID = {0}", trRoot.ID);
 
@@ -316,53 +304,60 @@ namespace TestHarness
             return stk;
         }
 
-        void TestRetrieveTreeRecursively(TreeID rootid)
+        async Task TestRetrieveTreeRecursively(TreeID rootid)
         {
             var db = getDataContext();
 
             Console.WriteLine("Retrieving TreeID {0} recursively...", rootid);
 
             ITreeRepository repo = new TreeRepository(db);
-            var treeTask = repo.GetTreeRecursively(rootid);
-            treeTask.Wait();
+            var tree = await repo.GetTreeRecursively(rootid);
 
             // Recursively display trees:
-            RecursivePrint(treeTask.Result.Item1, treeTask.Result.Item2);
+            RecursivePrint(tree.Item1, tree.Item2);
         }
 
-        CommitID TestCreateCommit(TreeID treeid, int num)
+        async Task<CommitID> TestCreateCommit(TreeID treeid, int num)
         {
             var db = getDataContext();
 
             ICommitRepository cmrepo = new CommitRepository(db);
             IRefRepository rfrepo = new RefRepository(db);
 
-            var task = cmrepo.GetCommitByRef("HEAD").ContinueWith((headTask) =>
-            {
-                Tuple<Ref, Commit> parent = headTask.Result;
+            Tuple<Ref, Commit> parent = await cmrepo.GetCommitByRef("HEAD");
 
-                Commit cm = new Commit.Builder(
-                    pParents:       parent == null ? new List<CommitID>(0) : new List<CommitID>(1) { parent.Item2.ID },
-                    pTreeID:        treeid,
-                    pCommitter:     "James Dunne <james.jdunne@gmail.com>",
-                    pDateCommitted: DateTimeOffset.Parse("2011-08-29 00:00:00 -0500"),
-                    pMessage:       "Commit #" + num.ToString() + "."
-                );
+            Commit cm = new Commit.Builder(
+                pParents:       parent == null ? new List<CommitID>(0) : new List<CommitID>(1) { parent.Item2.ID },
+                pTreeID:        treeid,
+                pCommitter:     "James Dunne <james.jdunne@gmail.com>",
+                pDateCommitted: DateTimeOffset.Parse("2011-08-29 00:00:00 -0500"),
+                pMessage:       "Commit #" + num.ToString() + "."
+            );
 
-                Console.WriteLine("CommitID {0}", cm.ID);
+            Console.WriteLine("CommitID {0}", cm.ID);
 
-                // Persist the commit:
-                return cmrepo.PersistCommit(cm).ContinueWith(t =>
-                    // Once the commit is persisted, update HEAD ref:
-                    rfrepo.PersistRef(new Ref.Builder("HEAD", cm.ID))
-                ).ContinueWith(rf => cm.ID, TaskContinuationOptions.ExecuteSynchronously);
-            }).Unwrap();
+            // Persist the commit:
+            await cmrepo.PersistCommit(cm);
+            // Once the commit is persisted, update HEAD ref:
+            await rfrepo.PersistRef(new Ref.Builder("HEAD", cm.ID));
 
-            task.Wait();
-            return task.Result;
+            return cm.ID;
         }
 
-        void TestCreateTag(CommitID cmid)
+        async Task Create3DeepCommit()
+        {
+            // Create a 3-depth commit tree up from HEAD:
+            for (int i = 0; i < 3; ++i)
+            {
+                TreeID rootid = await TestPersistTree();
+                TestRetrieveTreeRecursively(rootid).Wait();
+
+                CommitID cmid = await TestCreateCommit(rootid, i);
+                TestCreateTag(cmid).Wait();
+            }
+        }
+
+        async Task TestCreateTag(CommitID cmid)
         {
             var db = getDataContext();
 
@@ -370,35 +365,24 @@ namespace TestHarness
             ITagRepository tgrepo = new TagRepository(db);
 
             Console.WriteLine("Get commit by tag 'v1.0'");
-            var getCommitTask = cmrepo.GetCommitByTagName("v1.0");
-            getCommitTask.Wait();
-
-            if (getCommitTask.Result != null)
+            var cm = await cmrepo.GetCommitByTagName("v1.0");
+            if (cm != null)
             {
-                Console.WriteLine("v1.0 was {0}", getCommitTask.Result.Item2.ID);
+                Console.WriteLine("v1.0 was {0}", cm.Item2.ID);
 #if false
-                Console.WriteLine("Deleting Tag by ID {0}", getCommitTask.Result.Item1.ID);
-                tgrepo.DeleteTag(getCommitTask.Result.Item1.ID).Wait();
+                Console.WriteLine("Deleting Tag by ID {0}", cm.Item1.ID);
+                await tgrepo.DeleteTag(cm.Item1.ID).Wait();
 #else
                 Console.WriteLine("Deleting Tag by name 'v1.0'");
-                tgrepo.DeleteTagByName("v1.0").Wait();
+                await tgrepo.DeleteTagByName("v1.0");
 #endif
             }
 
             Tag tg = new Tag.Builder("v1.0", cmid, "James Dunne <james.jdunne@gmail.com>", DateTimeOffset.Now, "Tagged for version 1.0");
 
-            var testTask = tgrepo.PersistTag(tg)
-                .ContinueWith(t =>
-                {
-                    var getCommitTask2 = cmrepo.GetCommitByTagName("v1.0");
-                    return getCommitTask2.ContinueWith(tCommit =>
-                    {
-                        Debug.Assert(tCommit.Result.Item2.ID == cmid);
-                    });
-                }).Unwrap();
-
-            Console.WriteLine("Waiting...");
-            testTask.Wait();
+            await tgrepo.PersistTag(tg);
+            var tgByName = await cmrepo.GetCommitByTagName("v1.0");
+            Debug.Assert(tgByName.Item2.ID == cmid);
 
             Console.WriteLine("Completed.");
         }
@@ -430,25 +414,20 @@ namespace TestHarness
             }
         }
 
-        void TestGetCommitTree()
+        async Task TestGetCommitTree()
         {
             var db = getDataContext();
 
             IRefRepository rfrepo = new RefRepository(db);
             ICommitRepository cmrepo = new CommitRepository(db);
             
-            var task = rfrepo.GetRef("HEAD").ContinueWith(rfTask =>
-            {
-                Debug.Assert(rfTask.Result != null);
+            var rf = await rfrepo.GetRef("HEAD");
+            Debug.Assert(rf != null);
 
-                return cmrepo.GetCommitTree(rfTask.Result.CommitID, depth: 10).ContinueWith(cmTree =>
-                {
-                    // TODO: gather up another 10-deep commit tree from the last partial commit?
-                    RecursivePrint(cmTree.Result.Item1, cmTree.Result.Item2);
-                });
-            }).Unwrap();
+            var cmTree = await cmrepo.GetCommitTree(rf.CommitID, depth: 10);
 
-            task.Wait();
+            // TODO: gather up another 10-deep commit tree from the last partial commit?
+            RecursivePrint(cmTree.Item1, cmTree.Item2);
         }
 
         static void RecursivePrint(CommitID cmID, ICommitContainer commits, int depth = 1)
@@ -469,12 +448,12 @@ namespace TestHarness
             }
         }
 
-        void TestLargeBlobPersistence()
+        async Task TestLargeBlobPersistence()
         {
             var db = getDataContext();
             IBlobRepository blrepo = new BlobRepository(db);
 
-            Random rnd = new Random(0x5555AAC1);
+            Random rnd = new Random(0x5555AAC0);
 
             const int count = 2000;
 
@@ -491,9 +470,8 @@ namespace TestHarness
 
             Console.WriteLine("Persisting {0} blobs...", count);
             Stopwatch sw = Stopwatch.StartNew();
-            Task<BlobContainer> task = blrepo.PersistBlobs(blobs);
+            BlobContainer pBlobs = await blrepo.PersistBlobs(blobs);
             Console.WriteLine("Waiting...");
-            task.Wait();
             sw.Stop();
             Console.WriteLine("Completed in {0} ms, {1} blobs/sec, {2} bytes/sec",
                 sw.ElapsedMilliseconds,
@@ -501,20 +479,18 @@ namespace TestHarness
                 (double)(count * 8040) / (double)sw.ElapsedMilliseconds * 1000d);
         }
 
-        private void TestQueryByPath()
+        async Task TestQueryByPath()
         {
             var db = getDataContext();
-            
+
             ICommitRepository cmrepo = new CommitRepository(db);
             ITreeRepository trrepo = new TreeRepository(db);
-            
-            var task = cmrepo.GetCommitByRef("HEAD").ContinueWith(tRef =>
-            {
-                return trrepo.GetTreeRecursivelyFromPath(tRef.Result.Item2.TreeID, new AbsolutePath("src", "Persists"));
-            }).Unwrap();
 
-            task.Wait();
-            RecursivePrint(task.Result.Item1, task.Result.Item2);
+            var rf = await cmrepo.GetCommitByRef("HEAD");
+            if (rf == null) return;
+
+            var tree = await trrepo.GetTreeRecursivelyFromPath(rf.Item2.TreeID, new AbsolutePath("src", "Persists"));
+            RecursivePrint(tree.Item1, tree.Item2);
         }
     }
 }
