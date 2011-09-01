@@ -15,7 +15,7 @@ namespace IVO.Definition.Models
         {
             this._pathComponents =
                 pathComponents
-                .Where(a => a.All(ch => !((!AbsolutePath.invalidCharSet.Contains(ch)).Assert(b => b, b => new InvalidAbsolutePathException("One of the path components, '{0}', contains an invalid character '{1}'", a, ch)))))
+                .Where(a => a.All(ch => (!AbsolutePath.invalidCharSet.Contains(ch)).Assert(b => b, b => new InvalidAbsolutePathException("One of the path components, '{0}', contains an invalid character '{1}'", a, ch))))
                 .ToList(pathComponents.Length)
                 .AsReadOnly();
         }
@@ -24,7 +24,7 @@ namespace IVO.Definition.Models
         {
             this._pathComponents =
                 pathComponents
-                .Where(a => a.All(ch => !((!AbsolutePath.invalidCharSet.Contains(ch)).Assert(b => b, b => new InvalidAbsolutePathException("One of the path components, '{0}', contains an invalid character '{1}'", a, ch)))))
+                .Where(a => a.All(ch => (!AbsolutePath.invalidCharSet.Contains(ch)).Assert(b => b, b => new InvalidAbsolutePathException("One of the path components, '{0}', contains an invalid character '{1}'", a, ch))))
                 .ToList()
                 .AsReadOnly();
         }
