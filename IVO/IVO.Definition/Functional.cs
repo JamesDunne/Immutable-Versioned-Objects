@@ -20,7 +20,7 @@ namespace System
             _hasValue = true;
         }
 
-        public T Value { get { if (_hasValue) throw new NullReferenceException(); return _value; } }
+        public T Value { get { if (!_hasValue) throw new NullReferenceException(); return _value; } }
         public bool HasValue { get { return _hasValue; } }
 
         public static readonly Maybe<T> Nothing = new Maybe<T>();
