@@ -30,5 +30,13 @@ namespace IVO.Definition.Repositories
         /// <param name="ids"></param>
         /// <returns></returns>
         Task<Blob[]> GetBlobs(params BlobID[] ids);
+
+        /// <summary>
+        /// Gets a blob by its absolute path from a root TreeID.
+        /// </summary>
+        /// <param name="rootid"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        Task<Blob> GetBlobByAbsolutePath(TreeID rootid, CanonicalizedAbsolutePath path);
     }
 }

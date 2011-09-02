@@ -79,7 +79,7 @@ namespace IVO.Implementation.SQL
             throw new NotImplementedException();
         }
 
-        public Task<Tuple<TreeID, TreeContainer>> GetTreeRecursivelyFromPath(TreeID rootid, AbsolutePath path)
+        public Task<Tuple<TreeID, TreeContainer>> GetTreeRecursivelyFromPath(TreeID rootid, CanonicalizedAbsolutePath path)
         {
             return db.ExecuteSingleQueryAsync(new QueryTreeByPath(rootid, path));
         }

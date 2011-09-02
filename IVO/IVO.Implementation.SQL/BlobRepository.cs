@@ -63,5 +63,10 @@ namespace IVO.Implementation.SQL
             var blobs = await TaskEx.WhenAll(tasks);
             return blobs;
         }
+
+        public Task<Blob> GetBlobByAbsolutePath(TreeID rootid, CanonicalizedAbsolutePath path)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
