@@ -26,6 +26,7 @@ namespace TestHarness
             //pr.TestPersistBlob();
             //pr.TestQueryBlobs();
 
+#if false
             // Create a 3-level deep commit hierarchy:
             pr.Create3DeepCommit().Wait();
             // Get the commit tree recursively:
@@ -33,6 +34,9 @@ namespace TestHarness
 
             pr.TestLargeBlobPersistence().Wait();
             pr.TestQueryByPath().Wait();
+#endif
+            // Demonstrate the concept of content-addressable hashing:
+            pr.DemonstrateHashing().Wait();
 
 #if false
             Console.WriteLine("Press a key.");
@@ -392,7 +396,7 @@ namespace TestHarness
             var tr = trees[treeID];
             if (depth == 1)
             {
-                Console.WriteLine("tree {1}: {0}/", new string('_', (depth - 1) * 2), tr.ID.ToString().Substring(0, 12));
+                Console.WriteLine("tree {1}: {0}/", new string('_', (depth - 1) * 2), tr.ID.ToString(firstLength: 7));
             }
 
             // Sort refs by name:
@@ -404,11 +408,11 @@ namespace TestHarness
                 switch (nref.Which)
                 {
                     case Either<TreeTreeReference, TreeBlobReference>.Selected.Left:
-                        Console.WriteLine("tree {1}: {0}{2}/", new string('_', depth * 2), nref.Left.TreeID.ToString().Substring(0, 12), nref.Left.Name);
+                        Console.WriteLine("tree {1}: {0}{2}/", new string('_', depth * 2), nref.Left.TreeID.ToString(firstLength: 7), nref.Left.Name);
                         RecursivePrint(nref.Left.TreeID, trees, depth + 1);
                         break;
                     case Either<TreeTreeReference, TreeBlobReference>.Selected.Right:
-                        Console.WriteLine("blob {1}: {0}{2}", new string('_', depth * 2), nref.Right.BlobID.ToString().Substring(0, 12), nref.Right.Name);
+                        Console.WriteLine("blob {1}: {0}{2}", new string('_', depth * 2), nref.Right.BlobID.ToString(firstLength: 7), nref.Right.Name);
                         break;
                 }
             }
@@ -436,7 +440,7 @@ namespace TestHarness
 
             if (cm.IsComplete)
             {
-                Console.WriteLine("{0}c {1}:  ({2})", new string(' ', (depth - 1) * 2), cm.ID.ToString().Substring(0, 10), String.Join(",", cm.Parents.Select(id => id.ToString().Substring(0, 10))));
+                Console.WriteLine("{0}c {1}:  ({2})", new string(' ', (depth - 1) * 2), cm.ID.ToString(firstLength: 7), String.Join(",", cm.Parents.Select(id => id.ToString(firstLength: 7))));
                 foreach (CommitID parentID in cm.Parents)
                 {
                     RecursivePrint(parentID, commits, depth + 1);
@@ -444,7 +448,7 @@ namespace TestHarness
             }
             else
             {
-                Console.WriteLine("{0}p  {1}:  ?", new string(' ', (depth - 1) * 2), cm.ID.ToString().Substring(0, 10));
+                Console.WriteLine("{0}p  {1}:  ?", new string(' ', (depth - 1) * 2), cm.ID.ToString(firstLength: 7));
             }
         }
 
@@ -501,6 +505,84 @@ namespace TestHarness
             {
                 Console.Error.WriteLine(e);
             }
+        }
+
+        async Task DemonstrateHashing()
+        {
+            var db = getDataContext();
+
+            IBlobRepository blrepo = new BlobRepository(db);
+            ITreeRepository trrepo = new TreeRepository(db);
+            ICommitRepository cmrepo = new CommitRepository(db);
+            IRefRepository rfrepo = new RefRepository(db);
+
+            // Create a sample set of blobs:
+            Blob readmeBlob;
+            BlobContainer blobs = new BlobContainer(
+                readmeBlob = new Blob.Builder(pContents: Encoding.UTF8.GetBytes(@"Hello world"))
+            );
+            Console.Out.WriteAsync(String.Format("Blob {0} = \"{1}\"" + Environment.NewLine, readmeBlob.ID.ToString(firstLength: 7), Encoding.UTF8.GetString(readmeBlob.Contents)));
+            // Persist them:
+            var persistingBlobs = blrepo.PersistBlobs(blobs);
+
+            // Create an initial tree:
+            Tree trRoot;
+            TreeContainer trees = new TreeContainer(new Tree[] {
+                trRoot = new Tree.Builder(
+                    pTrees: new List<TreeTreeReference>(0),
+                    pBlobs: new List<TreeBlobReference> {
+                        new TreeBlobReference.Builder(pName: "README", pBlobID: readmeBlob.ID)
+                    }
+                )
+            });
+            // Dump the tree:
+            RecursivePrint(trRoot.ID, trees);
+
+            // Now wait for the blob persistence to complete:
+            await persistingBlobs;
+            // Persist our tree now:
+            var persistTrees = trrepo.PersistTree(trRoot.ID, trees);
+            await persistTrees;
+
+            // Let's make a commit out of all that:
+            Commit cm1 = new Commit.Builder(
+                pParents:       new List<CommitID>(0),
+                pTreeID:        trRoot.ID,
+                pCommitter:     @"James Dunne <james.jdunne@gmail.com>",
+                pDateCommitted: DateTimeOffset.Now,
+                pMessage:       "Initial commit."
+            );
+            // Persist that commit:
+            Console.Out.WriteAsync(String.Format("Persisting commit {0}..." + Environment.NewLine, cm1.ID.ToString(firstLength: 7)));
+            await cmrepo.PersistCommit(cm1);
+
+            // Let's create a ref to point to it:
+            await rfrepo.DestroyRefByName("demo/HEAD");
+            await rfrepo.PersistRef(new Ref.Builder(pName: "demo/HEAD", pCommitID: cm1.ID));
+
+            await Console.Out.WriteAsync(String.Format("Pointed demo/HEAD to commit {0}" + Environment.NewLine, cm1.ID.ToString(firstLength: 7)));
+
+            // Now let's create a new blob with some revised contents: (adding a period at the end)
+            Blob readmeBlob2;
+            blobs = new BlobContainer(
+                readmeBlob2 = new Blob.Builder(Encoding.UTF8.GetBytes(@"Hello world."))
+            );
+            var persistBlobs2 = blrepo.PersistBlobs(blobs);
+
+            // Make a new tree out of the old tree:
+            Tree.Builder trRoot2b = new Tree.Builder(trRoot);
+            // Point README to the new BlobID:
+            trRoot2b.Blobs[0] = new TreeBlobReference.Builder(trRoot2b.Blobs[0]) { BlobID = readmeBlob2.ID };
+
+            // Freeze our Tree.Builder to a Tree:
+            Tree trRoot2;
+            trees = new TreeContainer(trRoot2 = trRoot2b);
+
+            // Wait for the blobs to persist:
+            await persistBlobs2;
+            // Now persist the new tree:
+            await trrepo.PersistTree(trRoot2.ID, trees);
+
         }
     }
 }

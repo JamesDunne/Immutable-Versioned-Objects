@@ -32,5 +32,15 @@ namespace IVO.Implementation.SQL
         {
             return db.ExecuteSingleQueryAsync(new QueryRef(name));
         }
+
+        public async Task<Ref> DestroyRefByName(string name)
+        {
+            // Grab the ref before we destroy it, just in case:
+            var rf = await db.ExecuteSingleQueryAsync(new QueryRef(name));
+            // Destroy it:
+            await db.ExecuteNonQueryAsync(new DestroyRefByName(name));
+            // Return the old ref data that was destroyed:
+            return rf;
+        }
     }
 }

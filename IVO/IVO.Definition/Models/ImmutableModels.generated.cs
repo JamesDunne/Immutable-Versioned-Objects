@@ -21,7 +21,7 @@ namespace IVO.Definition.Models
         public Commit(Builder b)
         {
             this.ID = computeID(b);
-            this.Parents = (b.Parents).ToArray();
+            this.Parents = (b.Parents).ToArray((b.Parents).Count);
             this.TreeID = b.TreeID;
             this.Committer = b.Committer;
             this.DateCommitted = b.DateCommitted;
@@ -37,6 +37,15 @@ namespace IVO.Definition.Models
             public string Message { get; set; }
 
             public Builder() { }
+
+            public Builder(Commit imm)
+            {
+                this.Parents = (imm.Parents).ToList((imm.Parents).Length);
+                this.TreeID = imm.TreeID;
+                this.Committer = imm.Committer;
+                this.DateCommitted = imm.DateCommitted;
+                this.Message = imm.Message;
+            }
 
             public Builder(
                 List<CommitID> pParents
@@ -92,6 +101,15 @@ namespace IVO.Definition.Models
 
             public Builder() { }
 
+            public Builder(CommitPartial imm)
+            {
+                this.ID = imm.ID;
+                this.TreeID = imm.TreeID;
+                this.Committer = imm.Committer;
+                this.DateCommitted = imm.DateCommitted;
+                this.Message = imm.Message;
+            }
+
             public Builder(
                 CommitID pID
                ,TreeID pTreeID
@@ -135,6 +153,12 @@ namespace IVO.Definition.Models
 
             public Builder() { }
 
+            public Builder(TreeTreeReference imm)
+            {
+                this.Name = imm.Name;
+                this.TreeID = imm.TreeID;
+            }
+
             public Builder(
                 string pName
                ,TreeID pTreeID
@@ -172,6 +196,12 @@ namespace IVO.Definition.Models
 
             public Builder() { }
 
+            public Builder(TreeBlobReference imm)
+            {
+                this.Name = imm.Name;
+                this.BlobID = imm.BlobID;
+            }
+
             public Builder(
                 string pName
                ,BlobID pBlobID
@@ -200,8 +230,8 @@ namespace IVO.Definition.Models
         public Tree(Builder b)
         {
             this.ID = computeID(b);
-            this.Trees = (b.Trees).ToArray();
-            this.Blobs = (b.Blobs).ToArray();
+            this.Trees = (b.Trees).ToArray((b.Trees).Count);
+            this.Blobs = (b.Blobs).ToArray((b.Blobs).Count);
         }
 
         public sealed class Builder
@@ -210,6 +240,12 @@ namespace IVO.Definition.Models
             public List<TreeBlobReference> Blobs { get; set; }
 
             public Builder() { }
+
+            public Builder(Tree imm)
+            {
+                this.Trees = (imm.Trees).ToList((imm.Trees).Length);
+                this.Blobs = (imm.Blobs).ToList((imm.Blobs).Length);
+            }
 
             public Builder(
                 List<TreeTreeReference> pTrees
@@ -248,6 +284,11 @@ namespace IVO.Definition.Models
             public byte[] Contents { get; set; }
 
             public Builder() { }
+
+            public Builder(Blob imm)
+            {
+                this.Contents = imm.Contents;
+            }
 
             public Builder(
                 byte[] pContents
@@ -297,6 +338,15 @@ namespace IVO.Definition.Models
 
             public Builder() { }
 
+            public Builder(Tag imm)
+            {
+                this.Name = imm.Name;
+                this.CommitID = imm.CommitID;
+                this.Tagger = imm.Tagger;
+                this.DateTagged = imm.DateTagged;
+                this.Message = imm.Message;
+            }
+
             public Builder(
                 string pName
                ,CommitID pCommitID
@@ -341,6 +391,12 @@ namespace IVO.Definition.Models
             public CommitID CommitID { get; set; }
 
             public Builder() { }
+
+            public Builder(Ref imm)
+            {
+                this.Name = imm.Name;
+                this.CommitID = imm.CommitID;
+            }
 
             public Builder(
                 string pName

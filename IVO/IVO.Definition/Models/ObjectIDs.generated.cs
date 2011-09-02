@@ -96,10 +96,17 @@ namespace IVO.Definition.Models
             }
             return new string(c);
         }
-
+        
         public override string ToString()
         {
             return _toString;
+        }
+
+        public string ToString(int firstLength = ByteArrayLength * 2)
+        {
+            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            return _toString.Substring(0, firstLength);
         }
 
         public class Comparer : IComparer<CommitID>
@@ -207,10 +214,17 @@ namespace IVO.Definition.Models
             }
             return new string(c);
         }
-
+        
         public override string ToString()
         {
             return _toString;
+        }
+
+        public string ToString(int firstLength = ByteArrayLength * 2)
+        {
+            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            return _toString.Substring(0, firstLength);
         }
 
         public class Comparer : IComparer<TreeID>
@@ -318,10 +332,17 @@ namespace IVO.Definition.Models
             }
             return new string(c);
         }
-
+        
         public override string ToString()
         {
             return _toString;
+        }
+
+        public string ToString(int firstLength = ByteArrayLength * 2)
+        {
+            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            return _toString.Substring(0, firstLength);
         }
 
         public class Comparer : IComparer<BlobID>
@@ -429,10 +450,17 @@ namespace IVO.Definition.Models
             }
             return new string(c);
         }
-
+        
         public override string ToString()
         {
             return _toString;
+        }
+
+        public string ToString(int firstLength = ByteArrayLength * 2)
+        {
+            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            return _toString.Substring(0, firstLength);
         }
 
         public class Comparer : IComparer<TagID>

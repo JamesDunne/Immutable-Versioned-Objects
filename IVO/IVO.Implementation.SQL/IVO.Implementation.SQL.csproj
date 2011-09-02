@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="CommitRepository.cs" />
     <Compile Include="BlobRepository.cs" />
+    <Compile Include="Destroyers\DestroyRefByName.cs" />
     <Compile Include="Destroyers\DestroyBlob.cs" />
     <Compile Include="Destroyers\DestroyCommit.cs" />
     <Compile Include="Destroyers\DestroyTag.cs" />

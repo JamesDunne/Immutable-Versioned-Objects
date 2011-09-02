@@ -10,11 +10,11 @@
             comment = "A complete commit object.",
             idType = "CommitID",
             members = new[] {
-                new { name = "Parents",         type = "CommitID[]",        bType = "List<CommitID>", convert = "({0}).ToArray()" },
-                new { name = "TreeID",          type = "TreeID",            bType = (string)null, convert = (string)null },
-                new { name = "Committer",       type = "string",            bType = (string)null, convert = (string)null },
-                new { name = "DateCommitted",   type = "DateTimeOffset",    bType = (string)null, convert = (string)null },
-                new { name = "Message",         type = "string",            bType = (string)null, convert = (string)null },
+                new { name = "Parents",         type = "CommitID[]",        bType = "List<CommitID>", convert = "({0}).ToArray(({0}).Count)", revert = "({0}).ToList(({0}).Length)" },
+                new { name = "TreeID",          type = "TreeID",            bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "Committer",       type = "string",            bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "DateCommitted",   type = "DateTimeOffset",    bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "Message",         type = "string",            bType = (string)null, convert = (string)null, revert = (string)null },
             }
         },
 
@@ -24,11 +24,11 @@
             comment = "A partial commit object that is missing its parent CommitIDs.",
             idType = (string)null,
             members = new[] {
-                new { name = "ID",              type = "CommitID",          bType = (string)null, convert = (string)null },
-                new { name = "TreeID",          type = "TreeID",            bType = (string)null, convert = (string)null },
-                new { name = "Committer",       type = "string",            bType = (string)null, convert = (string)null },
-                new { name = "DateCommitted",   type = "DateTimeOffset",    bType = (string)null, convert = (string)null },
-                new { name = "Message",         type = "string",            bType = (string)null, convert = (string)null },
+                new { name = "ID",              type = "CommitID",          bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "TreeID",          type = "TreeID",            bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "Committer",       type = "string",            bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "DateCommitted",   type = "DateTimeOffset",    bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "Message",         type = "string",            bType = (string)null, convert = (string)null, revert = (string)null },
             }
         },
 
@@ -37,8 +37,8 @@
             comment = "A tree's named reference to another tree.",
             idType = (string)null,
             members = new[] {
-                new { name = "Name",    type = "string",    bType = (string)null, convert = (string)null },
-                new { name = "TreeID",  type = "TreeID",    bType = (string)null, convert = (string)null },
+                new { name = "Name",    type = "string",    bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "TreeID",  type = "TreeID",    bType = (string)null, convert = (string)null, revert = (string)null },
             }
         },
 
@@ -47,8 +47,8 @@
             comment = "A tree's named reference to a blob.",
             idType = (string)null,
             members = new[] {
-                new { name = "Name",    type = "string",    bType = (string)null, convert = (string)null },
-                new { name = "BlobID",  type = "BlobID",    bType = (string)null, convert = (string)null },
+                new { name = "Name",    type = "string",    bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "BlobID",  type = "BlobID",    bType = (string)null, convert = (string)null, revert = (string)null },
             }
         },
 
@@ -57,8 +57,8 @@
             comment = "A tree object.",
             idType = "TreeID",
             members = new[] {
-                new { name = "Trees", type = "TreeTreeReference[]", bType = "List<TreeTreeReference>", convert = "({0}).ToArray()" },
-                new { name = "Blobs", type = "TreeBlobReference[]", bType = "List<TreeBlobReference>", convert = "({0}).ToArray()" },
+                new { name = "Trees", type = "TreeTreeReference[]", bType = "List<TreeTreeReference>", convert = "({0}).ToArray(({0}).Count)", revert = "({0}).ToList(({0}).Length)" },
+                new { name = "Blobs", type = "TreeBlobReference[]", bType = "List<TreeBlobReference>", convert = "({0}).ToArray(({0}).Count)", revert = "({0}).ToList(({0}).Length)" },
             }
         },
 
@@ -67,7 +67,7 @@
             comment = "An immutable blob.",
             idType = "BlobID",
             members = new[] {
-                new { name = "Contents",    type = "byte[]",    bType = (string)null, convert = (string)null },
+                new { name = "Contents",    type = "byte[]",    bType = (string)null, convert = (string)null, revert = (string)null },
             }
         },
 
@@ -76,11 +76,11 @@
             comment = "An immutable tag that points to a specific commit.",
             idType = "TagID",
             members = new [] {
-                new { name = "Name",        type = "string",            bType = (string)null, convert = (string)null },
-                new { name = "CommitID",    type = "CommitID",          bType = (string)null, convert = (string)null },
-                new { name = "Tagger",      type = "string",            bType = (string)null, convert = (string)null },
-                new { name = "DateTagged",  type = "DateTimeOffset",    bType = (string)null, convert = (string)null },
-                new { name = "Message",     type = "string",            bType = (string)null, convert = (string)null },
+                new { name = "Name",        type = "string",            bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "CommitID",    type = "CommitID",          bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "Tagger",      type = "string",            bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "DateTagged",  type = "DateTimeOffset",    bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "Message",     type = "string",            bType = (string)null, convert = (string)null, revert = (string)null },
             }
         },
 
@@ -89,8 +89,8 @@
             comment = "A mutable reference that points to a specific commit; usable for tracking branch heads.",
             idType = (string)null,
             members = new [] {
-                new { name = "Name",        type = "string",    bType = (string)null, convert = (string)null },
-                new { name = "CommitID",    type = "CommitID",  bType = (string)null, convert = (string)null },
+                new { name = "Name",        type = "string",    bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "CommitID",    type = "CommitID",  bType = (string)null, convert = (string)null, revert = (string)null },
             }
         }
     };
@@ -177,6 +177,19 @@ namespace IVO.Definition.Models
 #>
 
             public Builder() { }
+
+            public Builder(<#= ty.name #> imm)
+            {
+<#
+        for (int j = 0; j < ty.members.Length; ++j)
+        {
+            var mbr = ty.members[j];
+#>
+                this.<#= mbr.name #> = <#= mbr.revert == null ? "imm." + mbr.name : String.Format(mbr.revert, "imm." + mbr.name, mbr.type, mbr.bType) #>;
+<#
+        } // for (int j = 0; j < ty.members.Length; ++j)
+#>
+            }
 
             public Builder(
 <#
