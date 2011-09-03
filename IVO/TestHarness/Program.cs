@@ -495,7 +495,7 @@ namespace TestHarness
 
             try
             {
-                var tree = await trrepo.GetTreeRecursivelyFromPath(rf.Item2.TreeID, new CanonicalizedAbsolutePath("src", "Persists"));
+                var tree = await trrepo.GetTreeRecursivelyFromPath(rf.Item2.TreeID, ((AbsoluteTreePath)"/src/Persists/").Canonicalize());
                 if (tree != null)
                 {
                     RecursivePrint(tree.Item1, tree.Item2);
