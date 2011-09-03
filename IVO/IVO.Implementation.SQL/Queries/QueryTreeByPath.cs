@@ -13,9 +13,9 @@ namespace IVO.Implementation.SQL.Queries
     public class QueryTreeByPath : IComplexDataQuery<Tuple<TreeID, TreeContainer>>
     {
         private TreeID _rootid;
-        private AbsolutePath _path;
+        private CanonicalizedAbsolutePath _path;
 
-        public QueryTreeByPath(TreeID rootid, AbsolutePath path)
+        public QueryTreeByPath(TreeID rootid, CanonicalizedAbsolutePath path)
         {
             this._rootid = rootid;
             this._path = path;
@@ -56,7 +56,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
             cmd.AddInParameter("@rootid", new SqlBinary((byte[])this._rootid));
-            cmd.AddInParameter("@path", new SqlString(this._path.ToString() + AbsolutePath.PathSeparatorString));
+            cmd.AddInParameter("@path", new SqlString(this._path.ToString() + CanonicalizedAbsolutePath.PathSeparatorString));
             cmd.AddOutParameter("@treeid", System.Data.SqlDbType.Binary, 20);
             return cmd;
         }

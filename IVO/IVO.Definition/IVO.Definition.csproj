@@ -47,7 +47,7 @@
     <Compile Include="Exceptions\InvalidRelativePathException.cs" />
     <Compile Include="Exceptions\InvalidAbsolutePathException.cs" />
     <Compile Include="Functional.cs" />
-    <Compile Include="Models\AbsolutePath.cs" />
+    <Compile Include="Models\CanonicalizedAbsolutePath.cs" />
     <Compile Include="Models\RelativePath.cs" />
     <Compile Include="Repositories\IBlobRepository.cs" />
     <Compile Include="Repositories\ICommitRepository.cs" />

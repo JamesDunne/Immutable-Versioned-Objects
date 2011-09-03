@@ -81,7 +81,7 @@
     </ProjectReference>
     <ProjectReference Include="..\IVO.Definition\IVO.Definition.csproj">
       <Project>{29D4825B-A343-45AA-99FB-CE6671E78178}</Project>
-      <Name>GitCMS.Definition</Name>
+      <Name>IVO.Definition</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
