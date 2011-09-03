@@ -23,7 +23,7 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public async Task<BlobContainer> PersistBlobs(BlobContainer blobs)
+        public async Task<ImmutableContainer<BlobID, Blob>> PersistBlobs(ImmutableContainer<BlobID, Blob> blobs)
         {
             var existBlobs = await db.ExecuteListQueryAsync(new QueryBlobsExist(blobs.Keys), expectedCapacity: blobs.Count);
 
@@ -64,7 +64,7 @@ namespace IVO.Implementation.SQL
             return blobs;
         }
 
-        public Task<Blob> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
+        public Task<BlobTreePath> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
         {
             return db.ExecuteSingleQueryAsync(new QueryBlobByPath(rootid, path));
         }

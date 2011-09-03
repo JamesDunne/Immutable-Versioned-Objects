@@ -53,7 +53,7 @@ namespace IVO.Implementation.SQL
             return db.ExecuteSingleQueryAsync(new QueryCommitByRefName(refName));
         }
 
-        public Task<Tuple<CommitID, ICommitContainer>> GetCommitTree(CommitID id, int depth = 10)
+        public Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTree(CommitID id, int depth = 10)
         {
             return db.ExecuteListQueryAsync(new QueryCommitsRecursively(id, depth));
         }

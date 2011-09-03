@@ -11,7 +11,7 @@ using IVO.Definition.Exceptions;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryCommitsRecursively : IComplexDataQuery<Tuple<CommitID, ICommitContainer>>
+    public class QueryCommitsRecursively : IComplexDataQuery<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>>
     {
         private CommitID _id;
         private int _depth;
@@ -45,7 +45,7 @@ WHERE   cm.depth <= @depth";
             return cmd;
         }
 
-        public Tuple<CommitID, ICommitContainer> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public Tuple<CommitID, ImmutableContainer<CommitID, ICommit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             Dictionary<CommitID, Commit.Builder> commits = new Dictionary<CommitID, Commit.Builder>(expectedCount);
             CommitPartial.Builder cmPartial = null;
@@ -93,9 +93,10 @@ WHERE   cm.depth <= @depth";
             }
 
             // Return the final result with immutable objects:
-            return new Tuple<CommitID, ICommitContainer>(
+            return new Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>(
                 this._id,
-                new ICommitContainer(
+                new ImmutableContainer<CommitID, ICommit>(
+                    cm => cm.ID,
                     commits.Select(kv =>
                         // Verify that the retrieved ID is equivalent to the constructed ID:
                         (ICommit) ((Commit)kv.Value).Assert(cm => kv.Key == cm.ID, cm => new CommitIDMismatchException(cm.ID, kv.Key))

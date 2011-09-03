@@ -36,11 +36,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Containers\Containers.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Containers.tt</DependentUpon>
-    </Compile>
+    <Compile Include="Containers\ImmutableContainer.cs" />
     <Compile Include="Exceptions\CommitIDMistmatchException.cs" />
     <Compile Include="Exceptions\BlobIDMistmatchException.cs" />
     <Compile Include="Exceptions\TreeIDMistmatchException.cs" />
@@ -48,6 +44,7 @@
     <Compile Include="Functional.cs" />
     <Compile Include="Models\AbsoluteBlobPath.cs" />
     <Compile Include="Models\AbsoluteTreePath.cs" />
+    <Compile Include="Models\BlobTreePath.cs" />
     <Compile Include="Models\CanonicalTreePath.cs" />
     <Compile Include="Models\CanonicalBlobPath.cs" />
     <Compile Include="Models\RelativeBlobPath.cs" />
@@ -59,10 +56,6 @@
     <Compile Include="Repositories\ITagRepository.cs" />
     <Compile Include="Repositories\ITreeRepository.cs" />
     <Compile Include="Exceptions\TagIDMismatchException.cs" />
-    <None Include="Containers\Containers.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Containers.generated.cs</LastGenOutput>
-    </None>
     <None Include="Models\ImmutableModels.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ImmutableModels.generated.cs</LastGenOutput>

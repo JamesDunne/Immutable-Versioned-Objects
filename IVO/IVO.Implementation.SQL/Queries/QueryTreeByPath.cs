@@ -10,7 +10,7 @@ using IVO.Definition.Exceptions;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryTreeByPath : IComplexDataQuery<Tuple<TreeID, TreeContainer>>
+    public class QueryTreeByPath : IComplexDataQuery<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>>
     {
         private TreeID _rootid;
         private CanonicalTreePath _path;
@@ -61,7 +61,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
             return cmd;
         }
 
-        public Tuple<TreeID, TreeContainer> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public Tuple<TreeID, ImmutableContainer<TreeID, Tree>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             Dictionary<TreeID, Tree.Builder> trees = new Dictionary<TreeID, Tree.Builder>(expectedCount);
 
@@ -131,9 +131,10 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
             if (!root.HasValue) return null;
 
             // Return the final result with immutable objects:
-            return new Tuple<TreeID, TreeContainer>(
+            return new Tuple<TreeID, ImmutableContainer<TreeID, Tree>>(
                 root.Value,
-                new TreeContainer(
+                new ImmutableContainer<TreeID, Tree>(
+                    tr => tr.ID,
                     trees.Select(kv =>
                         // Verify that the retrieved ID is equivalent to the constructed ID:
                         ((Tree)kv.Value).Assert(tr => kv.Key == tr.ID, tr => new TreeIDMismatchException(tr.ID, kv.Key))

@@ -16,7 +16,7 @@ namespace IVO.Definition.Repositories
         /// <param name="rootid">The root TreeID to start persisting from.</param>
         /// <param name="trees">A container to find the Tree objects in.</param>
         /// <returns>The root Tree object.</returns>
-        Task<Tree> PersistTree(TreeID rootid, TreeContainer trees);
+        Task<Tree> PersistTree(TreeID rootid, ImmutableContainer<TreeID, Tree> trees);
 
         /// <summary>
         /// Deletes an entire tree structure starting from the root TreeID (<paramref name="rootid"/>).
@@ -30,7 +30,7 @@ namespace IVO.Definition.Repositories
         /// </summary>
         /// <param name="rootid">The TreeID of the tree's root to retrieve.</param>
         /// <returns></returns>
-        Task<Tuple<TreeID, TreeContainer>> GetTreeRecursively(TreeID rootid);
+        Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursively(TreeID rootid);
 
         /// <summary>
         /// Gets a Tree object by its absolute path from the given root TreeID.
@@ -38,6 +38,6 @@ namespace IVO.Definition.Repositories
         /// <param name="rootid"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        Task<Tuple<TreeID, TreeContainer>> GetTreeRecursivelyFromPath(TreeID rootid, CanonicalTreePath path);
+        Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursivelyFromPath(TreeID rootid, CanonicalTreePath path);
     }
 }

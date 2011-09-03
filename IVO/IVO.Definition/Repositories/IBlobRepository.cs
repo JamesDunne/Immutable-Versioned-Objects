@@ -15,7 +15,7 @@ namespace IVO.Definition.Repositories
         /// </summary>
         /// <param name="blobs"></param>
         /// <returns></returns>
-        Task<BlobContainer> PersistBlobs(BlobContainer blobs);
+        Task<ImmutableContainer<BlobID, Blob>> PersistBlobs(ImmutableContainer<BlobID, Blob> blobs);
 
         /// <summary>
         /// Deletes multiple Blobs by BlobIDs asynchronously.
@@ -32,11 +32,11 @@ namespace IVO.Definition.Repositories
         Task<Blob[]> GetBlobs(params BlobID[] ids);
 
         /// <summary>
-        /// Gets a blob by its absolute path from a root TreeID.
+        /// Gets a blob by its canonicalized absolute path from a root TreeID.
         /// </summary>
         /// <param name="rootid"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        Task<Blob> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path);
+        Task<BlobTreePath> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path);
     }
 }

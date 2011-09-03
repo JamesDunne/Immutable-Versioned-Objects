@@ -24,7 +24,7 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public async Task<Tree> PersistTree(TreeID rootid, TreeContainer trees)
+        public async Task<Tree> PersistTree(TreeID rootid, ImmutableContainer<TreeID, Tree> trees)
         {
             // Start a query to check what Trees exist already:
             var existTrees = await db.ExecuteListQueryAsync(new QueryTreesExist(trees.Keys), expectedCapacity: trees.Count);
@@ -69,7 +69,7 @@ namespace IVO.Implementation.SQL
             return trees[rootid];
         }
 
-        public Task<Tuple<TreeID, TreeContainer>> GetTreeRecursively(TreeID rootid)
+        public Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursively(TreeID rootid)
         {
             return db.ExecuteListQueryAsync(new QueryTreeRecursively(rootid));
         }
@@ -79,7 +79,7 @@ namespace IVO.Implementation.SQL
             throw new NotImplementedException();
         }
 
-        public Task<Tuple<TreeID, TreeContainer>> GetTreeRecursivelyFromPath(TreeID rootid, CanonicalTreePath path)
+        public Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursivelyFromPath(TreeID rootid, CanonicalTreePath path)
         {
             return db.ExecuteSingleQueryAsync(new QueryTreeByPath(rootid, path));
         }
