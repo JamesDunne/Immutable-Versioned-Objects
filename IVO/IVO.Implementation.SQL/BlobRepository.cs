@@ -66,7 +66,7 @@ namespace IVO.Implementation.SQL
 
         public Task<Blob> GetBlobByAbsolutePath(TreeID rootid, CanonicalizedAbsolutePath path)
         {
-            throw new NotImplementedException();
+            return db.ExecuteSingleQueryAsync(new QueryBlobByPath(rootid, path));
         }
     }
 }
