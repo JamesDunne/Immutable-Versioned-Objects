@@ -19,8 +19,7 @@ namespace IVO.Definition.Models
 
         public static explicit operator RelativeBlobPath(string path)
         {
-            if (path.Length == 0) throw new InvalidPathException("path must begin with a '{0}'", PathSeparatorString);
-            if (path[0] != PathSeparatorChar) throw new InvalidPathException("path must begin with a '{0}'", PathSeparatorString);
+            if (path.Length == 0) throw new InvalidPathException("relative path cannot be empty");
 
             string[] parts = SplitPath(path);
             int treePartCount = parts.Length - 1;

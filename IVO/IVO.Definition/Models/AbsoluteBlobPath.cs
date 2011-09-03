@@ -19,8 +19,8 @@ namespace IVO.Definition.Models
 
         public static explicit operator AbsoluteBlobPath(string path)
         {
-            if (path.Length == 0) throw new InvalidPathException("path must begin with a '{0}'", PathSeparatorString);
-            if (path[0] != PathSeparatorChar) throw new InvalidPathException("path must begin with a '{0}'", PathSeparatorString);
+            if (path.Length == 0) throw new InvalidPathException("absolute path must begin with a '{0}'", PathSeparatorString);
+            if (path[0] != PathSeparatorChar) throw new InvalidPathException("absolute path must begin with a '{0}'", PathSeparatorString);
 
             string[] parts = SplitPath(path);
             int treePartCount = parts.Length - 1;
