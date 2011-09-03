@@ -13,9 +13,9 @@ namespace IVO.Implementation.SQL.Queries
     public class QueryBlobByPath : IComplexDataQuery<Blob>
     {
         private TreeID _rootid;
-        private CanonicalizedAbsolutePath _path;
+        private CanonicalBlobPath _path;
 
-        public QueryBlobByPath(TreeID rootid, CanonicalizedAbsolutePath path)
+        public QueryBlobByPath(TreeID rootid, CanonicalBlobPath path)
         {
             this._rootid = rootid;
             this._path = path;

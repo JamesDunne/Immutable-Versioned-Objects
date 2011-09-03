@@ -64,7 +64,7 @@ namespace IVO.Implementation.SQL
             return blobs;
         }
 
-        public Task<Blob> GetBlobByAbsolutePath(TreeID rootid, CanonicalizedAbsolutePath path)
+        public Task<Blob> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
         {
             return db.ExecuteSingleQueryAsync(new QueryBlobByPath(rootid, path));
         }

@@ -37,6 +37,6 @@ namespace IVO.Definition.Repositories
         /// <param name="rootid"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        Task<Blob> GetBlobByAbsolutePath(TreeID rootid, CanonicalizedAbsolutePath path);
+        Task<Blob> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path);
     }
 }

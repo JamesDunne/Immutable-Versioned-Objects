@@ -38,6 +38,6 @@ namespace IVO.Definition.Repositories
         /// <param name="rootid"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        Task<Tuple<TreeID, TreeContainer>> GetTreeRecursivelyFromPath(TreeID rootid, CanonicalizedAbsolutePath path);
+        Task<Tuple<TreeID, TreeContainer>> GetTreeRecursivelyFromPath(TreeID rootid, CanonicalTreePath path);
     }
 }
