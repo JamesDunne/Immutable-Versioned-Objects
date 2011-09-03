@@ -63,12 +63,21 @@ namespace IVO.Definition.Models
 
         public static explicit operator string(CanonicalizedAbsolutePath path) { return path.ToString(); }
         public static implicit operator CanonicalizedAbsolutePath(string[] paths) { return new CanonicalizedAbsolutePath(paths); }
+        public static implicit operator CanonicalizedAbsolutePath(string path) { return new CanonicalizedAbsolutePath(path.Split(PathSeparator)); }
 
         public CanonicalizedAbsolutePath Concat(RelativePath path)
         {
             var otherParts = path.GetPathComponents();
 
             return new CanonicalizedAbsolutePath(this._pathComponents.Concat(otherParts), this._pathComponents.Count + otherParts.Count);
+        }
+
+        public CanonicalizedAbsolutePath GetContainingFolderPath()
+        {
+            // The last path component being empty means this is a folder path:
+            if (_pathComponents[_pathComponents.Count - 1].Length == 0) return this;
+
+            return new CanonicalizedAbsolutePath(_pathComponents.Take(_pathComponents.Count - 1));
         }
     }
 }
