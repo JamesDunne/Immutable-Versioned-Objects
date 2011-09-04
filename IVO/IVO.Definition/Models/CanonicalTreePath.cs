@@ -27,6 +27,11 @@ namespace IVO.Definition.Models
             return new AbsoluteTreePath(root.Parts.Concat(rel.Parts), root.Parts.Count + rel.Parts.Count);
         }
 
+        public static AbsoluteBlobPath operator +(CanonicalTreePath root, RelativeBlobPath rel)
+        {
+            return new AbsoluteBlobPath(new AbsoluteTreePath(root.Parts.Concat(rel.Tree.Parts), root.Parts.Count + rel.Tree.Parts.Count), rel.Name);
+        }
+
         public override string ToString()
         {
             if (Parts.Count == 0) return PathSeparatorString;

@@ -31,5 +31,25 @@ namespace IVO.Definition.Models
         {
             return path.Split(PathSeparatorCharArray, StringSplitOptions.RemoveEmptyEntries);
         }
+
+        public static Either<AbsoluteBlobPath, RelativeBlobPath> ParseBlobPath(string path)
+        {
+            if (path.Length == 0) throw new ArgumentException("path cannot be empty", "path");
+            
+            if (path[0] == PathSeparatorChar)
+                return (AbsoluteBlobPath)path;
+            else
+                return (RelativeBlobPath)path;
+        }
+
+        public static Either<AbsoluteTreePath, RelativeTreePath> ParseTreePath(string path)
+        {
+            if (path.Length == 0) throw new ArgumentException("path cannot be empty", "path");
+
+            if (path[0] == PathSeparatorChar)
+                return (AbsoluteTreePath)path;
+            else
+                return (RelativeTreePath)path;
+        }
     }
 }

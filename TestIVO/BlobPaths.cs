@@ -13,15 +13,15 @@ namespace TestIVO
         [TestMethod]
         public void TestPaths()
         {
-            Assert.AreEqual("/test", new AbsoluteBlobPath((AbsoluteTreePath)"/", "test").ToString());
-            Assert.AreEqual("/template/head", new AbsoluteBlobPath((AbsoluteTreePath)"/template", "head").ToString());
-            Assert.AreEqual("/template/../icons/header-logo.png", new AbsoluteBlobPath((AbsoluteTreePath)"/template" + (RelativeTreePath)"../icons/", "header-logo.png").ToString());
+            Assert.AreEqual("/test", ((AbsoluteBlobPath)"/test").ToString());
+            Assert.AreEqual("/template/head", ((AbsoluteBlobPath)"/template/head").ToString());
+            Assert.AreEqual("/template/../icons/header-logo.png", ((AbsoluteTreePath)"/template" + (RelativeBlobPath)"../icons/header-logo.png").ToString());
         }
 
         [TestMethod]
         public void TestCanonicalPaths()
         {
-            Assert.AreEqual("/icons/header-logo.png", new AbsoluteBlobPath((AbsoluteTreePath)"/template" + (RelativeTreePath)"../icons/", "header-logo.png").Canonicalize().ToString());
+            Assert.AreEqual("/icons/header-logo.png", ((AbsoluteTreePath)"/template" + (RelativeBlobPath)"../icons/header-logo.png").Canonicalize().ToString());
         }
     }
 }
