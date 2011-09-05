@@ -70,6 +70,12 @@ namespace System
         {
             return new Either<TLeft, TRight>(right);
         }
+
+        public TResult Collapse<TResult>(Func<TLeft, TResult> collapseIfLeft, Func<TRight, TResult> collapseIfRight)
+        {
+            if (_which == Selected.Left) return collapseIfLeft(_Left);
+            return collapseIfRight(_Right);
+        }
     }
 
     public static class FunctionalExtensions

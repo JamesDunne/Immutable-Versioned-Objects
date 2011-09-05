@@ -16,6 +16,11 @@ namespace IVO.Definition.Models
         public CanonicalTreePath Tree { get; private set; }
         public string Name { get; private set; }
 
+        public static explicit operator CanonicalBlobPath(string path)
+        {
+            return ((AbsoluteBlobPath)path).Canonicalize();
+        }
+
         public override string ToString()
         {
             return String.Concat(Tree.ToString(), Name);
