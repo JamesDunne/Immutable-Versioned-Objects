@@ -167,23 +167,10 @@ namespace IVO.Definition.Models
                 // Read the list back in sorted-by-name order:
                 foreach (var either in namedRefs.Values)
                 {
-                    switch (either.Which)
-                    {
-                        case Either<TreeTreeReference, TreeBlobReference>.Selected.Left:
-                            bw.WriteRaw(String.Format(
-                                "tree {0} {1}\n",
-                                either.Left.TreeID,
-                                either.Left.Name
-                            ));
-                            break;
-                        case Either<TreeTreeReference, TreeBlobReference>.Selected.Right:
-                            bw.WriteRaw(String.Format(
-                                "blob {0} {1}\n",
-                                either.Right.BlobID,
-                                either.Right.Name
-                            ));
-                            break;
-                    }
+                    bw.WriteRaw(either.Collapse(
+                        tr => String.Format("tree {0} {1}\n", tr.TreeID, tr.Name),
+                        bl => String.Format("blob {0} {1}\n", bl.BlobID, bl.Name)
+                    ));
                 }
                 bw.Flush();
 
