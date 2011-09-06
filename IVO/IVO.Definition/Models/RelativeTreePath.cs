@@ -26,6 +26,11 @@ namespace IVO.Definition.Models
             return new RelativeTreePath(root.Parts.Concat(rel.Parts), root.Parts.Count + rel.Parts.Count);
         }
 
+        public static RelativeBlobPath operator +(RelativeTreePath root, RelativeBlobPath rel)
+        {
+            return new RelativeBlobPath(root + rel.Tree, rel.Name);
+        }
+
         public static explicit operator RelativeTreePath(string[] parts)
         {
             return new RelativeTreePath(parts);

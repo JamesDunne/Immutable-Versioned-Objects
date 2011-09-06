@@ -1,0 +1,27 @@
+# ADT-like representation of the strongly-typed path representation system.
+
+# An absolute path always begins with a leading '/' and denotes an absolute path from the root (optionally with directory traversals like '.' and '..')
+data AbsoluteTreePath = [string]
+data AbsoluteBlobPath = AbsoluteTreePath * string
+
+# A relative path is a path relative to some absolute path:
+data RelativeTreePath = [string]
+data RelativeTreePath = RelativeTreePath * string
+
+# A canonical path is a normalized absolute path with directory traversals evaluated:
+data CanonicalTreePath = [string]
+data CanonicalBlobPath = CanonicalTreePath * string
+
+# Defined `operator +` overloads:
+AbsoluteTreePath + RelativeTreePath -> AbsoluteTreePath
+AbsoluteTreePath + RelativeBlobPath -> AbsoluteBlobPath
+
+RelativeTreePath + RelativeTreePath -> RelativeTreePath
+RelativeTreePath + RelativeBlobPath -> RelativeBlobPath
+
+CanonicalTreePath + RelativeTreePath -> AbsoluteTreePath
+CanonicalTreePath + RelativeBlobPath -> AbsoluteBlobPath
+
+# The two Canonicalize() methods defined:
+canonicalize AbsoluteBlobPath -> CanonicalBlobPath
+canonicalize AbsoluteTreePath -> CanonicalTreePath
