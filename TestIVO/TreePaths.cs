@@ -34,14 +34,20 @@ namespace TestIVO
         [ExpectedException(typeof(InvalidPathException))]
         public void TestCanonicalFail()
         {
-            Assert.AreEqual("", ((AbsoluteTreePath)"/" + (RelativeTreePath)"..").Canonicalize().ToString());
+            var fail = ((AbsoluteTreePath)"/" + (RelativeTreePath)"..").Canonicalize();
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidPathException))]
         public void TestCanonicalFail2()
         {
-            Assert.AreEqual("", ((AbsoluteTreePath)"/test" + (RelativeTreePath)"../..").Canonicalize().ToString());
+            var fail = ((AbsoluteTreePath)"/test" + (RelativeTreePath)"../..").Canonicalize();
+        }
+
+        [TestMethod]
+        public void TestCanonicalPass1()
+        {
+            Assert.AreEqual("/test/head/", ((AbsoluteTreePath)"/test/head/").ToString());
         }
     }
 }

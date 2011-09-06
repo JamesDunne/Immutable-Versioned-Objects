@@ -10,7 +10,7 @@ namespace IVO.Definition.Models
     {
         private RelativeTreePath(IList<string> parts)
         {
-            validatePath(parts);
+            validateTreePath(parts);
             this.Parts = new ReadOnlyCollection<string>(parts);
         }
 

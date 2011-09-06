@@ -11,13 +11,14 @@ namespace IVO.Definition.Models
     {
         internal AbsoluteTreePath(IList<string> parts)
         {
-            validatePath(parts);
+            // parts must be validated with validatePath().
             this.Parts = new ReadOnlyCollection<string>(parts);
         }
 
         internal AbsoluteTreePath(IEnumerable<string> parts, int initialCapacity = 4)
-            : this(parts.ToList(initialCapacity))
         {
+            // parts must be validated with validatePath().
+            this.Parts = new ReadOnlyCollection<string>(parts.ToList(initialCapacity));
         }
 
         public ReadOnlyCollection<string> Parts { get; private set; }
@@ -34,12 +35,16 @@ namespace IVO.Definition.Models
         
         public static explicit operator AbsoluteTreePath(string path)
         {
-            return new AbsoluteTreePath(SplitPath(path));
-        }
+            if (String.IsNullOrWhiteSpace(path)) throw new InvalidPathException("Path cannot be empty");
 
-        public static explicit operator AbsoluteTreePath(string[] parts)
-        {
-            return new AbsoluteTreePath((string[])parts.Clone());
+            // Remove trailing path separator char for parsing:
+            if (path[path.Length - 1] == PathSeparatorChar) path = path.Substring(0, path.Length - 1);
+
+            string[] parts = SplitPath(path);
+
+            validateTreePath(parts);
+
+            return new AbsoluteTreePath(parts);
         }
 
         public override string ToString()

@@ -9,13 +9,13 @@ namespace IVO.Definition.Models
 {
     public sealed class CanonicalTreePath : Path
     {
-        private CanonicalTreePath(IList<string> parts)
+        internal CanonicalTreePath(IList<string> parts)
         {
-            validatePath(parts);
+            // parts must be already validated with validateCanonicalPath().
             this.Parts = new ReadOnlyCollection<string>(parts);
         }
 
-        private CanonicalTreePath(IEnumerable<string> parts, int initialCapacity = 4)
+        internal CanonicalTreePath(IEnumerable<string> parts, int initialCapacity = 4)
             : this(parts.ToList(initialCapacity))
         {
         }
@@ -34,7 +34,16 @@ namespace IVO.Definition.Models
 
         public static explicit operator CanonicalTreePath(string path)
         {
-            return ((AbsoluteTreePath)path).Canonicalize();
+            if (String.IsNullOrWhiteSpace(path)) throw new InvalidPathException("Path cannot be empty");
+
+            // Remove trailing path separator char for parsing:
+            if (path[path.Length - 1] == PathSeparatorChar) path = path.Substring(0, path.Length - 1);
+
+            string[] parts = SplitPath(path);
+
+            validateCanonicalTreePath(parts);
+
+            return new CanonicalTreePath(parts);
         }
 
         public override string ToString()
@@ -44,6 +53,13 @@ namespace IVO.Definition.Models
             return String.Concat(PathSeparatorString, String.Join(PathSeparatorString, Parts), PathSeparatorString);
         }
 
+        /// <summary>
+        /// Canonicalization normalizes an absolute path that may contain directory traversals like '.' or '..'
+        /// to a path that cannot contain relative traversals and will always be a specific downward path from
+        /// the root of the tree.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public static CanonicalTreePath Canonicalize(AbsoluteTreePath path)
         {
             // Canonicalize the absolute path:

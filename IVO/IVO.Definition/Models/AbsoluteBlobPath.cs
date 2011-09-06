@@ -19,16 +19,24 @@ namespace IVO.Definition.Models
 
         public static explicit operator AbsoluteBlobPath(string path)
         {
-            if (path.Length == 0) throw new InvalidPathException("absolute path must begin with a '{0}'", PathSeparatorString);
-            if (path[0] != PathSeparatorChar) throw new InvalidPathException("absolute path must begin with a '{0}'", PathSeparatorString);
+            if (path.Length == 0) throw new InvalidPathException("absolute blob path cannot be empty");
+            if (path[0] != PathSeparatorChar) throw new InvalidPathException("absolute blob path must begin with a '{0}'", PathSeparatorString);
 
             string[] parts = SplitPath(path);
+            validateTreePath(parts);
+
             int treePartCount = parts.Length - 1;
 
             string[] treeParts = new string[treePartCount];
             Array.Copy(parts, treeParts, treePartCount);
 
-            return new AbsoluteBlobPath((AbsoluteTreePath)treeParts, parts[treePartCount]);
+            string blobName = parts[treePartCount];
+            if (String.IsNullOrWhiteSpace(blobName))
+                throw new InvalidPathException("absolute blob path cannot end in a path separator character '{0}'", PathSeparatorChar);
+            if (blobName == "." || blobName == "..")
+                throw new InvalidPathException("absolute blob path cannot end in '.' or '..' directory traversals");
+
+            return new AbsoluteBlobPath(new AbsoluteTreePath(treeParts), blobName);
         }
 
         public static explicit operator CanonicalBlobPath(AbsoluteBlobPath path)
