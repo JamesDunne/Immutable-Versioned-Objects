@@ -23,7 +23,7 @@ namespace TestIVO
 
             Assert.AreEqual("/../", ((AbsoluteTreePath)"/" + (RelativeTreePath)"..").ToString());
         }
-        
+
         [TestMethod]
         public void TestCanonicalPaths()
         {
@@ -32,14 +32,42 @@ namespace TestIVO
 
         [TestMethod]
         [ExpectedException(typeof(InvalidPathException))]
-        public void TestCanonicalFail()
+        public void TestAbsoluteFail1()
+        {
+            var fail = (AbsoluteTreePath)"";
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidPathException))]
+        public void TestAbsoluteFail2()
+        {
+            var fail = (AbsoluteTreePath)" ";
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidPathException))]
+        public void TestCanonicalFail1()
+        {
+            var fail = (CanonicalTreePath)"";
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidPathException))]
+        public void TestCanonicalFail2()
+        {
+            var fail = (CanonicalTreePath)" ";
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidPathException))]
+        public void TestCanonicalFail3()
         {
             var fail = ((AbsoluteTreePath)"/" + (RelativeTreePath)"..").Canonicalize();
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidPathException))]
-        public void TestCanonicalFail2()
+        public void TestCanonicalFail4()
         {
             var fail = ((AbsoluteTreePath)"/test" + (RelativeTreePath)"../..").Canonicalize();
         }
