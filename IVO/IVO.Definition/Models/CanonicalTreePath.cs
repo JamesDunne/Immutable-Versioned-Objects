@@ -7,6 +7,9 @@ using IVO.Definition.Exceptions;
 
 namespace IVO.Definition.Models
 {
+    /// <summary>
+    /// A canonicalized tree path is an absolute tree path that is guaranteed to contain no directory traversals and is in a normalized form.
+    /// </summary>
     public sealed class CanonicalTreePath : Path
     {
         internal CanonicalTreePath(IList<string> parts)
@@ -20,6 +23,9 @@ namespace IVO.Definition.Models
         {
         }
 
+        /// <summary>
+        /// Gets the path components.
+        /// </summary>
         public ReadOnlyCollection<string> Parts { get; private set; }
 
         public static AbsoluteTreePath operator +(CanonicalTreePath root, RelativeTreePath rel)
@@ -46,6 +52,15 @@ namespace IVO.Definition.Models
             return new CanonicalTreePath(parts);
         }
 
+        public static implicit operator AbsoluteTreePath(CanonicalTreePath path)
+        {
+            return new AbsoluteTreePath(path.Parts);
+        }
+
+        /// <summary>
+        /// Renders the path as a string.
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             if (Parts.Count == 0) return PathSeparatorString;

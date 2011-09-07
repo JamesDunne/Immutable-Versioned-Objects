@@ -7,6 +7,9 @@ using IVO.Definition.Exceptions;
 
 namespace IVO.Definition.Models
 {
+    /// <summary>
+    /// An absolute tree path refers to a tree node with an absolute path that may contain directory traversals such as '.' and '..'.
+    /// </summary>
     public sealed class AbsoluteTreePath : Path
     {
         internal AbsoluteTreePath(IList<string> parts)
@@ -21,6 +24,9 @@ namespace IVO.Definition.Models
             this.Parts = new ReadOnlyCollection<string>(parts.ToList(initialCapacity));
         }
 
+        /// <summary>
+        /// Gets the list of path components.
+        /// </summary>
         public ReadOnlyCollection<string> Parts { get; private set; }
 
         public static AbsoluteTreePath operator +(AbsoluteTreePath root, RelativeTreePath rel)
@@ -47,6 +53,10 @@ namespace IVO.Definition.Models
             return new AbsoluteTreePath(parts);
         }
 
+        /// <summary>
+        /// Render the path as a string.
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             if (Parts.Count == 0) return PathSeparatorString;
@@ -54,6 +64,12 @@ namespace IVO.Definition.Models
             return String.Concat(PathSeparatorString, String.Join(PathSeparatorString, Parts), PathSeparatorString);
         }
 
+        /// <summary>
+        /// Canonicalization normalizes an absolute path that may contain directory traversals like '.' or '..'
+        /// to a path that cannot contain relative traversals and will always be a specific downward path from
+        /// the root of the tree.
+        /// </summary>
+        /// <returns></returns>
         public CanonicalTreePath Canonicalize()
         {
             return CanonicalTreePath.Canonicalize(this);

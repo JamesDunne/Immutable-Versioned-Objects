@@ -6,6 +6,9 @@ using System.Text;
 
 namespace IVO.Definition.Models
 {
+    /// <summary>
+    /// A relative tree path is a path to a tree that is relative to an absolute tree path.
+    /// </summary>
     public sealed class RelativeTreePath : Path
     {
         private RelativeTreePath(IList<string> parts)
@@ -19,6 +22,18 @@ namespace IVO.Definition.Models
         {
         }
 
+        /// <summary>
+        /// Create a relative tree path from a string.
+        /// </summary>
+        /// <param name="path"></param>
+        public RelativeTreePath(string path)
+            : this(SplitPath(path))
+        {
+        }
+
+        /// <summary>
+        /// Gets the path components.
+        /// </summary>
         public ReadOnlyCollection<string> Parts { get; private set; }
 
         public static RelativeTreePath operator +(RelativeTreePath root, RelativeTreePath rel)
@@ -41,6 +56,10 @@ namespace IVO.Definition.Models
             return new RelativeTreePath(SplitPath(path));
         }
 
+        /// <summary>
+        /// Renders a path as a string.
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return String.Concat(String.Join(PathSeparatorString, Parts), PathSeparatorString);
