@@ -211,7 +211,7 @@ namespace TestHarness
             Blob bl1 = new Blob.Builder(Encoding.UTF8.GetBytes("Sample content."));
             Console.WriteLine(bl1.ID.ToString());
 
-            BlobContainer blobs = new BlobContainer(bl0, bl1);
+            var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, bl0, bl1);
             var db = getDataContext();
 
             // Check which blobs exist already:
@@ -240,7 +240,7 @@ namespace TestHarness
         {
             // Create a Blob:
             Blob bl = new Blob.Builder(Encoding.UTF8.GetBytes("Sample README content."));
-            BlobContainer blobs = new BlobContainer(bl);
+            ImmutableContainer<BlobID, Blob> blobs = new ImmutableContainer<BlobID, Blob>(b => b.ID, bl);
 
             // Create a Tree:
             Tree trPersists = new Tree.Builder(
@@ -282,7 +282,7 @@ namespace TestHarness
                 }
             );
 
-            TreeContainer trees = new TreeContainer(trRoot, trSrc, trData, trPersists);
+            ImmutableContainer<TreeID, Tree> trees = new ImmutableContainer<TreeID, Tree>(tr => tr.ID, trRoot, trSrc, trData, trPersists);
 
             var db = getDataContext();
 
@@ -391,7 +391,7 @@ namespace TestHarness
             Console.WriteLine("Completed.");
         }
 
-        static void RecursivePrint(TreeID treeID, TreeContainer trees, int depth = 1)
+        static void RecursivePrint(TreeID treeID, ImmutableContainer<TreeID, Tree> trees, int depth = 1)
         {
             var tr = trees[treeID];
             if (depth == 1)
@@ -434,7 +434,7 @@ namespace TestHarness
             RecursivePrint(cmTree.Item1, cmTree.Item2);
         }
 
-        static void RecursivePrint(CommitID cmID, ICommitContainer commits, int depth = 1)
+        static void RecursivePrint(CommitID cmID, ImmutableContainer<CommitID, ICommit> commits, int depth = 1)
         {
             ICommit cm = commits[cmID];
 
@@ -470,11 +470,11 @@ namespace TestHarness
 
                 bls[i] = new Blob.Builder(c);
             }
-            BlobContainer blobs = new BlobContainer(bls);
+            ImmutableContainer<BlobID, Blob> blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, bls);
 
             Console.WriteLine("Persisting {0} blobs...", count);
             Stopwatch sw = Stopwatch.StartNew();
-            BlobContainer pBlobs = await blrepo.PersistBlobs(blobs);
+            ImmutableContainer<BlobID, Blob> pBlobs = await blrepo.PersistBlobs(blobs);
             Console.WriteLine("Waiting...");
             sw.Stop();
             Console.WriteLine("Completed in {0} ms, {1} blobs/sec, {2} bytes/sec",
@@ -518,7 +518,8 @@ namespace TestHarness
 
             // Create a sample set of blobs:
             Blob readmeBlob;
-            BlobContainer blobs = new BlobContainer(
+            ImmutableContainer<BlobID, Blob> blobs = new ImmutableContainer<BlobID, Blob>(
+                bl => bl.ID,
                 readmeBlob = new Blob.Builder(pContents: Encoding.UTF8.GetBytes(@"Hello world"))
             );
             Console.Out.WriteAsync(String.Format("Blob {0} = \"{1}\"" + Environment.NewLine, readmeBlob.ID.ToString(firstLength: 7), Encoding.UTF8.GetString(readmeBlob.Contents)));
@@ -527,14 +528,17 @@ namespace TestHarness
 
             // Create an initial tree:
             Tree trRoot;
-            TreeContainer trees = new TreeContainer(new Tree[] {
-                trRoot = new Tree.Builder(
-                    pTrees: new List<TreeTreeReference>(0),
-                    pBlobs: new List<TreeBlobReference> {
-                        new TreeBlobReference.Builder(pName: "README", pBlobID: readmeBlob.ID)
-                    }
-                )
-            });
+            ImmutableContainer<TreeID, Tree> trees = new ImmutableContainer<TreeID, Tree>(
+                tr => tr.ID,
+                new Tree[] {
+                    trRoot = new Tree.Builder(
+                        pTrees: new List<TreeTreeReference>(0),
+                        pBlobs: new List<TreeBlobReference> {
+                            new TreeBlobReference.Builder(pName: "README", pBlobID: readmeBlob.ID)
+                        }
+                    )
+                }
+            );
             // Dump the tree:
             RecursivePrint(trRoot.ID, trees);
 
@@ -564,7 +568,8 @@ namespace TestHarness
 
             // Now let's create a new blob with some revised contents: (adding a period at the end)
             Blob readmeBlob2;
-            blobs = new BlobContainer(
+            blobs = new ImmutableContainer<BlobID, Blob>(
+                bl => bl.ID,
                 readmeBlob2 = new Blob.Builder(Encoding.UTF8.GetBytes(@"Hello world."))
             );
             var persistBlobs2 = blrepo.PersistBlobs(blobs);
@@ -576,13 +581,12 @@ namespace TestHarness
 
             // Freeze our Tree.Builder to a Tree:
             Tree trRoot2;
-            trees = new TreeContainer(trRoot2 = trRoot2b);
+            trees = new ImmutableContainer<TreeID, Tree>(tr => tr.ID, trRoot2 = trRoot2b);
 
             // Wait for the blobs to persist:
             await persistBlobs2;
             // Now persist the new tree:
             await trrepo.PersistTree(trRoot2.ID, trees);
-
         }
     }
 }
