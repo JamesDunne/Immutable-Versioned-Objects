@@ -41,6 +41,10 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
@@ -49,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlobPaths.cs" />
+    <Compile Include="BlobRepositoryTest.cs" />
     <Compile Include="TreePaths.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -61,10 +66,17 @@
       <Project>{29D4825B-A343-45AA-99FB-CE6671E78178}</Project>
       <Name>IVO.Definition</Name>
     </ProjectReference>
+    <ProjectReference Include="..\IVO\IVO.Implementation.FileSystem\IVO.Implementation.FileSystem.csproj">
+      <Project>{8FE335EC-1E14-489F-A00D-1C56E2058DC9}</Project>
+      <Name>IVO.Implementation.FileSystem</Name>
+    </ProjectReference>
     <ProjectReference Include="..\IVO\IVO.Implementation.SQL\IVO.Implementation.SQL.csproj">
       <Project>{BCD16F4B-3915-43B7-B1C8-5A9132D97615}</Project>
       <Name>IVO.Implementation.SQL</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="FileSystem\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

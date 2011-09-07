@@ -5,7 +5,7 @@ using System.Text;
 
 namespace IVO.Definition.Containers
 {
-    public sealed class ImmutableContainer<K,V>
+    public sealed class ImmutableContainer<K,V> : IEnumerable<KeyValuePair<K, V>>
         where K : struct
         where V : class
     {
@@ -118,5 +118,23 @@ namespace IVO.Definition.Containers
         public IEnumerable<K> Keys { get { return _container.Keys; } }
 
         public IEnumerable<V> Values { get { return _container.Values; } }
+
+        #region IEnumerable<KeyValuePair<K,V>> Members
+
+        public IEnumerator<KeyValuePair<K, V>> GetEnumerator()
+        {
+            return _container.GetEnumerator();
+        }
+
+        #endregion
+
+        #region IEnumerable Members
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return _container.GetEnumerator();
+        }
+
+        #endregion
     }
 }

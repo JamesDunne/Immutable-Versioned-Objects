@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BCD16F4B-3915-43B7-B1C8-5A9132D97615}</ProjectGuid>
+    <ProjectGuid>{8FE335EC-1E14-489F-A00D-1C56E2058DC9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IVO.Implementation.SQL</RootNamespace>
-    <AssemblyName>IVO.Implementation.SQL</AssemblyName>
+    <RootNamespace>IVO.Implementation.FileSystem</RootNamespace>
+    <AssemblyName>IVO.Implementation.FileSystem</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -42,43 +42,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CommitRepository.cs" />
     <Compile Include="BlobRepository.cs" />
-    <Compile Include="Destroyers\DestroyRefByName.cs" />
-    <Compile Include="Destroyers\DestroyBlob.cs" />
-    <Compile Include="Destroyers\DestroyCommit.cs" />
-    <Compile Include="Destroyers\DestroyTag.cs" />
-    <Compile Include="Destroyers\DestroyTagByName.cs" />
-    <Compile Include="Helpers.cs" />
-    <Compile Include="Persists\PersistBlob.cs" />
-    <Compile Include="Persists\PersistCommit.cs" />
-    <Compile Include="Persists\PersistRef.cs" />
-    <Compile Include="Persists\PersistTag.cs" />
-    <Compile Include="Persists\PersistTree.cs" />
-    <Compile Include="Queries\QueryBlobByPath.cs" />
-    <Compile Include="Queries\QueryBlob.cs" />
-    <Compile Include="Queries\QueryBlobsExist.cs" />
-    <Compile Include="Queries\QueryCommit.cs" />
-    <Compile Include="Queries\QueryCommitByRef.cs" />
-    <Compile Include="Queries\QueryCommitByTagID.cs" />
-    <Compile Include="Queries\QueryCommitByTagName.cs" />
-    <Compile Include="Queries\QueryCommitsRecursively.cs" />
-    <Compile Include="Queries\QueryRef.cs" />
-    <Compile Include="Queries\QueryTag.cs" />
-    <Compile Include="Queries\QueryTreeByPath.cs" />
-    <Compile Include="Queries\QueryTreeRecursively.cs" />
-    <Compile Include="Queries\QueryTreesExist.cs" />
-    <Compile Include="Tables.cs" />
-    <Compile Include="TagRepository.cs" />
+    <Compile Include="FileSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RefRepository.cs" />
-    <Compile Include="TreeRepository.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Asynq\Asynq.csproj">
-      <Project>{42EFAFD3-5939-492C-8B93-DFD1969BA925}</Project>
-      <Name>Asynq</Name>
-    </ProjectReference>
     <ProjectReference Include="..\IVO.Definition\IVO.Definition.csproj">
       <Project>{29D4825B-A343-45AA-99FB-CE6671E78178}</Project>
       <Name>IVO.Definition</Name>
