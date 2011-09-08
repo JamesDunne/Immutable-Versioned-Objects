@@ -166,10 +166,10 @@ namespace IVO.Implementation.FileSystem
 #endif
         }
 
-        public async Task<PersistingBlob[]> PersistBlobs(params PersistingBlob[] blobs)
+        public async Task<IStreamedBlob[]> PersistBlobs(params PersistingBlob[] blobs)
         {
             if (blobs == null) throw new ArgumentNullException("blobs");
-            if (blobs.Length == 0) return blobs;
+            if (blobs.Length == 0) return new IStreamedBlob[0];
 
             // TODO: implement a filesystem lock?
 
@@ -177,11 +177,13 @@ namespace IVO.Implementation.FileSystem
 
             // Persist each blob to the 'objects' folder asynchronously:
             Task[] persistTasks = new Task[blobs.Length];
+            IStreamedBlob[] streamedBlobs = new IStreamedBlob[blobs.Length];
             for (int i = 0; i < blobs.Length; ++i)
             {
                 var blob = blobs[i];
                 // Start a new task to contain each asynchronous task so that they can start up in parallel with one another:
                 persistTasks[i] = TaskEx.RunEx(() => persistBlob(blob, objDir));
+                streamedBlobs[i] = new StreamedBlob(this, blob.ComputedID);
             }
 
             Debug.WriteLine("Awaiting all persistence tasks...");
@@ -190,7 +192,7 @@ namespace IVO.Implementation.FileSystem
             Debug.WriteLine("All completed.");
 
             // Return the final immutable container:
-            return blobs;
+            return streamedBlobs;
         }
 
         private void deleteBlob(BlobID id, DirectoryInfo objDir)

@@ -26,9 +26,10 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public async Task<PersistingBlob[]> PersistBlobs(PersistingBlob[] blobs)
+        public async Task<IStreamedBlob[]> PersistBlobs(params PersistingBlob[] blobs)
         {
             var blobIndexLookup = new ConcurrentDictionary<BlobID, int>(Environment.ProcessorCount * 2, blobs.Length);
+            IStreamedBlob[] streamedBlobs = new IStreamedBlob[blobs.Length];
 
             // Compute all our BlobIDs first:
             Task<BlobID>[] computeIDTasks = new Task<BlobID>[blobs.Length];
@@ -43,6 +44,7 @@ namespace IVO.Implementation.SQL
 
                 // Update the lookup dictionary:
                 computeIDTasks[index] = computeIDTasks[index].ContinueWith(blidTask => { blobIndexLookup.AddOrUpdate(blidTask.Result, index, (k, v) => index); return blidTask.Result; });
+                streamedBlobs[index] = new StreamedBlob(this, blob.ComputedID);
             }
             await TaskEx.WhenAll(computeIDTasks);
 
@@ -54,7 +56,7 @@ namespace IVO.Implementation.SQL
 
             // Early-out case:
             if (blobsToPersist.Count == 0)
-                return blobs;
+                return streamedBlobs;
 
             // Start persisting blobs:
             Task<PersistingBlob>[] tasks = new Task<PersistingBlob>[blobsToPersist.Count];
@@ -63,7 +65,7 @@ namespace IVO.Implementation.SQL
 
             // When all persists are complete, roll up the results from all the tasks into a single array:
             await TaskEx.WhenAll(tasks);
-            return blobs;
+            return streamedBlobs;
         }
 
         public Task<BlobID[]> DeleteBlobs(params BlobID[] ids)

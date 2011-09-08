@@ -27,6 +27,18 @@ namespace IVO.Definition.Models
         public BlobID? ID { get; private set; }
 
         /// <summary>
+        /// Get or compute the BlobID.
+        /// </summary>
+        public BlobID ComputedID
+        {
+            get
+            {
+                if (this.ID.HasValue) return this.ID.Value;
+                return ComputeID();
+            }
+        }
+
+        /// <summary>
         /// Calls GetNewStream to acquire a new read-only Stream over the to-be-persisted blob contents and
         /// computes the BlobID.
         /// </summary>
