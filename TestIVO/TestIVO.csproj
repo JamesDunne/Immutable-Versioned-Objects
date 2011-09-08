@@ -53,7 +53,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlobPaths.cs" />
-    <Compile Include="FileSystem\BlobRepositoryTest.cs" />
+    <Compile Include="FileSystemTest\BlobRepositoryTest.cs" />
+    <Compile Include="SQLTest\BlobRepositoryTest.cs" />
     <Compile Include="TreePaths.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

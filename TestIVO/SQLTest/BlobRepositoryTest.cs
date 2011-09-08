@@ -5,28 +5,20 @@ using System.Linq;
 using IVO.Definition.Containers;
 using IVO.Definition.Models;
 using IVO.Definition.Repositories;
-using IVO.Implementation.FileSystem;
+using IVO.Implementation.SQL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using Asynq;
 
-namespace TestIVO
+namespace TestIVO.SQLTest
 {
     [TestClass()]
     public class BlobRepositoryTest
     {
-        private FileSystem getFileSystem()
+        private DataContext getDataContext()
         {
-            string tmpPath = System.IO.Path.GetTempPath();
-            string tmpRoot = System.IO.Path.Combine(tmpPath, "ivo");
-
-            // Delete our temporary 'ivo' folder:
-            var tmpdi = new DirectoryInfo(tmpRoot);
-            if (tmpdi.Exists)
-                tmpdi.Delete(recursive: true);
-
-            FileSystem system = new FileSystem(new DirectoryInfo(tmpRoot));
-            return system;
+            return new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=IVO;Integrated Security=SSPI");
         }
 
         private Blob[] createBlobs(int numBlobs)
@@ -54,8 +46,8 @@ namespace TestIVO
         [TestMethod()]
         public void PersistBlobsTest()
         {
-            FileSystem system = getFileSystem();
-            IBlobRepository blrepo = new BlobRepository(system);
+            DataContext db = getDataContext();
+            IBlobRepository blrepo = new BlobRepository(db);
 
             const int numBlobs = 32;
 
@@ -68,17 +60,13 @@ namespace TestIVO
             Stopwatch sw = Stopwatch.StartNew();
             blrepo.PersistBlobs(blobs).Wait();
             Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, blobs.Values.Sum(b => b.Contents.Length) * 1000d / sw.ElapsedMilliseconds);
-
-            // Clean up:
-            if (system.Root.Exists)
-                system.Root.Delete(recursive: true);
         }
 
         [TestMethod]
         public void DeleteBlobsTest()
         {
-            FileSystem system = getFileSystem();
-            IBlobRepository blrepo = new BlobRepository(system);
+            var db = getDataContext();
+            IBlobRepository blrepo = new BlobRepository(db);
 
             const int numBlobs = 32;
             var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
@@ -88,10 +76,6 @@ namespace TestIVO
 
             // Delete the newly persisted blobs:
             blrepo.DeleteBlobs(blobs.Keys.ToArray(numBlobs)).Wait();
-
-            // Clean up:
-            if (system.Root.Exists)
-                system.Root.Delete(recursive: true);
         }
 
         [TestMethod]
@@ -101,8 +85,8 @@ namespace TestIVO
 
             TaskEx.RunEx(async () =>
             {
-                FileSystem system = getFileSystem();
-                IBlobRepository blrepo = new BlobRepository(system);
+                var db = getDataContext();
+                IBlobRepository blrepo = new BlobRepository(db);
 
                 const int numBlobs = 1;
                 var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
@@ -151,9 +135,6 @@ namespace TestIVO
                 });
 
                 Console.WriteLine("Cleaning up");
-                // Clean up:
-                if (system.Root.Exists)
-                    system.Root.Delete(recursive: true);
             }).Wait();
 
             Assert.AreEqual(constructedID, retrievedID);
