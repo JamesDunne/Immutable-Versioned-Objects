@@ -11,7 +11,7 @@ namespace IVO.Definition.Models
     {
         public PersistingBlob(Func<System.IO.Stream> getNewStream)
         {
-            this.GetNewStream = GetNewStream;
+            this.GetNewStream = getNewStream;
         }
 
         /// <summary>
