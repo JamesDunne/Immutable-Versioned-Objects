@@ -186,7 +186,7 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<BlobID[]> DeleteBlobs(params BlobID[] ids)
         {
-            if (ids == null) return ids;
+            if (ids == null) throw new ArgumentNullException("ids");
             if (ids.Length == 0) return ids;
 
             DirectoryInfo objDir = CreateObjectsDirectory();
@@ -213,7 +213,17 @@ namespace IVO.Implementation.FileSystem
             throw new NotImplementedException();
         }
 
-        public Task<BlobTreePath> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
+        public Task<TreePathBlob> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IStreamedBlob GetStreamedBlob(BlobID id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IStreamedBlob GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
         {
             throw new NotImplementedException();
         }

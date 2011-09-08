@@ -10,7 +10,7 @@ using IVO.Definition.Exceptions;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryBlobByPath : IComplexDataQuery<BlobTreePath>
+    public class QueryBlobByPath : IComplexDataQuery<TreePathBlob>
     {
         private TreeID _rootid;
         private CanonicalBlobPath _path;
@@ -46,7 +46,7 @@ WHERE tr.[path] + trbl.name = @path;";
             return cmd;
         }
 
-        public BlobTreePath Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public TreePathBlob Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             if (!dr.Read()) return null;
 
@@ -59,7 +59,7 @@ WHERE tr.[path] + trbl.name = @path;";
             Blob bl = b;
             if (bl.ID != id) throw new BlobIDMismatchException(bl.ID, id);
 
-            return new BlobTreePath(this._rootid, this._path, bl);
+            return new TreePathBlob(this._rootid, this._path, bl);
         }
     }
 }

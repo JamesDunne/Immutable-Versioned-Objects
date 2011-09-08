@@ -64,9 +64,19 @@ namespace IVO.Implementation.SQL
             return blobs;
         }
 
-        public Task<BlobTreePath> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
+        public Task<TreePathBlob> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
         {
             return db.ExecuteSingleQueryAsync(new QueryBlobByPath(rootid, path));
+        }
+
+        public IStreamedBlob GetStreamedBlob(BlobID id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IStreamedBlob GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
+        {
+            throw new NotImplementedException();
         }
     }
 }

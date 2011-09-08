@@ -5,9 +5,9 @@ using System.Text;
 
 namespace IVO.Definition.Models
 {
-    public sealed class BlobTreePath
+    public sealed class TreePathBlob
     {
-        public BlobTreePath(TreeID rootTreeID, CanonicalBlobPath path, Blob blob)
+        public TreePathBlob(TreeID rootTreeID, CanonicalBlobPath path, Blob blob)
         {
             this.RootTreeID = rootTreeID;
             this.Path = path;

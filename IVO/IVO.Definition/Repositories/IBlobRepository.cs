@@ -37,6 +37,20 @@ namespace IVO.Definition.Repositories
         /// <param name="rootid"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        Task<BlobTreePath> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path);
+        Task<TreePathBlob> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path);
+
+        /// <summary>
+        /// Gets a streamed blob by BlobID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IStreamedBlob GetStreamedBlob(BlobID id);
+
+        /// <summary>
+        /// Gets a streamed blob by its canonicalized absolute path from a root TreeID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        IStreamedBlob GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path);
     }
 }
