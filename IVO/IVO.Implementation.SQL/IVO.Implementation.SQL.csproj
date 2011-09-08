@@ -57,7 +57,6 @@
     <Compile Include="Persists\PersistTree.cs" />
     <Compile Include="Queries\QueryStreamedBlob.cs" />
     <Compile Include="Queries\QueryBlobByPath.cs" />
-    <Compile Include="Queries\QueryBlob.cs" />
     <Compile Include="Queries\QueryBlobsExist.cs" />
     <Compile Include="Queries\QueryCommit.cs" />
     <Compile Include="Queries\QueryCommitByRef.cs" />

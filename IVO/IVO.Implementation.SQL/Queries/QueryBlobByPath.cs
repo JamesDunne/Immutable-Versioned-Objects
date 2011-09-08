@@ -11,15 +11,15 @@ using System.Data;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryBlobByPath : IComplexDataQuery<TreePathBlob>
+    public class QueryBlobByPath : IComplexDataQuery<TreePathStreamedBlob>
     {
-        private TreeID _rootid;
-        private CanonicalBlobPath _path;
+        private TreePath _treePath;
+        private BlobRepository _blrepo;
 
-        public QueryBlobByPath(TreeID rootid, CanonicalBlobPath path)
+        public QueryBlobByPath(BlobRepository blrepo, TreePath treePath)
         {
-            this._rootid = rootid;
-            this._path = path;
+            this._blrepo = blrepo;
+            this._treePath = treePath;
         }
 
         public SqlCommand ConstructCommand(SqlConnection cn)
@@ -35,32 +35,25 @@ namespace IVO.Implementation.SQL.Queries
     FROM        [dbo].[TreeTree] tr
     JOIN        rec parent ON parent.linked_treeid = tr.treeid
 )
-SELECT  bl.[blobid], bl.[contents]
+SELECT  bl.[blobid]
 FROM rec tr
 JOIN [dbo].[TreeBlob] trbl ON trbl.treeid = tr.linked_treeid
 JOIN [dbo].[Blob] bl ON bl.blobid = trbl.linked_blobid
 WHERE tr.[path] + trbl.name = @path;";
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@rootid", new SqlBinary((byte[])this._rootid));
-            cmd.AddInParameter("@path", new SqlString(this._path.ToString()));
+            cmd.AddInParameter("@rootid", new SqlBinary((byte[])this._treePath.RootTreeID));
+            cmd.AddInParameter("@path", new SqlString(this._treePath.Path.ToString()));
             return cmd;
         }
 
-        public TreePathBlob Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public TreePathStreamedBlob Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             if (!dr.Read()) return null;
 
             BlobID id = (BlobID)dr.GetSqlBinary(0).Value;
 
-            Blob.Builder b = new Blob.Builder(
-                pContents: dr.GetSqlBinary(1).Value
-            );
-
-            Blob bl = b;
-            if (bl.ID != id) throw new BlobIDMismatchException(bl.ID, id);
-
-            return new TreePathBlob(this._rootid, this._path, bl);
+            return new TreePathStreamedBlob(this._treePath, new StreamedBlob(this._blrepo, id));
         }
 
         public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)

@@ -11,6 +11,7 @@ using IVO.Definition;
 using IVO.Definition.Models;
 using IVO.Definition.Containers;
 using IVO.Definition.Repositories;
+using System.Collections.Concurrent;
 
 namespace IVO.Implementation.SQL
 {
@@ -25,60 +26,69 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public async Task<ImmutableContainer<BlobID, Blob>> PersistBlobs(ImmutableContainer<BlobID, Blob> blobs)
+        public async Task<PersistingBlob[]> PersistBlobs(PersistingBlob[] blobs)
         {
-            var existBlobs = await db.ExecuteListQueryAsync(new QueryBlobsExist(blobs.Keys), expectedCapacity: blobs.Count);
+            var blobIndexLookup = new ConcurrentDictionary<BlobID, int>(Environment.ProcessorCount * 2, blobs.Length);
+
+            // Compute all our BlobIDs first:
+            Task<BlobID>[] computeIDTasks = new Task<BlobID>[blobs.Length];
+            for (int i = 0; i < blobs.Length; ++i)
+            {
+                int index = i;
+                PersistingBlob blob = blobs[index];
+                if (blob.ID.HasValue)
+                    computeIDTasks[index] = TaskEx.FromResult(blob.ID.Value);
+                else
+                    computeIDTasks[index] = TaskEx.Run((Func<BlobID>)blob.ComputeID);
+
+                // Update the lookup dictionary:
+                computeIDTasks[index] = computeIDTasks[index].ContinueWith(blidTask => { blobIndexLookup.AddOrUpdate(blidTask.Result, index, (k, v) => index); return blidTask.Result; });
+            }
+            await TaskEx.WhenAll(computeIDTasks);
+
+            // Query which BlobIDs already exist:
+            var existBlobs = await db.ExecuteListQueryAsync(new QueryBlobsExist(blobs.Select(bl => bl.ID.Value)), expectedCapacity: blobs.Length);
 
             // Find the BlobIDs to persist:
-            var blobsToPersist = blobs.Keys.Except(existBlobs).ToList(blobs.Count - existBlobs.Count);
+            var blobsToPersist = blobs.Select(bl => bl.ID.Value).Except(existBlobs).ToList(blobs.Length - existBlobs.Count);
 
             // Early-out case:
             if (blobsToPersist.Count == 0)
                 return blobs;
 
             // Start persisting blobs:
-            Task<Blob>[] tasks = new Task<Blob>[blobsToPersist.Count];
+            Task<PersistingBlob>[] tasks = new Task<PersistingBlob>[blobsToPersist.Count];
             for (int i = 0; i < blobsToPersist.Count; ++i)
-                tasks[i] = db.ExecuteNonQueryAsync(new PersistBlob(blobs[blobsToPersist[i]]));
+                tasks[i] = db.ExecuteNonQueryAsync(new PersistBlob(blobs[blobIndexLookup[blobsToPersist[i]]]));
 
             // When all persists are complete, roll up the results from all the tasks into a single array:
             await TaskEx.WhenAll(tasks);
             return blobs;
         }
 
-        public async Task<BlobID[]> DeleteBlobs(params BlobID[] ids)
+        public Task<BlobID[]> DeleteBlobs(params BlobID[] ids)
         {
             Task<BlobID>[] tasks = new Task<BlobID>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
                 tasks[i] = db.ExecuteNonQueryAsync(new DestroyBlob(ids[i]));
 
-            var blobIDs = await TaskEx.WhenAll(tasks);
-            return blobIDs;
+            return TaskEx.WhenAll(tasks);
         }
 
-        public async Task<Blob[]> GetBlobs(params BlobID[] ids)
+        public Task<IStreamedBlob[]> GetBlobs(params BlobID[] ids)
         {
-            Task<Blob>[] tasks = new Task<Blob>[ids.Length];
+            IStreamedBlob[] blobs = new IStreamedBlob[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
-                tasks[i] = db.ExecuteSingleQueryAsync(new QueryBlob(ids[i]));
-
-            var blobs = await TaskEx.WhenAll(tasks);
-            return blobs;
+                blobs[i] = new StreamedBlob(this, ids[i]);
+            return TaskEx.FromResult(blobs);
         }
 
-        public Task<TreePathBlob> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
+        public Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(params TreePath[] treePaths)
         {
-            return db.ExecuteSingleQueryAsync(new QueryBlobByPath(rootid, path));
-        }
-
-        public Task<IStreamedBlob> GetStreamedBlob(BlobID id)
-        {
-            return TaskEx.FromResult((IStreamedBlob)new StreamedBlob(this, id));
-        }
-
-        public Task<TreePathStreamedBlob> GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
-        {
-            throw new NotImplementedException();
+            Task<TreePathStreamedBlob>[] tasks = new Task<TreePathStreamedBlob>[treePaths.Length];
+            for (int i = 0; i < treePaths.Length; ++i)
+                tasks[i] = db.ExecuteSingleQueryAsync(new QueryBlobByPath(this, treePaths[i]));
+            return TaskEx.WhenAll(tasks);
         }
     }
 }

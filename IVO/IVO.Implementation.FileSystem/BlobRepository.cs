@@ -39,6 +39,7 @@ namespace IVO.Implementation.FileSystem
             return objDir;
         }
 
+#if false
         private class WriteBlobAsyncState
         {
             public Blob Blob;
@@ -47,10 +48,22 @@ namespace IVO.Implementation.FileSystem
             public int BytesWritten;
             public FileStream OutputStream;
         }
+#endif
 
-        private async Task persistBlob(Blob blob, DirectoryInfo objDir)
+        private async Task persistBlob(PersistingBlob blob, DirectoryInfo objDir)
         {
-            string id = blob.ID.ToString();
+            BlobID blid;
+
+            if (blob.ID.HasValue)
+                blid = blob.ID.Value;
+            else
+            {
+                // Asynchronously compute the BlobID from a stream of the contents:
+                blid = await TaskEx.Run((Func<BlobID>)blob.ComputeID);
+            }
+
+            // Get the hex string of the BlobID:
+            string id = blid.ToString();
 
             Debug.WriteLine(String.Format("Starting persistence of blob {0}", id));
 
@@ -72,58 +85,66 @@ namespace IVO.Implementation.FileSystem
                 goto verifyContents;
             }
 
-            // Determine the best buffer size to use for writing contents:
-            int bufSize = Math.Min(blob.Contents.Length, largeBufferSize);
-
-            // Create a new file and set its length so we can asynchronously write to it:
-            using (var tmpFi = File.Open(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            // Open a new stream to the source blob contents:
+            using (var sr = blob.GetNewStream())
             {
-                tmpFi.SetLength(blob.Contents.Length);
-                tmpFi.Close();
-            }
-
-            // Open a new FileStream to asynchronously write the blob contents:
-            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.Read, bufSize, useAsync: true))
-            {
-                var state = new WriteBlobAsyncState()
+                // Create a new file and set its length so we can asynchronously write to it:
+                using (var tmpFi = File.Open(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 {
-                    OutputStream = fs,
-                    Blob = blob,
-                    BufferSize = bufSize,
-                    Offset = 0,
-                    BytesWritten = Math.Min(bufSize, blob.Contents.Length)
-                };
+                    tmpFi.SetLength(sr.Length);
+                    tmpFi.Close();
+                }
 
-                // Asynchronously write the blob contents to the file:
-                do
+                // Determine the best buffer size to use for writing contents:
+                int bufSize = Math.Min((int)sr.Length, largeBufferSize);
+
+                // Open a new FileStream to asynchronously write the blob contents:
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.Read, bufSize, useAsync: true))
                 {
-                    Debug.WriteLine(String.Format("Awaiting  write to '{0}', offs = {1,8}, count = {2,8}", state.OutputStream.Name, state.Offset, state.BytesWritten));
-                    try
+                    // Copy the contents asynchronously:
+                    await sr.CopyToAsync(fs, bufSize);
+#if false
+                    var state = new WriteBlobAsyncState()
                     {
-                        await Task.Factory.FromAsync(
-                            state.OutputStream.BeginWrite,
-                            state.OutputStream.EndWrite,
-                            arg1: state.Blob.Contents,      // byte[] buffer
-                            arg2: state.Offset,             // int offset
-                            arg3: state.BytesWritten,       // int count
-                            state: state
-                        );
-                        Debug.WriteLine(String.Format("Completed write to '{0}', offs = {1,8}, count = {2,8}", state.OutputStream.Name, state.Offset, state.BytesWritten));
-                    }
-                    catch (Exception ex)
+                        OutputStream = fs,
+                        Blob = blob,
+                        BufferSize = bufSize,
+                        Offset = 0,
+                        BytesWritten = Math.Min(bufSize, (int)sr.Length)
+                    };
+
+                    // Asynchronously write the blob contents to the file:
+                    do
                     {
-                        Debug.WriteLine(String.Format("EXPECTION while writing to '{0}', offs = {1,8}, count = {2,8}:" + Environment.NewLine + ex.ToString(), state.OutputStream.Name, state.Offset, state.BytesWritten));
-                    }
+                        Debug.WriteLine(String.Format("Awaiting  write to '{0}', offs = {1,8}, count = {2,8}", state.OutputStream.Name, state.Offset, state.BytesWritten));
+                        try
+                        {
+                            await Task.Factory.FromAsync(
+                                state.OutputStream.BeginWrite,
+                                state.OutputStream.EndWrite,
+                                arg1: state.Blob.Contents,      // byte[] buffer
+                                arg2: state.Offset,             // int offset
+                                arg3: state.BytesWritten,       // int count
+                                state: state
+                            );
+                            Debug.WriteLine(String.Format("Completed write to '{0}', offs = {1,8}, count = {2,8}", state.OutputStream.Name, state.Offset, state.BytesWritten));
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(String.Format("EXPECTION while writing to '{0}', offs = {1,8}, count = {2,8}:" + Environment.NewLine + ex.ToString(), state.OutputStream.Name, state.Offset, state.BytesWritten));
+                        }
 
-                    // Move the offset up by however much was written:
-                    state.Offset += state.BytesWritten;
-                    // Now calculate the new amount to write:
-                    state.BytesWritten = Math.Min(state.BufferSize, state.Blob.Contents.Length - state.Offset);
-                } while (state.BytesWritten > 0);
+                        // Move the offset up by however much was written:
+                        state.Offset += state.BytesWritten;
+                        // Now calculate the new amount to write:
+                        state.BytesWritten = Math.Min(state.BufferSize, state.Blob.Contents.Length - state.Offset);
+                    } while (state.BytesWritten > 0);
 
-                Debug.WriteLine(String.Format("Done persisting to '{0}'", state.OutputStream.Name));
+                    Debug.WriteLine(String.Format("Done persisting to '{0}'", state.OutputStream.Name));
 
-                fs.Close();
+                    fs.Close();
+#endif
+                }
             }
 
         verifyContents:
@@ -145,25 +166,22 @@ namespace IVO.Implementation.FileSystem
 #endif
         }
 
-        public async Task<ImmutableContainer<BlobID, Blob>> PersistBlobs(ImmutableContainer<BlobID, Blob> blobs)
+        public async Task<PersistingBlob[]> PersistBlobs(params PersistingBlob[] blobs)
         {
             if (blobs == null) throw new ArgumentNullException("blobs");
-            if (blobs.Count == 0) return blobs;
+            if (blobs.Length == 0) return blobs;
 
             // TODO: implement a filesystem lock?
 
             DirectoryInfo objDir = CreateObjectsDirectory();
 
             // Persist each blob to the 'objects' folder asynchronously:
-            Task[] persistTasks = new Task[blobs.Count];
-            using (var en = blobs.GetEnumerator())
+            Task[] persistTasks = new Task[blobs.Length];
+            for (int i = 0; i < blobs.Length; ++i)
             {
-                for (int i = 0; en.MoveNext(); ++i)
-                {
-                    var blob = en.Current.Value;
-                    // Start a new task to contain each asynchronous task so that they can start up in parallel with one another:
-                    persistTasks[i] = TaskEx.RunEx(() => persistBlob(blob, objDir));
-                }
+                var blob = blobs[i];
+                // Start a new task to contain each asynchronous task so that they can start up in parallel with one another:
+                persistTasks[i] = TaskEx.RunEx(() => persistBlob(blob, objDir));
             }
 
             Debug.WriteLine("Awaiting all persistence tasks...");
@@ -192,7 +210,7 @@ namespace IVO.Implementation.FileSystem
             if (ids.Length == 0) return ids;
 
             DirectoryInfo objDir = CreateObjectsDirectory();
-            
+
             // Delete each blob asynchronously:
             Task[] deleteTasks = new Task[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
@@ -210,22 +228,12 @@ namespace IVO.Implementation.FileSystem
             return ids;
         }
 
-        public Task<Blob[]> GetBlobs(params BlobID[] ids)
+        public Task<IStreamedBlob[]> GetBlobs(params BlobID[] ids)
         {
             throw new NotImplementedException();
         }
 
-        public Task<TreePathBlob> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IStreamedBlob> GetStreamedBlob(BlobID id)
-        {
-            return TaskEx.FromResult((IStreamedBlob)new StreamedBlob(this, id));
-        }
-
-        public Task<TreePathStreamedBlob> GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
+        public Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(TreePath[] treePath)
         {
             throw new NotImplementedException();
         }

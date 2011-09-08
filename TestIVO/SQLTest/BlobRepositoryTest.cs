@@ -21,25 +21,6 @@ namespace TestIVO.SQLTest
             return new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=IVO;Integrated Security=SSPI");
         }
 
-        private Blob[] createBlobs(int numBlobs)
-        {
-            Random rnd = new Random(8191);
-
-            Blob[] blobArr = new Blob[numBlobs];
-            for (int i = 0; i < numBlobs; ++i)
-            {
-                // Create a random-sized (multiple of 64KB) temp buffer:
-                int multiplier = rnd.Next(0, 8) + 12;
-                byte[] tmp = new byte[multiplier * 65536];
-                rnd.NextBytes(tmp);
-
-                blobArr[i] = new Blob.Builder(tmp);
-                tmp = null;
-            }
-
-            return blobArr;
-        }
-
         /// <summary>
         ///A test for PersistBlobs
         ///</summary>
@@ -53,12 +34,12 @@ namespace TestIVO.SQLTest
 
             // Create an immutable container that points to the new blobs:
             Console.WriteLine("Creating {0} random blobs...", numBlobs);
-            var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
+            // TODO
 
             // Now persist those blobs to the filesystem:
             Console.WriteLine("Persisting {0} random blobs...", numBlobs);
             Stopwatch sw = Stopwatch.StartNew();
-            blrepo.PersistBlobs(blobs).Wait();
+            //blrepo.PersistBlobs(new PersistingBlob()).Wait();
             Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, blobs.Values.Sum(b => b.Contents.Length) * 1000d / sw.ElapsedMilliseconds);
         }
 

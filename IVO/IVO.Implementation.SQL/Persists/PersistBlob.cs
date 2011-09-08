@@ -7,11 +7,11 @@ using IVO.Definition.Models;
 
 namespace IVO.Implementation.SQL.Persists
 {
-    public sealed class PersistBlob : IDataOperation<Blob>
+    public sealed class PersistBlob : IDataOperation<PersistingBlob>
     {
-        private Blob _bl;
+        private PersistingBlob _bl;
 
-        public PersistBlob(Blob bl)
+        public PersistBlob(PersistingBlob bl)
         {
             this._bl = bl;
         }
@@ -33,13 +33,32 @@ WHEN NOT MATCHED THEN INSERT ({2}) VALUES ({4});",
             );
 
             var cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@blobid", new SqlBinary((byte[])_bl.ID));
-            // TODO: chunked xactional update to [contents] in multiples of 8040 bytes.
-            cmd.AddInParameter("@contents", new SqlBinary(_bl.Contents), size: ((_bl.Contents.Length / 8040) + (_bl.Contents.Length % 8040 > 0 ? 1 : 0)) * 8040);
+
+            BlobID blid;
+            if (_bl.ID.HasValue)
+                blid = _bl.ID.Value;
+            else
+            {
+                // TODO: asynchrony!
+                blid = _bl.ComputeID();
+            }
+
+            cmd.AddInParameter("@blobid", new SqlBinary((byte[])blid));
+
+            // Open a new stream of the source contents to upload to the database:
+            using (var sr = _bl.GetNewStream())
+            {
+                byte[] dum = new byte[sr.Length];
+
+                // TODO: chunked xactional update to [contents] in multiples of 8040 bytes.
+                sr.Read(dum, 0, dum.Length);
+
+                cmd.AddInParameter("@contents", new SqlBinary(dum), size: dum.Length);
+            }
             return cmd;
         }
 
-        public Blob Return(SqlCommand cmd, int rowsAffected)
+        public PersistingBlob Return(SqlCommand cmd, int rowsAffected)
         {
             return this._bl;
         }
