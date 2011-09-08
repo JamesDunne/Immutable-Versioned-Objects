@@ -21,6 +21,7 @@ namespace TestIVO.SQLTest
             return new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=IVO;Integrated Security=SSPI");
         }
 
+#if false
         /// <summary>
         ///A test for PersistBlobs
         ///</summary>
@@ -50,14 +51,15 @@ namespace TestIVO.SQLTest
             IBlobRepository blrepo = new BlobRepository(db);
 
             const int numBlobs = 32;
-            var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
+            //var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
             
             // Persist the blobs:
-            blrepo.PersistBlobs(blobs).Wait();
+            //blrepo.PersistBlobs(blobs).Wait();
 
             // Delete the newly persisted blobs:
-            blrepo.DeleteBlobs(blobs.Keys.ToArray(numBlobs)).Wait();
+            //blrepo.DeleteBlobs(blobs.Keys.ToArray(numBlobs)).Wait();
         }
+#endif
 
         [TestMethod]
         public void StreamedBlobTest()
@@ -69,6 +71,7 @@ namespace TestIVO.SQLTest
                 var db = getDataContext();
                 IBlobRepository blrepo = new BlobRepository(db);
 
+#if false
                 const int numBlobs = 1;
                 var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
 
@@ -78,11 +81,14 @@ namespace TestIVO.SQLTest
                 // Load a streamed blob:
                 Console.WriteLine("Awaiting fetch of streamed blob.");
                 constructedID = blobs.Values.First().ID;
+#else
+                constructedID = new BlobID("");
+#endif
 
-                IStreamedBlob strbl = await blrepo.GetStreamedBlob(constructedID);
+                IStreamedBlob[] strbls = await blrepo.GetBlobs(constructedID);
 
                 Console.WriteLine("Awaiting ReadStream to complete...");
-                await strbl.ReadStream(blsr =>
+                await strbls[0].ReadStream(blsr =>
                 {
                     Console.WriteLine("blob is {0} length", blsr.Length);
 

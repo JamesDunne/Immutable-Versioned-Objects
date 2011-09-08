@@ -29,6 +29,7 @@ namespace TestIVO.FileSystemTest
             return system;
         }
 
+#if false
         private Blob[] createBlobs(int numBlobs)
         {
             Random rnd = new Random(8191);
@@ -61,12 +62,12 @@ namespace TestIVO.FileSystemTest
 
             // Create an immutable container that points to the new blobs:
             Console.WriteLine("Creating {0} random blobs...", numBlobs);
-            var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
+            //var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
 
             // Now persist those blobs to the filesystem:
             Console.WriteLine("Persisting {0} random blobs...", numBlobs);
             Stopwatch sw = Stopwatch.StartNew();
-            blrepo.PersistBlobs(blobs).Wait();
+            //blrepo.PersistBlobs(blobs).Wait();
             Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, blobs.Values.Sum(b => b.Contents.Length) * 1000d / sw.ElapsedMilliseconds);
 
             // Clean up:
@@ -93,6 +94,7 @@ namespace TestIVO.FileSystemTest
             if (system.Root.Exists)
                 system.Root.Delete(recursive: true);
         }
+#endif
 
         [TestMethod]
         public void StreamedBlobTest()
@@ -104,6 +106,7 @@ namespace TestIVO.FileSystemTest
                 FileSystem system = getFileSystem();
                 IBlobRepository blrepo = new BlobRepository(system);
 
+#if false
                 const int numBlobs = 1;
                 var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
 
@@ -113,11 +116,14 @@ namespace TestIVO.FileSystemTest
                 // Load a streamed blob:
                 Console.WriteLine("Awaiting fetch of streamed blob.");
                 constructedID = blobs.Values.First().ID;
+#else
+                constructedID = new BlobID("");
+#endif
 
-                IStreamedBlob strbl = await blrepo.GetStreamedBlob(constructedID);
+                IStreamedBlob[] strbls = await blrepo.GetBlobs(constructedID);
 
                 Console.WriteLine("Awaiting ReadStream to complete...");
-                await strbl.ReadStream(blsr =>
+                await strbls[0].ReadStream(blsr =>
                 {
                     Console.WriteLine("blob is {0} length", blsr.Length);
 
