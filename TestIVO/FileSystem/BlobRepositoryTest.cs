@@ -13,11 +13,7 @@ namespace TestIVO
     [TestClass()]
     public class BlobRepositoryTest
     {
-        /// <summary>
-        ///A test for PersistBlobs
-        ///</summary>
-        [TestMethod()]
-        public void PersistBlobsTest()
+        private FileSystem getFileSystem()
         {
             string tmpPath = System.IO.Path.GetTempPath();
             string tmpRoot = System.IO.Path.Combine(tmpPath, "ivo");
@@ -28,13 +24,13 @@ namespace TestIVO
                 tmpdi.Delete(recursive: true);
 
             FileSystem system = new FileSystem(new DirectoryInfo(tmpRoot));
-            IBlobRepository blrepo = new BlobRepository(system);
+            return system;
+        }
 
+        private Blob[] createBlobs(int numBlobs)
+        {
             Random rnd = new Random(8191);
-            
-            const int numBlobs = 256;
-            Debug.WriteLine("Creating {0} random blobs...", numBlobs);
-            
+
             Blob[] blobArr = new Blob[numBlobs];
             for (int i = 0; i < numBlobs; ++i)
             {
@@ -47,14 +43,53 @@ namespace TestIVO
                 tmp = null;
             }
 
+            return blobArr;
+        }
+
+        /// <summary>
+        ///A test for PersistBlobs
+        ///</summary>
+        [TestMethod()]
+        public void PersistBlobsTest()
+        {
+            FileSystem system = getFileSystem();
+            IBlobRepository blrepo = new BlobRepository(system);
+
+            const int numBlobs = 32;
+
             // Create an immutable container that points to the new blobs:
-            var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, blobArr);
+            Console.WriteLine("Creating {0} random blobs...", numBlobs);
+            var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
 
             // Now persist those blobs to the filesystem:
-            Debug.WriteLine("Persisting {0} random blobs...", numBlobs);
+            Console.WriteLine("Persisting {0} random blobs...", numBlobs);
             Stopwatch sw = Stopwatch.StartNew();
             blrepo.PersistBlobs(blobs).Wait();
-            Debug.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, blobArr.Sum(b => b.Contents.Length) * 1000d / sw.ElapsedMilliseconds);
+            Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, blobs.Values.Sum(b => b.Contents.Length) * 1000d / sw.ElapsedMilliseconds);
+
+            // Clean up:
+            if (system.Root.Exists)
+                system.Root.Delete(recursive: true);
+        }
+
+        [TestMethod]
+        public void DeleteBlobsTest()
+        {
+            FileSystem system = getFileSystem();
+            IBlobRepository blrepo = new BlobRepository(system);
+
+            const int numBlobs = 32;
+            var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
+            
+            // Persist the blobs:
+            blrepo.PersistBlobs(blobs).Wait();
+
+            // Delete the newly persisted blobs:
+            blrepo.DeleteBlobs(blobs.Keys.ToArray(numBlobs)).Wait();
+
+            // Clean up:
+            if (system.Root.Exists)
+                system.Root.Delete(recursive: true);
         }
     }
 }

@@ -28,6 +28,15 @@ namespace IVO.Implementation.FileSystem
 
         #region IBlobRepository Members
 
+        private DirectoryInfo CreateObjectsDirectory()
+        {
+            // Create the 'objects' subdirectory if it doesn't exist:
+            DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(system.Root.FullName, "objects"));
+            if (!objDir.Exists)
+                objDir.Create();
+            return objDir;
+        }
+
         private class WriteBlobAsyncState
         {
             public Blob Blob;
@@ -141,10 +150,7 @@ namespace IVO.Implementation.FileSystem
 
             // TODO: implement a filesystem lock?
 
-            // Create the 'objects' subdirectory if it doesn't exist:
-            DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(system.Root.FullName, "objects"));
-            if (!objDir.Exists)
-                objDir.Create();
+            DirectoryInfo objDir = CreateObjectsDirectory();
 
             // Persist each blob to the 'objects' folder asynchronously:
             Task[] persistTasks = new Task[blobs.Count];
@@ -153,6 +159,7 @@ namespace IVO.Implementation.FileSystem
                 for (int i = 0; en.MoveNext(); ++i)
                 {
                     var blob = en.Current.Value;
+                    // Start a new task to contain each asynchronous task so that they can start up in parallel with one another:
                     persistTasks[i] = TaskEx.RunEx(() => persistBlob(blob, objDir));
                 }
             }
@@ -166,9 +173,39 @@ namespace IVO.Implementation.FileSystem
             return blobs;
         }
 
-        public Task<BlobID[]> DeleteBlobs(params BlobID[] ids)
+        private void deleteBlob(BlobID id, DirectoryInfo objDir)
         {
-            throw new NotImplementedException();
+            string idStr = id.ToString();
+            string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
+
+            if (File.Exists(path))
+                File.Delete(path);
+
+            return;
+        }
+
+        public async Task<BlobID[]> DeleteBlobs(params BlobID[] ids)
+        {
+            if (ids == null) return ids;
+            if (ids.Length == 0) return ids;
+
+            DirectoryInfo objDir = CreateObjectsDirectory();
+            
+            // Delete each blob asynchronously:
+            Task[] deleteTasks = new Task[ids.Length];
+            for (int i = 0; i < ids.Length; ++i)
+            {
+                BlobID id = ids[i];
+                deleteTasks[i] = TaskEx.Run(() => deleteBlob(id, objDir));
+            }
+
+            // Wait for all blobs to be deleted:
+            await TaskEx.WhenAll(deleteTasks);
+
+            // TODO: Run through all the 'objects' directories and prune empty ones.
+            // Too eager? Could cause conflicts with other threads.
+
+            return ids;
         }
 
         public Task<Blob[]> GetBlobs(params BlobID[] ids)
