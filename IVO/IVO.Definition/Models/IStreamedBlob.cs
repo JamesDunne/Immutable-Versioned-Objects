@@ -17,6 +17,11 @@ namespace IVO.Definition.Models
         BlobID ID { get; }
 
         /// <summary>
+        /// Gets the length of the data contained in this Blob (if retrieved).
+        /// </summary>
+        long? Length { get; }
+
+        /// <summary>
         /// Starts a Task to open the data stream from the persistence store, passes it to the <paramref name="read"/>
         /// function to read from and then closes the underlying Stream when the lambda returns. The Stream must not
         /// leave the lambda's scope. This method returns the value returned from the <paramref name="read"/> function.

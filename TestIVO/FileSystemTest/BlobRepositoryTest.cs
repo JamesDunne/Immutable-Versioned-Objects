@@ -9,6 +9,7 @@ using IVO.Implementation.FileSystem;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using IVO.Definition;
 
 namespace TestIVO.FileSystemTest
 {
@@ -29,24 +30,20 @@ namespace TestIVO.FileSystemTest
             return system;
         }
 
-#if false
-        private Blob[] createBlobs(int numBlobs)
+        private PersistingBlob[] createBlobs(int numBlobs)
         {
-            Random rnd = new Random(8191);
-
-            Blob[] blobArr = new Blob[numBlobs];
+            PersistingBlob[] blobs = new PersistingBlob[numBlobs];
             for (int i = 0; i < numBlobs; ++i)
             {
-                // Create a random-sized (multiple of 64KB) temp buffer:
-                int multiplier = rnd.Next(0, 8) + 12;
-                byte[] tmp = new byte[multiplier * 65536];
-                rnd.NextBytes(tmp);
+                string tmpFileName = System.IO.Path.GetTempFileName();
+                using (var fs = new FileStream(tmpFileName, FileMode.Open, FileAccess.Write, FileShare.Read, 1048576, true))
+                {
+                    new RandomDataStream(1048576 * 2).CopyTo(fs);
 
-                blobArr[i] = new Blob.Builder(tmp);
-                tmp = null;
+                    blobs[i] = new PersistingBlob(() => new FileStream(tmpFileName, FileMode.Open, FileAccess.Read, FileShare.Read));
+                }
             }
-
-            return blobArr;
+            return blobs;
         }
 
         /// <summary>
@@ -55,46 +52,52 @@ namespace TestIVO.FileSystemTest
         [TestMethod()]
         public void PersistBlobsTest()
         {
-            FileSystem system = getFileSystem();
-            IBlobRepository blrepo = new BlobRepository(system);
+            TaskEx.RunEx(async () =>
+            {
+                FileSystem system = getFileSystem();
+                IBlobRepository blrepo = new BlobRepository(system);
 
-            const int numBlobs = 32;
+                const int numBlobs = 64;
 
-            // Create an immutable container that points to the new blobs:
-            Console.WriteLine("Creating {0} random blobs...", numBlobs);
-            //var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
+                // Create an immutable container that points to the new blobs:
+                Console.WriteLine("Creating {0} random blobs...", numBlobs);
+                PersistingBlob[] blobs = createBlobs(numBlobs);
 
-            // Now persist those blobs to the filesystem:
-            Console.WriteLine("Persisting {0} random blobs...", numBlobs);
-            Stopwatch sw = Stopwatch.StartNew();
-            //blrepo.PersistBlobs(blobs).Wait();
-            Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, blobs.Values.Sum(b => b.Contents.Length) * 1000d / sw.ElapsedMilliseconds);
+                // Now persist those blobs to the filesystem:
+                Console.WriteLine("Persisting {0} random blobs...", numBlobs);
+                Stopwatch sw = Stopwatch.StartNew();
+                var streamedBlobs = await blrepo.PersistBlobs(blobs);
 
-            // Clean up:
-            if (system.Root.Exists)
-                system.Root.Delete(recursive: true);
+                Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, streamedBlobs.Sum(b => b.Length) * 1000d / sw.ElapsedMilliseconds);
+
+                // Clean up:
+                if (system.Root.Exists)
+                    system.Root.Delete(recursive: true);
+            }).Wait();
         }
 
         [TestMethod]
         public void DeleteBlobsTest()
         {
-            FileSystem system = getFileSystem();
-            IBlobRepository blrepo = new BlobRepository(system);
+            TaskEx.RunEx(async () =>
+            {
+                FileSystem system = getFileSystem();
+                IBlobRepository blrepo = new BlobRepository(system);
 
-            const int numBlobs = 32;
-            var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
-            
-            // Persist the blobs:
-            blrepo.PersistBlobs(blobs).Wait();
+                const int numBlobs = 32;
 
-            // Delete the newly persisted blobs:
-            blrepo.DeleteBlobs(blobs.Keys.ToArray(numBlobs)).Wait();
+                // Persist the blobs:
+                PersistingBlob[] blobs = createBlobs(numBlobs);
+                var streamedBlobs = await blrepo.PersistBlobs(blobs);
 
-            // Clean up:
-            if (system.Root.Exists)
-                system.Root.Delete(recursive: true);
+                // Delete the newly persisted blobs:
+                await blrepo.DeleteBlobs(streamedBlobs.Select(bl => bl.ID).ToArray(numBlobs));
+
+                // Clean up:
+                if (system.Root.Exists)
+                    system.Root.Delete(recursive: true);
+            }).Wait();
         }
-#endif
 
         [TestMethod]
         public void StreamedBlobTest()
@@ -106,24 +109,17 @@ namespace TestIVO.FileSystemTest
                 FileSystem system = getFileSystem();
                 IBlobRepository blrepo = new BlobRepository(system);
 
-#if false
                 const int numBlobs = 1;
-                var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
+                PersistingBlob[] blobs = createBlobs(numBlobs);
 
                 // Persist the blobs:
-                blrepo.PersistBlobs(blobs).Wait();
+                var streamedBlobs = await blrepo.PersistBlobs(blobs);
 
                 // Load a streamed blob:
                 Console.WriteLine("Awaiting fetch of streamed blob.");
-                constructedID = blobs.Values.First().ID;
-#else
-                constructedID = new BlobID("");
-#endif
-
-                IStreamedBlob[] strbls = await blrepo.GetBlobs(constructedID);
 
                 Console.WriteLine("Awaiting ReadStream to complete...");
-                await strbls[0].ReadStream(blsr =>
+                await streamedBlobs[0].ReadStream(blsr =>
                 {
                     Console.WriteLine("blob is {0} length", blsr.Length);
 
@@ -162,7 +158,6 @@ namespace TestIVO.FileSystemTest
                     system.Root.Delete(recursive: true);
             }).Wait();
 
-            Assert.AreEqual(constructedID, retrievedID);
             Console.WriteLine("Test complete");
         }
     }

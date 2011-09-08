@@ -50,7 +50,7 @@ namespace IVO.Implementation.FileSystem
         }
 #endif
 
-        private async Task persistBlob(PersistingBlob blob, DirectoryInfo objDir)
+        private async Task<IStreamedBlob> persistBlob(PersistingBlob blob, DirectoryInfo objDir)
         {
             BlobID blid;
 
@@ -78,6 +78,8 @@ namespace IVO.Implementation.FileSystem
             // Create the blob's file path:
             string path = System.IO.Path.Combine(subdir.FullName, id.Substring(2));
 
+            long length = -1;
+
             // Don't recreate an existing blob:
             if (File.Exists(path))
             {
@@ -88,15 +90,17 @@ namespace IVO.Implementation.FileSystem
             // Open a new stream to the source blob contents:
             using (var sr = blob.GetNewStream())
             {
+                length = sr.Length;
+
                 // Create a new file and set its length so we can asynchronously write to it:
                 using (var tmpFi = File.Open(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 {
-                    tmpFi.SetLength(sr.Length);
+                    tmpFi.SetLength(length);
                     tmpFi.Close();
                 }
 
                 // Determine the best buffer size to use for writing contents:
-                int bufSize = Math.Min((int)sr.Length, largeBufferSize);
+                int bufSize = Math.Min((int)length, largeBufferSize);
 
                 // Open a new FileStream to asynchronously write the blob contents:
                 using (var fs = new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.Read, bufSize, useAsync: true))
@@ -110,7 +114,7 @@ namespace IVO.Implementation.FileSystem
                         Blob = blob,
                         BufferSize = bufSize,
                         Offset = 0,
-                        BytesWritten = Math.Min(bufSize, (int)sr.Length)
+                        BytesWritten = Math.Min(bufSize, (int)length)
                     };
 
                     // Asynchronously write the blob contents to the file:
@@ -149,21 +153,20 @@ namespace IVO.Implementation.FileSystem
 
         verifyContents:
 #if VerifyContents
-                // This kills performance, naturally.
-                // Only used for debugging.
-                Debug.WriteLine(String.Format("Verifying contents of '{0}'", path));
+            // This kills performance, naturally.
+            // Only used for debugging.
+            Debug.WriteLine(String.Format("Verifying contents of '{0}'", path));
 
-                byte[] readContents = File.ReadAllBytes(path);
+            byte[] readContents = File.ReadAllBytes(path);
                     
-                if (readContents.Length != blob.Contents.Length)
-                    throw new Exception("Written length != blob length");
+            if (readContents.Length != blob.Contents.Length)
+                throw new Exception("Written length != blob length");
 
-                for (int x = 0; x < readContents.Length; ++x)
-                    if (readContents[x] != blob.Contents[x])
-                        throw new Exception(String.Format("Written byte at position {0} != blob byte", x));
-#else
-            return;
+            for (int x = 0; x < readContents.Length; ++x)
+                if (readContents[x] != blob.Contents[x])
+                    throw new Exception(String.Format("Written byte at position {0} != blob byte", x));
 #endif
+            return (IStreamedBlob)new StreamedBlob(this, blid, length);
         }
 
         public async Task<IStreamedBlob[]> PersistBlobs(params PersistingBlob[] blobs)
@@ -176,18 +179,16 @@ namespace IVO.Implementation.FileSystem
             DirectoryInfo objDir = CreateObjectsDirectory();
 
             // Persist each blob to the 'objects' folder asynchronously:
-            Task[] persistTasks = new Task[blobs.Length];
-            IStreamedBlob[] streamedBlobs = new IStreamedBlob[blobs.Length];
+            Task<IStreamedBlob>[] persistTasks = new Task<IStreamedBlob>[blobs.Length];
             for (int i = 0; i < blobs.Length; ++i)
             {
                 var blob = blobs[i];
                 // Start a new task to contain each asynchronous task so that they can start up in parallel with one another:
                 persistTasks[i] = TaskEx.RunEx(() => persistBlob(blob, objDir));
-                streamedBlobs[i] = new StreamedBlob(this, blob.ComputedID);
             }
 
             Debug.WriteLine("Awaiting all persistence tasks...");
-            await TaskEx.WhenAll(persistTasks);
+            var streamedBlobs = await TaskEx.WhenAll(persistTasks);
 
             Debug.WriteLine("All completed.");
 

@@ -7,13 +7,17 @@ using IVO.Definition.Models;
 
 namespace IVO.Implementation.SQL.Persists
 {
-    public sealed class PersistBlob : IDataOperation<PersistingBlob>
+    public sealed class PersistBlob : IDataOperation<IStreamedBlob>
     {
         private PersistingBlob _bl;
+        private BlobRepository _blrepo;
+        private long _length;
 
-        public PersistBlob(PersistingBlob bl)
+        public PersistBlob(BlobRepository blrepo, PersistingBlob bl)
         {
             this._bl = bl;
+            this._blrepo = blrepo;
+            this._length = -1;
         }
 
         public SqlCommand ConstructCommand(SqlConnection cn)
@@ -48,19 +52,20 @@ WHEN NOT MATCHED THEN INSERT ({2}) VALUES ({4});",
             // Open a new stream of the source contents to upload to the database:
             using (var sr = _bl.GetNewStream())
             {
-                byte[] dum = new byte[sr.Length];
+                this._length = sr.Length;
+                byte[] dum = new byte[_length];
 
                 // TODO: chunked xactional update to [contents] in multiples of 8040 bytes.
-                sr.Read(dum, 0, dum.Length);
+                sr.Read(dum, 0, (int)_length);
 
-                cmd.AddInParameter("@contents", new SqlBinary(dum), size: dum.Length);
+                cmd.AddInParameter("@contents", new SqlBinary(dum), size: (int)_length);
             }
             return cmd;
         }
 
-        public PersistingBlob Return(SqlCommand cmd, int rowsAffected)
+        public IStreamedBlob Return(SqlCommand cmd, int rowsAffected)
         {
-            return this._bl;
+            return new StreamedBlob(_blrepo, _bl.ComputedID, _length);
         }
     }
 }

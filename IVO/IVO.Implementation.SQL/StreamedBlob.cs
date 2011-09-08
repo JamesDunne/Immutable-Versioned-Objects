@@ -12,13 +12,15 @@ namespace IVO.Implementation.SQL
     {
         private BlobRepository blrepo;
 
-        internal StreamedBlob(BlobRepository blrepo, BlobID id)
+        internal StreamedBlob(BlobRepository blrepo, BlobID id, long? length = null)
         {
             this.ID = id;
             this.blrepo = blrepo;
+            this.Length = length;
         }
 
         public BlobID ID { get; private set; }
+        public long? Length { get; private set; }
 
         public Task<TResult> ReadStream<TResult>(Func<System.IO.Stream, TResult> read)
         {

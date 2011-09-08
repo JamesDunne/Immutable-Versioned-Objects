@@ -35,7 +35,7 @@ namespace IVO.Implementation.SQL.Queries
     FROM        [dbo].[TreeTree] tr
     JOIN        rec parent ON parent.linked_treeid = tr.treeid
 )
-SELECT  bl.[blobid]
+SELECT  bl.[blobid], DATALENGTH(bl.[contents])
 FROM rec tr
 JOIN [dbo].[TreeBlob] trbl ON trbl.treeid = tr.linked_treeid
 JOIN [dbo].[Blob] bl ON bl.blobid = trbl.linked_blobid
@@ -52,8 +52,9 @@ WHERE tr.[path] + trbl.name = @path;";
             if (!dr.Read()) return null;
 
             BlobID id = (BlobID)dr.GetSqlBinary(0).Value;
+            long length = dr.GetSqlInt64(1).Value;
 
-            return new TreePathStreamedBlob(this._treePath, new StreamedBlob(this._blrepo, id));
+            return new TreePathStreamedBlob(this._treePath, new StreamedBlob(this._blrepo, id, length));
         }
 
         public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)

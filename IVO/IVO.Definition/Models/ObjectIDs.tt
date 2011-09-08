@@ -93,6 +93,8 @@ namespace IVO.Definition.Models
 
         public bool Equals(<#= types[i] #> other)
         {
+            if ((this._idValue == null) != (other._idValue == null)) return false;
+
             // Compare byte-by-byte:
             for (int i = 0; i < ByteArrayLength; ++i)
                 if (this._idValue[i] != other._idValue[i]) return false;

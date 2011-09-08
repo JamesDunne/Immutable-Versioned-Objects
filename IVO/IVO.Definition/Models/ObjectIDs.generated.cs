@@ -73,6 +73,8 @@ namespace IVO.Definition.Models
 
         public bool Equals(CommitID other)
         {
+            if ((this._idValue == null) != (other._idValue == null)) return false;
+
             // Compare byte-by-byte:
             for (int i = 0; i < ByteArrayLength; ++i)
                 if (this._idValue[i] != other._idValue[i]) return false;
@@ -179,6 +181,8 @@ namespace IVO.Definition.Models
 
         public bool Equals(TreeID other)
         {
+            if ((this._idValue == null) != (other._idValue == null)) return false;
+
             // Compare byte-by-byte:
             for (int i = 0; i < ByteArrayLength; ++i)
                 if (this._idValue[i] != other._idValue[i]) return false;
@@ -285,6 +289,8 @@ namespace IVO.Definition.Models
 
         public bool Equals(BlobID other)
         {
+            if ((this._idValue == null) != (other._idValue == null)) return false;
+
             // Compare byte-by-byte:
             for (int i = 0; i < ByteArrayLength; ++i)
                 if (this._idValue[i] != other._idValue[i]) return false;
@@ -391,6 +397,8 @@ namespace IVO.Definition.Models
 
         public bool Equals(TagID other)
         {
+            if ((this._idValue == null) != (other._idValue == null)) return false;
+
             // Compare byte-by-byte:
             for (int i = 0; i < ByteArrayLength; ++i)
                 if (this._idValue[i] != other._idValue[i]) return false;
