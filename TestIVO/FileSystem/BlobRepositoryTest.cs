@@ -20,11 +20,14 @@ namespace TestIVO
         public void PersistBlobsTest()
         {
             string tmpPath = System.IO.Path.GetTempPath();
+            string tmpRoot = System.IO.Path.Combine(tmpPath, "ivo");
 
-            var tmpdi = new DirectoryInfo(System.IO.Path.Combine(tmpPath, "objects"));
-            tmpdi.Delete(recursive: true);
+            // Delete our temporary 'ivo' folder:
+            var tmpdi = new DirectoryInfo(tmpRoot);
+            if (tmpdi.Exists)
+                tmpdi.Delete(recursive: true);
 
-            FileSystem system = new FileSystem(new DirectoryInfo(tmpPath));
+            FileSystem system = new FileSystem(new DirectoryInfo(tmpRoot));
             IBlobRepository blrepo = new BlobRepository(system);
 
             Random rnd = new Random(8191);
