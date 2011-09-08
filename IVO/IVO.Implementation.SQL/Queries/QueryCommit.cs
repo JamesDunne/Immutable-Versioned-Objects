@@ -5,6 +5,7 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
 using IVO.Definition.Exceptions;
+using System.Data;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -62,6 +63,11 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             if (cm.ID != id) throw new CommitIDMismatchException(cm.ID, id);
 
             return cm;
+        }
+
+        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
+        {
+            return CommandBehavior.Default;
         }
     }
 }

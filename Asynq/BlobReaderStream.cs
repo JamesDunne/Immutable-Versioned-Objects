@@ -29,7 +29,7 @@ namespace Asynq
         /// <param name="ordinal"></param>
         /// <param name="length">Optional parameter used to supply the Length property with.
         /// If null (the default), the Length property will throw an exception if it is accessed.</param>
-        internal BlobReaderStream(SqlDataReader dr, int ordinal, long? length = null)
+        public BlobReaderStream(SqlDataReader dr, int ordinal, long? length = null)
         {
             this.dr = dr;
             this.ordinal = ordinal;

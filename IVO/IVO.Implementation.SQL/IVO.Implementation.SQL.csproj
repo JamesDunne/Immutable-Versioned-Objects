@@ -55,6 +55,7 @@
     <Compile Include="Persists\PersistRef.cs" />
     <Compile Include="Persists\PersistTag.cs" />
     <Compile Include="Persists\PersistTree.cs" />
+    <Compile Include="Queries\QueryStreamedBlob.cs" />
     <Compile Include="Queries\QueryBlobByPath.cs" />
     <Compile Include="Queries\QueryBlob.cs" />
     <Compile Include="Queries\QueryBlobsExist.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Queries\QueryTreeByPath.cs" />
     <Compile Include="Queries\QueryTreeRecursively.cs" />
     <Compile Include="Queries\QueryTreesExist.cs" />
+    <Compile Include="StreamedBlob.cs" />
     <Compile Include="Tables.cs" />
     <Compile Include="TagRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

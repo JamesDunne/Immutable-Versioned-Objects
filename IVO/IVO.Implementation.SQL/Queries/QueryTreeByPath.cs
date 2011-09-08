@@ -7,6 +7,7 @@ using Asynq;
 using IVO.Definition.Containers;
 using IVO.Definition.Models;
 using IVO.Definition.Exceptions;
+using System.Data;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -141,6 +142,11 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                     )
                 )
             );
+        }
+
+        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
+        {
+            return CommandBehavior.Default;
         }
     }
 }

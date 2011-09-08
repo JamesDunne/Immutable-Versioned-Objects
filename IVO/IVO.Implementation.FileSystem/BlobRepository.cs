@@ -218,12 +218,12 @@ namespace IVO.Implementation.FileSystem
             throw new NotImplementedException();
         }
 
-        public IStreamedBlob GetStreamedBlob(BlobID id)
+        public Task<IStreamedBlob> GetStreamedBlob(BlobID id)
         {
             throw new NotImplementedException();
         }
 
-        public IStreamedBlob GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
+        public Task<TreePathStreamedBlob> GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
         {
             throw new NotImplementedException();
         }

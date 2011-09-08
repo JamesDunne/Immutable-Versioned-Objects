@@ -5,6 +5,7 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
 using System.Collections.Generic;
+using System.Data;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -41,6 +42,11 @@ namespace IVO.Implementation.SQL.Queries
         {
             TreeID id = (TreeID)dr.GetSqlBinary(0).Value;
             return id;
+        }
+
+        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
+        {
+            return CommandBehavior.Default;
         }
     }
 }

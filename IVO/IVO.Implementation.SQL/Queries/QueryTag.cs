@@ -6,6 +6,7 @@ using Asynq;
 using IVO.Definition.Models;
 using IVO.Definition.Exceptions;
 using IVO.Definition;
+using System.Data;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -74,6 +75,11 @@ namespace IVO.Implementation.SQL.Queries
             if (tg.ID != id) throw new TagIDMismatchException(tg.ID, id);
 
             return tg;
+        }
+
+        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
+        {
+            return CommandBehavior.Default;
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using IVO.Definition.Containers;
 using System.Diagnostics;
 using IVO.Definition.Exceptions;
+using System.Data;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -108,6 +109,11 @@ WHERE   cm.depth <= @depth";
                     )
                 )
             );
+        }
+
+        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
+        {
+            return CommandBehavior.Default;
         }
     }
 }

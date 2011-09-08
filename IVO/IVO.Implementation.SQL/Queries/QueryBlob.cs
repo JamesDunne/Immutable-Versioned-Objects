@@ -5,6 +5,7 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
 using IVO.Definition.Exceptions;
+using System.Data;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -44,6 +45,11 @@ namespace IVO.Implementation.SQL.Queries
             if (bl.ID != id) throw new BlobIDMismatchException(bl.ID, id);
 
             return bl;
+        }
+
+        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
+        {
+            return CommandBehavior.Default;
         }
     }
 }

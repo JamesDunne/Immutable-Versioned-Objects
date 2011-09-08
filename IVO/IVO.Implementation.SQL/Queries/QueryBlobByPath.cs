@@ -7,6 +7,7 @@ using Asynq;
 using IVO.Definition.Containers;
 using IVO.Definition.Models;
 using IVO.Definition.Exceptions;
+using System.Data;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -60,6 +61,11 @@ WHERE tr.[path] + trbl.name = @path;";
             if (bl.ID != id) throw new BlobIDMismatchException(bl.ID, id);
 
             return new TreePathBlob(this._rootid, this._path, bl);
+        }
+
+        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
+        {
+            return CommandBehavior.Default;
         }
     }
 }

@@ -50,7 +50,7 @@ namespace Asynq
             cn.Open();
 
             return factory.FromAsync(
-                cmd.BeginExecuteReader(CommandBehavior.CloseConnection),
+                cmd.BeginExecuteReader(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)),
                 ar =>
                 {
                     try
@@ -93,7 +93,7 @@ namespace Asynq
             cn.Open();
 
             return factory.FromAsync(
-                cmd.BeginExecuteReader(CommandBehavior.CloseConnection),
+                cmd.BeginExecuteReader(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)),
                 ar =>
                 {
                     try
@@ -126,7 +126,7 @@ namespace Asynq
             cn.Open();
 
             return factory.FromAsync(
-                cmd.BeginExecuteReader(CommandBehavior.CloseConnection | CommandBehavior.SingleRow),
+                cmd.BeginExecuteReader(CommandBehavior.CloseConnection | CommandBehavior.SingleRow | query.GetCustomCommandBehaviors(cn, cmd)),
                 ar =>
                 {
                     try
@@ -164,7 +164,7 @@ namespace Asynq
             cn.Open();
 
             return factory.FromAsync(
-                cmd.BeginExecuteReader(CommandBehavior.CloseConnection),
+                cmd.BeginExecuteReader(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)),
                 ar =>
                 {
                     try

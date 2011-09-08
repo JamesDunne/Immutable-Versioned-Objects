@@ -5,9 +5,12 @@ using System.Text;
 
 namespace IVO.Definition.Models
 {
-    public sealed class TreePathStreamBlob
+    /// <summary>
+    /// Represents a streamed blob with its known absolute path relative to a root TreeID.
+    /// </summary>
+    public sealed class TreePathStreamedBlob
     {
-        public TreePathStreamBlob(TreeID rootTreeID, CanonicalBlobPath path, IStreamedBlob blob)
+        public TreePathStreamedBlob(TreeID rootTreeID, CanonicalBlobPath path, IStreamedBlob blob)
         {
             this.RootTreeID = rootTreeID;
             this.Path = path;

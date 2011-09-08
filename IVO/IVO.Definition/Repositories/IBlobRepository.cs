@@ -44,13 +44,13 @@ namespace IVO.Definition.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        IStreamedBlob GetStreamedBlob(BlobID id);
+        Task<IStreamedBlob> GetStreamedBlob(BlobID id);
 
         /// <summary>
         /// Gets a streamed blob by its canonicalized absolute path from a root TreeID.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        IStreamedBlob GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path);
+        Task<TreePathStreamedBlob> GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path);
     }
 }

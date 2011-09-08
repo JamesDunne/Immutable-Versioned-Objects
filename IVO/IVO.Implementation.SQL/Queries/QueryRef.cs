@@ -4,6 +4,7 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
+using System.Data;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -40,6 +41,11 @@ namespace IVO.Implementation.SQL.Queries
 
             Ref rf = b;
             return rf;
+        }
+
+        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
+        {
+            return CommandBehavior.Default;
         }
     }
 }

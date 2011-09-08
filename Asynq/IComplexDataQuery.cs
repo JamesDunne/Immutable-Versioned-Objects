@@ -1,5 +1,6 @@
 ﻿using System.Data.SqlClient;
 using System.Collections.Generic;
+using System.Data;
 
 namespace Asynq
 {
@@ -15,6 +16,14 @@ namespace Asynq
         /// <param name="cn"></param>
         /// <returns></returns>
         SqlCommand ConstructCommand(SqlConnection cn);
+
+        /// <summary>
+        /// Get a set of custom CommandBehaviors used to execute the given command on the connection.
+        /// </summary>
+        /// <param name="cn"></param>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd);
 
         /// <summary>
         /// Read all rows from the SqlDataReader to an instance of <typeparamref name="T"/>.

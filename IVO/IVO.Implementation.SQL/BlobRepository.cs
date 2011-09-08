@@ -18,6 +18,8 @@ namespace IVO.Implementation.SQL
     {
         private DataContext db;
 
+        internal DataContext DB { get { return db; } }
+
         public BlobRepository(DataContext db)
         {
             this.db = db;
@@ -69,12 +71,12 @@ namespace IVO.Implementation.SQL
             return db.ExecuteSingleQueryAsync(new QueryBlobByPath(rootid, path));
         }
 
-        public IStreamedBlob GetStreamedBlob(BlobID id)
+        public Task<IStreamedBlob> GetStreamedBlob(BlobID id)
         {
-            throw new NotImplementedException();
+            return TaskEx.FromResult((IStreamedBlob)new StreamedBlob(this, id));
         }
 
-        public IStreamedBlob GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
+        public Task<TreePathStreamedBlob> GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)
         {
             throw new NotImplementedException();
         }
