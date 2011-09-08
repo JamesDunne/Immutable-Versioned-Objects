@@ -45,6 +45,7 @@
     <Compile Include="BlobRepository.cs" />
     <Compile Include="FileSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StreamedBlob.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IVO.Definition\IVO.Definition.csproj">

@@ -20,7 +20,7 @@ namespace IVO.Definition.Models
             
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = toString(_idValue);
+            _toString = _idValue.ToHexString(0, 20);
         }
         
         public CommitID(string hexValue)
@@ -35,7 +35,7 @@ namespace IVO.Definition.Models
             }
 
             _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = toString(_idValue);
+            _toString = _idValue.ToHexString(0, 20);
         }
         
         private static int deHex(char c)
@@ -85,18 +85,6 @@ namespace IVO.Definition.Models
             return _quickHash;
         }
 
-        private static readonly char[] hexChars = new char[16] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-        private static string toString(byte[] value)
-        {
-            char[] c = new char[ByteArrayLength * 2];
-            for (int i = 0; i < ByteArrayLength; ++i)
-            {
-                c[i * 2 + 0] = hexChars[value[i] >> 4];
-                c[i * 2 + 1] = hexChars[value[i] & 15];
-            }
-            return new string(c);
-        }
-        
         public override string ToString()
         {
             return _toString;
@@ -138,7 +126,7 @@ namespace IVO.Definition.Models
             
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = toString(_idValue);
+            _toString = _idValue.ToHexString(0, 20);
         }
         
         public TreeID(string hexValue)
@@ -153,7 +141,7 @@ namespace IVO.Definition.Models
             }
 
             _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = toString(_idValue);
+            _toString = _idValue.ToHexString(0, 20);
         }
         
         private static int deHex(char c)
@@ -203,18 +191,6 @@ namespace IVO.Definition.Models
             return _quickHash;
         }
 
-        private static readonly char[] hexChars = new char[16] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-        private static string toString(byte[] value)
-        {
-            char[] c = new char[ByteArrayLength * 2];
-            for (int i = 0; i < ByteArrayLength; ++i)
-            {
-                c[i * 2 + 0] = hexChars[value[i] >> 4];
-                c[i * 2 + 1] = hexChars[value[i] & 15];
-            }
-            return new string(c);
-        }
-        
         public override string ToString()
         {
             return _toString;
@@ -256,7 +232,7 @@ namespace IVO.Definition.Models
             
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = toString(_idValue);
+            _toString = _idValue.ToHexString(0, 20);
         }
         
         public BlobID(string hexValue)
@@ -271,7 +247,7 @@ namespace IVO.Definition.Models
             }
 
             _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = toString(_idValue);
+            _toString = _idValue.ToHexString(0, 20);
         }
         
         private static int deHex(char c)
@@ -321,18 +297,6 @@ namespace IVO.Definition.Models
             return _quickHash;
         }
 
-        private static readonly char[] hexChars = new char[16] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-        private static string toString(byte[] value)
-        {
-            char[] c = new char[ByteArrayLength * 2];
-            for (int i = 0; i < ByteArrayLength; ++i)
-            {
-                c[i * 2 + 0] = hexChars[value[i] >> 4];
-                c[i * 2 + 1] = hexChars[value[i] & 15];
-            }
-            return new string(c);
-        }
-        
         public override string ToString()
         {
             return _toString;
@@ -374,7 +338,7 @@ namespace IVO.Definition.Models
             
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = toString(_idValue);
+            _toString = _idValue.ToHexString(0, 20);
         }
         
         public TagID(string hexValue)
@@ -389,7 +353,7 @@ namespace IVO.Definition.Models
             }
 
             _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = toString(_idValue);
+            _toString = _idValue.ToHexString(0, 20);
         }
         
         private static int deHex(char c)
@@ -439,18 +403,6 @@ namespace IVO.Definition.Models
             return _quickHash;
         }
 
-        private static readonly char[] hexChars = new char[16] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-        private static string toString(byte[] value)
-        {
-            char[] c = new char[ByteArrayLength * 2];
-            for (int i = 0; i < ByteArrayLength; ++i)
-            {
-                c[i * 2 + 0] = hexChars[value[i] >> 4];
-                c[i * 2 + 1] = hexChars[value[i] & 15];
-            }
-            return new string(c);
-        }
-        
         public override string ToString()
         {
             return _toString;

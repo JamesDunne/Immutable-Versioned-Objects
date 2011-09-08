@@ -16,6 +16,8 @@ namespace IVO.Implementation.FileSystem
     {
         private FileSystem system;
 
+        internal FileSystem FileSystem { get { return system; } }
+
         /// <summary>
         /// TODO: tune this parameter for best async write buffer size.
         /// </summary>
@@ -220,7 +222,7 @@ namespace IVO.Implementation.FileSystem
 
         public Task<IStreamedBlob> GetStreamedBlob(BlobID id)
         {
-            throw new NotImplementedException();
+            return TaskEx.FromResult((IStreamedBlob)new StreamedBlob(this, id));
         }
 
         public Task<TreePathStreamedBlob> GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path)

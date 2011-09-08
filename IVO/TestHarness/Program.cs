@@ -587,6 +587,31 @@ namespace TestHarness
             await persistBlobs2;
             // Now persist the new tree:
             await trrepo.PersistTree(trRoot2.ID, trees);
+
+            // Load a streamed blob:
+            IStreamedBlob strbl = await blrepo.GetStreamedBlob(readmeBlob.ID);
+            await strbl.ReadStream(blsr =>
+            {
+                Console.WriteLine("blob is {0} length", blsr.Length);
+                
+                byte[] dum = new byte[8040];
+                int count = 8040;
+
+                try
+                {
+                    while ((count = blsr.Read(dum, 0, 8040)) > 0)
+                    {
+                        for (int i = 0; i < (count / 40) + ((count % 40) > 0 ? 1 : 0); ++i)
+                        {
+                            Console.WriteLine(dum.ToHexString(i * 40, Math.Min(count - (i * 40), 40)));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine(ex.ToString());
+                }
+            });
         }
     }
 }
