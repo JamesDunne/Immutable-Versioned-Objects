@@ -63,15 +63,6 @@
         },
 
         new {
-            name = "Blob",
-            comment = "An immutable blob.",
-            idType = "BlobID",
-            members = new[] {
-                new { name = "Contents",    type = "byte[]",    bType = (string)null, convert = (string)null, revert = (string)null },
-            }
-        },
-
-        new {
             name = "Tag",
             comment = "An immutable tag that points to a specific commit.",
             idType = "TagID",

@@ -44,8 +44,9 @@
     <Compile Include="Functional.cs" />
     <Compile Include="Models\AbsoluteBlobPath.cs" />
     <Compile Include="Models\AbsoluteTreePath.cs" />
+    <Compile Include="Models\TreePath.cs" />
+    <Compile Include="Models\PersistingBlob.cs" />
     <Compile Include="Models\TreePathStreamedBlob.cs" />
-    <Compile Include="Models\TreePathBlob.cs" />
     <Compile Include="Models\CanonicalTreePath.cs" />
     <Compile Include="Models\CanonicalBlobPath.cs" />
     <Compile Include="Models\IStreamedBlob.cs" />

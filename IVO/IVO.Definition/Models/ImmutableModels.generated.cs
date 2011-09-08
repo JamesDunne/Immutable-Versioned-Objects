@@ -266,47 +266,6 @@ namespace IVO.Definition.Models
     }
 
     /// <summary>
-    /// An immutable blob.
-    /// </summary>
-    public sealed partial class Blob
-    {
-        public BlobID ID { get; private set; }
-        public byte[] Contents { get; private set; }
-
-        public Blob(Builder b)
-        {
-            this.ID = computeID(b);
-            this.Contents = b.Contents;
-        }
-
-        public sealed class Builder
-        {
-            public byte[] Contents { get; set; }
-
-            public Builder() { }
-
-            public Builder(Blob imm)
-            {
-                this.Contents = imm.Contents;
-            }
-
-            public Builder(
-                byte[] pContents
-            )
-            {
-                this.Contents = pContents;
-            }
-        }
-
-        //private static BlobID computeID(Builder b);
-
-        public static implicit operator Blob(Builder b)
-        {
-            return new Blob(b);
-        }
-    }
-
-    /// <summary>
     /// An immutable tag that points to a specific commit.
     /// </summary>
     public sealed partial class Tag

@@ -182,22 +182,43 @@ namespace IVO.Definition.Models
         }
     }
 
-    public sealed partial class Blob
+    public static class BlobMethods
     {
         /// <summary>
         /// TODO: determine if this is thread-safe?
         /// </summary>
         private static readonly SHA1 sha1 = SHA1.Create();
 
-        private static BlobID computeID(Builder m)
+        public static BlobID ComputeID(byte[] m)
         {
             // TODO: g-zip compress?
-            byte[] buf = m.Contents;
+            byte[] buf = m;
 
             // SHA-1 the data:
             //var sha1 = SHA1.Create();
             byte[] hash = sha1.ComputeHash(buf);
             return new BlobID(hash);
+        }
+
+        public static BlobID ComputeID(Stream m)
+        {
+            SHA1 sh = SHA1.Create();
+
+            const int bufsize = 8040 * 8 * 4;
+            
+            byte[] dum = new byte[bufsize];
+            int count = bufsize;
+
+            while ((count = m.Read(dum, 0, bufsize)) > 0)
+            {
+                sh.TransformBlock(dum, 0, count, null, 0);
+            }
+            sh.TransformFinalBlock(dum, 0, 0);
+
+            byte[] hash = sh.Hash;
+
+            BlobID id = new BlobID(hash);
+            return id;
         }
     }
 }

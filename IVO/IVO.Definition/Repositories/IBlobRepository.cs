@@ -15,7 +15,7 @@ namespace IVO.Definition.Repositories
         /// </summary>
         /// <param name="blobs"></param>
         /// <returns></returns>
-        Task<ImmutableContainer<BlobID, Blob>> PersistBlobs(ImmutableContainer<BlobID, Blob> blobs);
+        Task<PersistingBlob[]> PersistBlobs(params PersistingBlob[] blobs);
 
         /// <summary>
         /// Deletes multiple Blobs by BlobIDs asynchronously.
@@ -29,28 +29,14 @@ namespace IVO.Definition.Repositories
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        Task<Blob[]> GetBlobs(params BlobID[] ids);
+        Task<IStreamedBlob[]> GetBlobs(params BlobID[] ids);
 
         /// <summary>
-        /// Gets a blob by its canonicalized absolute path from a root TreeID.
+        /// Retrieves multiple Blobs by their canonicalized absolute paths relative to their root TreeIDs asynchronously.
         /// </summary>
         /// <param name="rootid"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        Task<TreePathBlob> GetBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path);
-
-        /// <summary>
-        /// Gets a streamed blob by BlobID.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task<IStreamedBlob> GetStreamedBlob(BlobID id);
-
-        /// <summary>
-        /// Gets a streamed blob by its canonicalized absolute path from a root TreeID.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        Task<TreePathStreamedBlob> GetStreamedBlobByAbsolutePath(TreeID rootid, CanonicalBlobPath path);
+        Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(TreePath[] treePath);
     }
 }

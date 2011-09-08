@@ -5,17 +5,18 @@ using System.Text;
 
 namespace IVO.Definition.Models
 {
-    public sealed class TreePathBlob
+    /// <summary>
+    /// Represents a canonical path to a blob relative to a root TreeID.
+    /// </summary>
+    public sealed class TreePath
     {
-        public TreePathBlob(TreeID rootTreeID, CanonicalBlobPath path, Blob blob)
+        public TreePath(TreeID rootTreeID, CanonicalBlobPath path)
         {
             this.RootTreeID = rootTreeID;
             this.Path = path;
-            this.Blob = blob;
         }
 
         public TreeID RootTreeID { get; private set; }
         public CanonicalBlobPath Path { get; private set; }
-        public Blob Blob { get; private set; }
     }
 }
