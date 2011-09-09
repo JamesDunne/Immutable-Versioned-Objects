@@ -43,7 +43,8 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
         public Tree Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             Tree.Builder tb = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
-            
+
+            // Read the TreeTreeReferences:
             while (dr.Read())
             {
                 var name = dr.GetSqlString(0).Value;
@@ -54,6 +55,7 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
 
             if (!dr.NextResult()) return null;
 
+            // Read the TreeBlobReferences:
             while (dr.Read())
             {
                 var name = dr.GetSqlString(0).Value;

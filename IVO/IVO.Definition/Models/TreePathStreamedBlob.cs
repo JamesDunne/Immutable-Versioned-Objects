@@ -10,18 +10,18 @@ namespace IVO.Definition.Models
     /// </summary>
     public sealed class TreePathStreamedBlob
     {
-        public TreePathStreamedBlob(TreePath treePath, IStreamedBlob blob)
+        public TreePathStreamedBlob(TreeBlobPath treePath, IStreamedBlob blob)
         {
-            this.TreePath = treePath;
+            this.TreeBlobPath = treePath;
             this.StreamedBlob = blob;
         }
 
         public TreePathStreamedBlob(TreeID rootTreeID, CanonicalBlobPath path, IStreamedBlob blob)
-            : this(new TreePath(rootTreeID, path), blob)
+            : this(new TreeBlobPath(rootTreeID, path), blob)
         {
         }
 
-        public TreePath TreePath { get; private set; }
+        public TreeBlobPath TreeBlobPath { get; private set; }
         public IStreamedBlob StreamedBlob { get; private set; }
     }
 }

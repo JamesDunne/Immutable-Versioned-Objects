@@ -56,9 +56,51 @@ namespace TestIVO.FileSystemTest
         }
 
         [TestMethod()]
+        public void GetTreeTest()
+        {
+            getTestMethods().GetTreeTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
         public void GetTreesTest()
         {
             getTestMethods().GetTreesTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetTreeIDByPathTest()
+        {
+            getTestMethods().GetTreeIDByPathTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetTreeIDsByPathsTest()
+        {
+            getTestMethods().GetTreeIDsByPathsTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetTreeRecursivelyTest()
+        {
+            getTestMethods().GetTreeRecursivelyTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetTreeRecursivelyFromPathTest()
+        {
+            getTestMethods().GetTreeRecursivelyFromPathTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void DeleteTreeRecursivelyTest()
+        {
+            getTestMethods().DeleteTreeRecursivelyTest().Wait();
             cleanUp();
         }
     }

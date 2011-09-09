@@ -43,6 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommitRepository.cs" />
+    <Compile Include="Queries\QueryTreeIDsByPaths.cs" />
+    <Compile Include="Queries\QueryTreeByPath.cs" />
     <Compile Include="Queries\QueryTree.cs" />
     <Compile Include="StreamedBlobRepository.cs" />
     <Compile Include="Destroyers\DestroyRefByName.cs" />
@@ -67,7 +69,7 @@
     <Compile Include="Queries\QueryCommitsRecursively.cs" />
     <Compile Include="Queries\QueryRef.cs" />
     <Compile Include="Queries\QueryTag.cs" />
-    <Compile Include="Queries\QueryTreeByPath.cs" />
+    <Compile Include="Queries\QueryTreeRecursivelyByPath.cs" />
     <Compile Include="Queries\QueryTreeRecursively.cs" />
     <Compile Include="Queries\QueryTreesExist.cs" />
     <Compile Include="StreamedBlob.cs" />

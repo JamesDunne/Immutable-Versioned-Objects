@@ -8,9 +8,9 @@ namespace IVO.Definition.Models
     /// <summary>
     /// Represents a canonical path to a blob relative to a root TreeID.
     /// </summary>
-    public sealed class TreePath
+    public sealed class TreeBlobPath
     {
-        public TreePath(TreeID rootTreeID, CanonicalBlobPath path)
+        public TreeBlobPath(TreeID rootTreeID, CanonicalBlobPath path)
         {
             this.RootTreeID = rootTreeID;
             this.Path = path;

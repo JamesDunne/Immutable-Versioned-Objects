@@ -19,7 +19,7 @@ namespace IVO.Implementation.FileSystem
             this.blrepo = blrepo;
         }
 
-        public Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(params TreePath[] treePaths)
+        public Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(params TreeBlobPath[] treePaths)
         {
             throw new NotImplementedException();
         }

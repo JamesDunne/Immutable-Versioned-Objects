@@ -11,14 +11,12 @@ using System.Data;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryTreeByPath : IComplexDataQuery<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>>
+    public class QueryTreeByPath : IComplexDataQuery<Tree>
     {
-        private TreeID _rootid;
-        private CanonicalTreePath _path;
+        private TreeTreePath _path;
 
-        public QueryTreeByPath(TreeID rootid, CanonicalTreePath path)
+        public QueryTreeByPath(TreeTreePath path)
         {
-            this._rootid = rootid;
             this._path = path;
         }
 
@@ -37,111 +35,45 @@ namespace IVO.Implementation.SQL.Queries
     JOIN        rec parent ON parent.linked_treeid = tr.treeid
 )
 SELECT  @treeid = [tr].linked_treeid FROM rec tr WHERE tr.[path] = @path;" +
-                // Next, query the Tree recursively from there:
-@";WITH Trees AS (
-    SELECT      CONVERT(binary(20), NULL) AS treeid, tr.treeid AS linked_treeid, CONVERT(nvarchar(128), NULL) COLLATE SQL_Latin1_General_CP1_CS_AS AS name
-    FROM        [dbo].[Tree] tr
-    WHERE       tr.treeid = @treeid
-    UNION ALL
-    SELECT      tr.treeid, tr.linked_treeid, tr.name
-    FROM        [dbo].[TreeTree] tr
-    JOIN        Trees parent ON parent.linked_treeid = tr.treeid
-)
-SELECT  [tr].[treeid] AS tr_treeid
-       ,[tr].[linked_treeid] AS tr_linked_treeid
-       ,[tr].[name] AS tr_name
-       ,[bl].[linked_blobid] AS trbl_linked_blobid
-       ,[bl].[name] AS trbl_name
-FROM    Trees tr
-LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
+@"SELECT tr.name, tr.linked_treeid FROM [dbo].[TreeTree] tr WHERE [{0}] = @treeid;
+SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;";
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@rootid", new SqlBinary((byte[])this._rootid));
-            cmd.AddInParameter("@path", new SqlString(this._path.ToString()));
+            cmd.AddInParameter("@rootid", new SqlBinary((byte[])this._path.RootTreeID));
+            cmd.AddInParameter("@path", new SqlString(this._path.Path.ToString()));
             cmd.AddOutParameter("@treeid", System.Data.SqlDbType.Binary, 20);
             return cmd;
         }
 
-        public Tuple<TreeID, ImmutableContainer<TreeID, Tree>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public Tree Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            Dictionary<TreeID, Tree.Builder> trees = new Dictionary<TreeID, Tree.Builder>(expectedCount);
+            Tree.Builder tb = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
 
-            TreeID? root = null;
-
-            // Iterate through rows of the recursive query, assuming ordering of rows guarantees tree depth locality.
+            // Read the TreeTreeReferences:
             while (dr.Read())
             {
-                SqlBinary btreeid = dr.GetSqlBinary(0);
-                SqlBinary blinked_treeid = dr.GetSqlBinary(1);
-                SqlString treename = dr.GetSqlString(2);
-                SqlBinary linked_blobid = dr.GetSqlBinary(3);
-                SqlString blobname = dr.GetSqlString(4);
+                var name = dr.GetSqlString(0).Value;
+                var linked_treeid = (TreeID)dr.GetSqlBinary(1).Value;
 
-                TreeID? treeid = btreeid.IsNull ? (TreeID?)null : (TreeID)btreeid.Value;
-                TreeID? linked_treeid = blinked_treeid.IsNull ? (TreeID?)null : (TreeID)blinked_treeid.Value;
-
-                TreeID pullFor = treeid.HasValue ? treeid.Value : linked_treeid.Value;
-
-                // Use the first row as the root:
-                if (!root.HasValue) root = linked_treeid.Value;
-
-                Tree.Builder curr;
-                if (!trees.TryGetValue(pullFor, out curr))
-                {
-                    curr = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
-                    trees.Add(pullFor, curr);
-                }
-
-                // The tree to add the blob link to:
-                Tree.Builder blobTree = curr;
-
-                // Add a tree link:
-                if (treeid.HasValue && linked_treeid.HasValue)
-                {
-                    // Create the Tree.Builder for the linked_treeid if it does not exist:
-                    if (!trees.TryGetValue(linked_treeid.Value, out blobTree))
-                    {
-                        blobTree = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
-                        trees.Add(linked_treeid.Value, blobTree);
-                    }
-
-                    List<TreeTreeReference> treeRefs = curr.Trees;
-
-                    bool isDupe = false;
-                    if (treeRefs.Count > 0)
-                    {
-                        // Only check the previous ref record for dupe:
-                        // TODO: verify that SQL Server will *always* return rows in an order that supports depth locality from a recursive CTE.
-                        isDupe = (
-                            (treeRefs[treeRefs.Count - 1].TreeID == linked_treeid.Value) &&
-                            (treeRefs[treeRefs.Count - 1].Name == treename.Value)
-                        );
-                    }
-
-                    // Don't re-add the same tree link:
-                    if (!isDupe)
-                        treeRefs.Add(new TreeTreeReference.Builder(treename.Value, linked_treeid.Value));
-                }
-
-                // Add a blob link to the child or parent tree:
-                if (!linked_blobid.IsNull)
-                    blobTree.Blobs.Add(new TreeBlobReference.Builder(blobname.Value, (BlobID)linked_blobid.Value));
+                tb.Trees.Add(new TreeTreeReference.Builder(name, linked_treeid));
             }
 
-            // If no root assigned, then no tree retrieved:
-            if (!root.HasValue) return null;
+            if (!dr.NextResult()) return null;
 
-            // Return the final result with immutable objects:
-            return new Tuple<TreeID, ImmutableContainer<TreeID, Tree>>(
-                root.Value,
-                new ImmutableContainer<TreeID, Tree>(
-                    tr => tr.ID,
-                    trees.Select(kv =>
-                        // Verify that the retrieved ID is equivalent to the constructed ID:
-                        ((Tree)kv.Value).Assert(tr => kv.Key == tr.ID, tr => new TreeIDMismatchException(tr.ID, kv.Key))
-                    )
-                )
-            );
+            // Read the TreeBlobReferences:
+            while (dr.Read())
+            {
+                var name = dr.GetSqlString(0).Value;
+                var linked_blobid = (BlobID)dr.GetSqlBinary(1).Value;
+
+                tb.Blobs.Add(new TreeBlobReference.Builder(name, linked_blobid));
+            }
+
+            Tree tr = tb;
+            TreeID retrievedId = (TreeID)((SqlBinary)cmd.Parameters["@treeid"].SqlValue).Value;
+            if (tr.ID != retrievedId) throw new TreeIDMismatchException(tr.ID, retrievedId);
+
+            return tr;
         }
 
         public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)

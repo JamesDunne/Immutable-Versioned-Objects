@@ -12,6 +12,7 @@ using IVO.Definition.Models;
 using IVO.Definition.Containers;
 using IVO.Definition.Repositories;
 using System.Diagnostics;
+using System.Collections.ObjectModel;
 
 namespace IVO.Implementation.SQL
 {
@@ -90,9 +91,52 @@ namespace IVO.Implementation.SQL
             throw new NotImplementedException();
         }
 
-        public Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursivelyFromPath(TreeID rootid, CanonicalTreePath path)
+        public Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursivelyFromPath(TreeTreePath path)
         {
-            return db.ExecuteSingleQueryAsync(new QueryTreeByPath(rootid, path));
+            return db.ExecuteSingleQueryAsync(new QueryTreeRecursivelyByPath(path));
+        }
+
+        public Task<Tree> GetTree(TreeID id)
+        {
+            return db.ExecuteSingleQueryAsync(new QueryTree(id));
+        }
+
+        public async Task<TreeIDPathMapping> GetTreeIDByPath(TreeTreePath path)
+        {
+            var treeIDs = await db.ExecuteSingleQueryAsync(new QueryTreeIDsByPaths(path.RootTreeID, path.Path));
+            if (treeIDs.Count == 0) return new TreeIDPathMapping(path, (TreeID?)null);
+            return treeIDs[0];
+        }
+
+        public async Task<TreeIDPathMapping[]> GetTreeIDsByPaths(params TreeTreePath[] paths)
+        {
+            // Since we cannot query the database with multiple root TreeIDs at once, group all the
+            // paths that share the same root TreeID together and submit those in one query.
+
+            var rootTreeIDGroups = from path in paths group path by path.RootTreeID;
+
+            var tasks = new List<Task<ReadOnlyCollection<TreeIDPathMapping>>>(capacity: paths.Length);
+            using (var en = rootTreeIDGroups.GetEnumerator())
+            {
+                for (int i = 0; en.MoveNext(); ++i)
+                {
+                    TreeID rootid = en.Current.Key;
+                    CanonicalTreePath[] treePaths = en.Current.Select(tr => tr.Path).ToArray();
+
+                    tasks.Add( db.ExecuteSingleQueryAsync(new QueryTreeIDsByPaths(rootid, treePaths)) );
+                }
+            }
+
+            // Wait for all the queries to come back:
+            var allTreeIDs = await TaskEx.WhenAll(tasks);
+
+            // Flatten out the array-of-arrays:
+            var flattenedTreeIDs =
+                from trArr in allTreeIDs
+                from tr in trArr
+                select tr;
+
+            return flattenedTreeIDs.ToArray(paths.Length);
         }
     }
 }

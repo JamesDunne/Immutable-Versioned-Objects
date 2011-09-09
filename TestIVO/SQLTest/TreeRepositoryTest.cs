@@ -31,16 +31,68 @@ namespace TestIVO.SQLTest
             return new CommonTest.TreeRepositoryTestMethods(blrepo, trrepo);
         }
 
+        private void cleanUp()
+        {
+            // TODO: clear database data!
+        }
+
         [TestMethod()]
         public void PersistTreeTest()
         {
             getTestMethods().PersistTreeTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetTreeTest()
+        {
+            getTestMethods().GetTreeTest().Wait();
+            cleanUp();
         }
 
         [TestMethod()]
         public void GetTreesTest()
         {
             getTestMethods().GetTreesTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetTreeIDByPathTest()
+        {
+            getTestMethods().GetTreeIDByPathTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetTreeIDsByPathsTest()
+        {
+            getTestMethods().GetTreeIDsByPathsTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetTreeRecursivelyTest()
+        {
+            getTestMethods().GetTreeRecursivelyTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetTreeRecursivelyFromPathTest()
+        {
+            getTestMethods().GetTreeRecursivelyFromPathTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        // FIXME: VS unit testing is a bit short-sighted for exceptions here. AggregateException CONTAINS the NotImplementedException.
+        //[ExpectedException(typeof(NotImplementedException))]
+        [ExpectedException(typeof(AggregateException))]
+        public void DeleteTreeRecursivelyTest()
+        {
+            getTestMethods().DeleteTreeRecursivelyTest().Wait();
+            cleanUp();
         }
     }
 }

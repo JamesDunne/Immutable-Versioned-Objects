@@ -82,4 +82,15 @@ namespace System
             return new string(c, 0, i * 2);
         }
     }
+
+    public static class ArrayExtensions
+    {
+        public static TResult[] SelectAsArray<T, TResult>(this T[] arr, Func<T, TResult> projection)
+        {
+            TResult[] res = new TResult[arr.Length];
+            for (int i = 0; i < arr.Length; ++i)
+                res[i] = projection(arr[i]);
+            return res;
+        }
+    }
 }

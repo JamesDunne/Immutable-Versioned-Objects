@@ -18,6 +18,6 @@ namespace IVO.Definition.Repositories
         /// <param name="rootid"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(params TreePath[] treePaths);
+        Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(params TreeBlobPath[] treePaths);
     }
 }

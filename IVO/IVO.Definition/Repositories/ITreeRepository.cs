@@ -23,7 +23,30 @@ namespace IVO.Definition.Repositories
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
+        Task<Tree> GetTree(TreeID id);
+        
+        /// <summary>
+        /// Gets a set of Tree objects by TreeIDs asynchronously.
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
         Task<Tree[]> GetTrees(params TreeID[] ids);
+
+        /// <summary>
+        /// Gets a TreeID from its path relative to a root TreeID.
+        /// </summary>
+        /// <param name="rootid"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        Task<TreeIDPathMapping> GetTreeIDByPath(TreeTreePath path);
+
+        /// <summary>
+        /// Gets a TreeID from its path relative to a root TreeID.
+        /// </summary>
+        /// <param name="rootid"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        Task<TreeIDPathMapping[]> GetTreeIDsByPaths(params TreeTreePath[] paths);
 
         /// <summary>
         /// Deletes an entire tree structure starting from the root TreeID (<paramref name="rootid"/>).
@@ -40,11 +63,11 @@ namespace IVO.Definition.Repositories
         Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursively(TreeID rootid);
 
         /// <summary>
-        /// Gets a Tree object by its absolute path from the given root TreeID asynchronously.
+        /// Recursively retrieves all Tree objects from the absolute path from a root TreeID.
         /// </summary>
         /// <param name="rootid"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursivelyFromPath(TreeID rootid, CanonicalTreePath path);
+        Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursivelyFromPath(TreeTreePath path);
     }
 }

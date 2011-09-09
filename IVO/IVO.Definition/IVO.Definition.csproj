@@ -46,10 +46,12 @@
     <Compile Include="Models\AbsoluteTreePath.cs" />
     <Compile Include="Models\Commit.cs" />
     <Compile Include="Models\CommitPartial.cs" />
+    <Compile Include="Models\TreeIDPathMapping.cs" />
+    <Compile Include="Models\TreeTreePath.cs" />
     <Compile Include="Models\ICommit.cs" />
     <Compile Include="Models\Tag.cs" />
     <Compile Include="Models\Tree.cs" />
-    <Compile Include="Models\TreePath.cs" />
+    <Compile Include="Models\TreeBlobPath.cs" />
     <Compile Include="Models\PersistingBlob.cs" />
     <Compile Include="Models\TreePathStreamedBlob.cs" />
     <Compile Include="Models\CanonicalTreePath.cs" />
