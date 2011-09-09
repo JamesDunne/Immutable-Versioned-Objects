@@ -6,6 +6,7 @@ using Asynq;
 using IVO.Definition.Models;
 using System.Collections.Generic;
 using System.Data;
+using IVO.Definition.Exceptions;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -61,7 +62,10 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl;",
                 tb.Blobs.Add(new TreeBlobReference.Builder(name, linked_blobid));
             }
 
-            return tb;
+            Tree tr = tb;
+            if (tr.ID != _id) throw new TreeIDMismatchException(tr.ID, _id);
+
+            return tr;
         }
     }
 }
