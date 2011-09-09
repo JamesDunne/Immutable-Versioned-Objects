@@ -17,18 +17,29 @@ namespace TestIVO.CommonTest
     class TreeRepositoryTestMethods
     {
         private ITreeRepository trrepo;
+        private IStreamedBlobRepository blrepo;
 
-        internal TreeRepositoryTestMethods(ITreeRepository trrepo)
+        internal TreeRepositoryTestMethods(IStreamedBlobRepository blrepo, ITreeRepository trrepo)
         {
+            this.blrepo = blrepo;
             this.trrepo = trrepo;
         }
 
-        private Tuple<TreeID, ImmutableContainer<TreeID, Tree>> createTree()
+        private TreeID rootId;
+        private ImmutableContainer<TreeID, Tree> trees;
+        private PersistingBlob[] pblobs;
+
+        private void createTrees()
         {
+            PersistingBlob pbHeader;
+            pblobs = new PersistingBlob[1] {
+                pbHeader = new PersistingBlob(() => "<div>Header</div>".ToStream())
+            };
+
             Tree trTemplate = new Tree.Builder(
                 new List<TreeTreeReference>(0),
                 new List<TreeBlobReference> {
-                    new TreeBlobReference.Builder("header", new BlobID("0000000000000000000011111111111111111111"))
+                    new TreeBlobReference.Builder("header", pbHeader.ComputedID)
                 }
             );
 
@@ -39,24 +50,27 @@ namespace TestIVO.CommonTest
                 new List<TreeBlobReference>(0)
             );
 
-            return new Tuple<TreeID, ImmutableContainer<TreeID, Tree>>(trRoot.ID, new ImmutableContainer<TreeID, Tree>(tr => tr.ID, trTemplate, trRoot));
+            rootId = trRoot.ID;
+            trees = new ImmutableContainer<TreeID, Tree>(tr => tr.ID, trTemplate, trRoot);
         }
 
         internal async Task PersistTreeTest()
         {
-            var tr = createTree();
-            await trrepo.PersistTree(tr.Item1, tr.Item2);
+            createTrees();
+
+            await blrepo.PersistBlobs(pblobs);
+            await trrepo.PersistTree(rootId, trees);
         }
 
         internal async Task GetTreesTest()
         {
-            var tr = createTree();
+            createTrees();
 
-            // Persist the sample trees:
-            await trrepo.PersistTree(tr.Item1, tr.Item2);
+            await blrepo.PersistBlobs(pblobs);
+            await trrepo.PersistTree(rootId, trees);
 
             // Now retrieve those trees:
-            var treeIDs = tr.Item2.Keys.ToArray();
+            var treeIDs = trees.Keys.ToArray();
             var trGot = await trrepo.GetTrees(treeIDs);
 
             Assert.AreEqual(treeIDs[0], trGot[0].ID);

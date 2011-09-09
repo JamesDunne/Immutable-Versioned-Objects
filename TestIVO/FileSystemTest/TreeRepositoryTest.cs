@@ -30,30 +30,36 @@ namespace TestIVO.FileSystemTest
             return system;
         }
 
-        [TestMethod()]
-        public void PersistTreeTest()
+        FileSystem system;
+
+        private CommonTest.TreeRepositoryTestMethods getTestMethods()
         {
-            FileSystem system = getFileSystem();
+            system = getFileSystem();
+            IStreamedBlobRepository blrepo = new StreamedBlobRepository(system);
             ITreeRepository trrepo = new TreeRepository(system);
 
-            new CommonTest.TreeRepositoryTestMethods(trrepo).PersistTreeTest().Wait();
+            return new CommonTest.TreeRepositoryTestMethods(blrepo, trrepo);
+        }
 
+        private void cleanUp()
+        {
             // Clean up:
             if (system.Root.Exists)
                 system.Root.Delete(recursive: true);
         }
 
         [TestMethod()]
+        public void PersistTreeTest()
+        {
+            getTestMethods().PersistTreeTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
         public void GetTreesTest()
         {
-            FileSystem system = getFileSystem();
-            ITreeRepository trrepo = new TreeRepository(system);
-
-            new CommonTest.TreeRepositoryTestMethods(trrepo).GetTreesTest().Wait();
-
-            // Clean up:
-            if (system.Root.Exists)
-                system.Root.Delete(recursive: true);
+            getTestMethods().GetTreesTest().Wait();
+            cleanUp();
         }
     }
 }

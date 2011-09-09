@@ -60,6 +60,7 @@
     <Compile Include="CommonTest\StreamedBlobRepositoryTestMethods.cs" />
     <Compile Include="FileSystemTest\TreeRepositoryTest.cs" />
     <Compile Include="FileSystemTest\StreamedBlobRepositoryTest.cs" />
+    <Compile Include="SQLTest\TreeRepositoryTest.cs" />
     <Compile Include="SQLTest\StreamedBlobRepositoryTest.cs" />
     <Compile Include="TreePaths.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -80,6 +81,10 @@
     <ProjectReference Include="..\IVO\IVO.Implementation.SQL\IVO.Implementation.SQL.csproj">
       <Project>{BCD16F4B-3915-43B7-B1C8-5A9132D97615}</Project>
       <Name>IVO.Implementation.SQL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IVO\IVO.TestSupport\IVO.TestSupport.csproj">
+      <Project>{C2E7FC6B-14F8-4F24-A536-2CAEEBCDFFF1}</Project>
+      <Name>IVO.TestSupport</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

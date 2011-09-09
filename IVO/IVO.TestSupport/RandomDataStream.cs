@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace IVO.Definition
+namespace IVO.TestSupport
 {
     public sealed class RandomDataStream : Stream
     {

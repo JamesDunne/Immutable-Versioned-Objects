@@ -23,8 +23,8 @@ namespace IVO.Implementation.SQL.Queries
         {
             string pkName = Tables.TablePKs_Tree.Single();
             string cmdText = String.Format(
-@"SELECT tr.name, tr.linked_treeid FROM [dbo].[TreeTree] tr;
-SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl;",
+@"SELECT tr.name, tr.linked_treeid FROM [dbo].[TreeTree] tr WHERE [{0}] = @treeid;
+SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;",
                 pkName,
                 Tables.TableName_Tree,
                 Tables.TableFromHint_Tree

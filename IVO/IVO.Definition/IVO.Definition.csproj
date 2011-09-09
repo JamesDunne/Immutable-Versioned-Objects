@@ -58,7 +58,6 @@
     <Compile Include="Models\RelativeBlobPath.cs" />
     <Compile Include="Models\Path.cs" />
     <Compile Include="Models\RelativeTreePath.cs" />
-    <Compile Include="RandomDataStream.cs" />
     <Compile Include="Repositories\IStreamedBlobRepository.cs" />
     <Compile Include="Repositories\ICommitRepository.cs" />
     <Compile Include="Repositories\IRefRepository.cs" />
