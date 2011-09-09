@@ -45,17 +45,17 @@ namespace IVO.Definition.Models
             // Sort refs by name:
             var namedRefs = ComputeChildList(Trees, Blobs);
 
-            var bw = new BinaryWriter(ms, Encoding.UTF8);
+            var sw = new StreamWriter(ms, Encoding.UTF8);
 
             // Read the list back in sorted-by-name order:
             foreach (var either in namedRefs.Values)
             {
-                bw.WriteRaw(either.Collapse(
+                sw.Write(either.Collapse(
                     tr => String.Format("tree {0} {1}\n", tr.TreeID, tr.Name),
                     bl => String.Format("blob {0} {1}\n", bl.BlobID, bl.Name)
                 ));
             }
-            bw.Flush();
+            sw.Flush();
         }
 
         private void computeID()

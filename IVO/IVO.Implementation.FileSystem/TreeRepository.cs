@@ -7,6 +7,7 @@ using IVO.Definition.Containers;
 using IVO.Definition.Models;
 using IVO.Definition.Repositories;
 using System.IO;
+using IVO.Definition.Exceptions;
 
 namespace IVO.Implementation.FileSystem
 {
@@ -19,6 +20,57 @@ namespace IVO.Implementation.FileSystem
             this.system = system;
         }
 
+        #region Private details
+
+        private async Task<Tree> getTree(TreeID id)
+        {
+            FileInfo fi = system.getPathByID(id);
+            if (!fi.Exists) return null;
+
+            byte[] buf;
+            using (var fs = new FileStream(fi.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, 16384, true))
+            {
+                // TODO: implement an async buffered Stream:
+                buf = new byte[16384];
+                int nr = await fs.ReadAsync(buf, 0, 16384);
+                if (nr >= 16384)
+                {
+                    // My, what a large tree you have!
+                    throw new NotSupportedException();
+                }
+            }
+
+            Tree.Builder tb = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
+
+            // Parse the Tree:
+            using (var ms = new MemoryStream(buf))
+            using (var sr = new StreamReader(ms, Encoding.UTF8))
+            {
+                string line;
+
+                while ((line = sr.ReadLine()) != null)
+                {
+                    if (line.StartsWith("tree "))
+                    {
+                        int endpos = line.Length - (TreeID.ByteArrayLength * 2) - 1;
+                        tb.Trees.Add(new TreeTreeReference.Builder(line.Substring(5, endpos), new TreeID(line.Substring(endpos + 1))));
+                    }
+                    else if (line.StartsWith("blob "))
+                    {
+                        int endpos = line.Length - (BlobID.ByteArrayLength * 2) - 1;
+                        tb.Blobs.Add(new TreeBlobReference.Builder(line.Substring(5, endpos), new BlobID(line.Substring(endpos + 1))));
+                    }
+                }
+            }
+
+            // Create the immutable Tree from the Builder:
+            Tree tr = tb;
+            // Validate the computed TreeID:
+            if (tr.ID != id) throw new TreeIDMismatchException(tr.ID, id);
+
+            return tr;
+        }
+
         private void persistTree(Tree tr)
         {
             FileInfo fi = system.getPathByID(tr.ID);
@@ -29,6 +81,8 @@ namespace IVO.Implementation.FileSystem
                 tr.WriteTo(fs);
             }
         }
+
+        #endregion
 
         public async Task<Tree> PersistTree(TreeID rootid, ImmutableContainer<TreeID, Tree> trees)
         {
@@ -50,14 +104,29 @@ namespace IVO.Implementation.FileSystem
             return trees[rootid];
         }
 
+        public Task<Tree[]> GetTrees(params TreeID[] ids)
+        {
+            Task<Tree>[] tasks = new Task<Tree>[ids.Length];
+            for (int i = 0; i < ids.Length; ++i)
+            {
+                TreeID id = ids[i];
+                tasks[i] = getTree(id);
+            }
+            return TaskEx.WhenAll(tasks);
+        }
+
         public Task<TreeID> DeleteTreeRecursively(TreeID rootid)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursively(TreeID rootid)
+        public async Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursively(TreeID rootid)
         {
-            throw new NotImplementedException();
+            Dictionary<TreeID, Tree> trees = new Dictionary<TreeID, Tree>();
+
+            var root = await getTree(rootid);
+
+            return new Tuple<TreeID, ImmutableContainer<TreeID, Tree>>(rootid, new ImmutableContainer<TreeID, Tree>(trees));
         }
 
         public Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursivelyFromPath(TreeID rootid, CanonicalTreePath path)

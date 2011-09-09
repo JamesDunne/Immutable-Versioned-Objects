@@ -69,6 +69,17 @@ namespace IVO.Implementation.SQL
             return trees[rootid];
         }
 
+        public Task<Tree[]> GetTrees(params TreeID[] ids)
+        {
+            Task<Tree>[] tasks = new Task<Tree>[ids.Length];
+            for (int i = 0; i < ids.Length; ++i)
+            {
+                TreeID id = ids[i];
+                tasks[i] = db.ExecuteSingleQueryAsync(new QueryTree(id));
+            }
+            return TaskEx.WhenAll(tasks);
+        }
+
         public Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursively(TreeID rootid)
         {
             return db.ExecuteListQueryAsync(new QueryTreeRecursively(rootid));
