@@ -94,6 +94,10 @@ namespace IVO.Implementation.FileSystem
                 // Set DateCommitted:
                 line = sr.ReadLine();
                 if (line == null || !line.StartsWith("date ")) throw new ObjectParseException("While parsing a commit, expected: 'date'");
+
+                // NOTE: date parsing will result in an inexact DateTimeOffset from what was created with, but it
+                // is close enough because the SHA-1 hash is calculated using the DateTimeOffset.ToString(), so
+                // only the ToString() representations of the DateTimeOffsets need to match.
                 cb.DateCommitted = DateTimeOffset.Parse(line.Substring("date ".Length));
 
                 // Skip empty line:
@@ -156,9 +160,49 @@ namespace IVO.Implementation.FileSystem
             throw new NotImplementedException();
         }
 
-        public Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTree(CommitID id, int depth = 10)
+        private async Task<Commit[]> getCommitsRecursively(CommitID id, int depthLevel, int depthMaximum)
         {
-            throw new NotImplementedException();
+            // Get the current commit:
+            var root = await getCommit(id);
+            var rootArr = new Commit[1] { root };
+
+            // We have no parents:
+            if (root.Parents.Length == 0)
+                return rootArr;
+
+            // This is the last depth level:
+            if (depthLevel >= depthMaximum)
+                return rootArr;
+
+            // Recurse up the commit parents:
+            Task<Commit[]>[] tasks = new Task<Commit[]>[root.Parents.Length];
+            for (int i = 0; i < root.Parents.Length; ++i)
+            {
+                tasks[i] = getCommitsRecursively(root.Parents[i], depthLevel + 1, depthMaximum);
+            }
+
+            // Await all the tree retrievals:
+            var allCommits = await TaskEx.WhenAll(tasks);
+
+            // Flatten out the tree arrays:
+            var flattened =
+                from cmArr in allCommits
+                from cm in cmArr
+                select cm;
+
+            // Return the final array:
+            return rootArr.Concat(flattened).ToArray(allCommits.Sum(ca => ca.Length) + 1);
+        }
+
+        public async Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTree(CommitID id, int depth = 10)
+        {
+            var all = await getCommitsRecursively(id, 1, depth);
+
+            // Return them (all[0] is the root):
+            return new Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>(
+                all[0].ID,
+                new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, all)
+            );
         }
     }
 }

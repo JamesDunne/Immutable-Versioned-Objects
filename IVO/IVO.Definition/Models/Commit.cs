@@ -33,6 +33,10 @@ namespace IVO.Definition.Models
 
             bw.WriteRaw(String.Format("tree {0}\n", TreeID));
             bw.WriteRaw(String.Format("committer {0}\n", Committer));
+
+            // NOTE: date parsing will result in an inexact DateTimeOffset from what was created with, but it
+            // is close enough because the SHA-1 hash is calculated using the DateTimeOffset.ToString(), so
+            // only the ToString() representations of the DateTimeOffsets need to match.
             bw.WriteRaw(String.Format("date {0}\n\n", DateCommitted.ToString()));
             bw.WriteRaw(Message);
             bw.Flush();

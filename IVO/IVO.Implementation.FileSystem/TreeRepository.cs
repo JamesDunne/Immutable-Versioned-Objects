@@ -232,8 +232,6 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursively(TreeID rootid)
         {
-            Dictionary<TreeID, Tree> trees = new Dictionary<TreeID, Tree>();
-
             // Get all trees recursively:
             var all = await getTreeRecursively(rootid);
 
