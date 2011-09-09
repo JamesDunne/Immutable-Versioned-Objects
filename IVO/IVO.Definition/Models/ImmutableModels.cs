@@ -14,28 +14,34 @@ namespace IVO.Definition.Models
         /// </summary>
         private static readonly SHA1 sha1 = SHA1.Create();
 
-        private static TagID computeID(Builder b)
+        public void WriteTo(Stream ms)
+        {
+            var bw = new BinaryWriter(ms, Encoding.UTF8);
+
+            bw.WriteRaw(String.Format("commit {0}\n", CommitID));
+            bw.WriteRaw(String.Format("name {0}\n", Name));
+            bw.WriteRaw(String.Format("tagger {0}\n", Tagger));
+            bw.WriteRaw(string.Format("date {0}\n\n", DateTagged.ToString("u")));
+
+            if (!String.IsNullOrEmpty(Message))
+            {
+                bw.WriteRaw(Message);
+            }
+            bw.Flush();
+        }
+
+        private void computeID()
         {
             int initialCapacity = "commit ".Length + TagID.ByteArrayLength;
 
             using (var ms = new MemoryStream(initialCapacity))
-            using (var bw = new BinaryWriter(ms, Encoding.UTF8))
             {
-                bw.WriteRaw(String.Format("commit {0}\n", b.CommitID));
-                bw.WriteRaw(String.Format("name {0}\n", b.Name));
-                bw.WriteRaw(String.Format("tagger {0}\n", b.Tagger));
-                bw.WriteRaw(string.Format("date {0}\n\n", b.DateTagged.ToString("u")));
-
-                if (!String.IsNullOrEmpty(b.Message))
-                {
-                    bw.WriteRaw(b.Message);
-                }
-                bw.Flush();
+                WriteTo(ms);
 
                 // SHA-1 the data:
                 //var sha1 = SHA1.Create();
                 byte[] hash = sha1.ComputeHash(ms.ToArray());
-                return new TagID(hash);
+                this.ID = new TagID(hash);
             }
         }
     }
@@ -77,43 +83,49 @@ namespace IVO.Definition.Models
             get { return true; }
         }
 
-        private static CommitID computeID(Builder m)
+        public void WriteTo(Stream ms)
+        {
+            var bw = new BinaryWriter(ms, Encoding.UTF8);
+
+            if (Parents != null && Parents.Length > 0)
+            {
+                // Sort parent CommitIDs in order:
+                CommitID[] parents = new CommitID[Parents.Length];
+                for (int i = 0; i < parents.Length; ++i)
+                    parents[i] = Parents[i];
+                Array.Sort(parents, new CommitID.Comparer());
+
+                for (int i = 0; i < parents.Length; ++i)
+                {
+                    bw.WriteRaw(String.Format("parent {0}\n", parents[i]));
+                }
+            }
+
+            bw.WriteRaw(String.Format("tree {0}\n", TreeID));
+            bw.WriteRaw(String.Format("committer {0}\n", Committer));
+            bw.WriteRaw(String.Format("date {0}\n\n", DateCommitted.ToString("u")));
+            bw.WriteRaw(Message);
+            bw.Flush();
+        }
+
+        private void computeID()
         {
             // Calculate a quick-and-dirty expected capacity:
             int initialCapacity =
-                m.Parents == null || m.Parents.Count == 0 ? 0 : m.Parents.Sum(t => "parent ".Length + CommitID.ByteArrayLength * 2 + 1)
+                Parents == null || Parents.Length == 0 ? 0 : Parents.Sum(t => "parent ".Length + CommitID.ByteArrayLength * 2 + 1)
               + "tree ".Length + TreeID.ByteArrayLength * 2 + 1
-              + "committer ".Length + m.Committer.Length + 1
+              + "committer ".Length + Committer.Length + 1
               + "date ".Length + 25 + 1
-              + m.Message.Length;
+              + Message.Length;
 
             using (var ms = new MemoryStream(initialCapacity))
-            using (var bw = new BinaryWriter(ms, Encoding.UTF8))
             {
-                if (m.Parents != null && m.Parents.Count > 0)
-                {
-                    // Sort parent CommitIDs in order:
-                    CommitID[] parents = new CommitID[m.Parents.Count];
-                    for (int i = 0; i < parents.Length; ++i)
-                        parents[i] = m.Parents[i];
-                    Array.Sort(parents, new CommitID.Comparer());
-                    
-                    for (int i = 0; i < parents.Length; ++i)
-                    {
-                        bw.WriteRaw(String.Format("parent {0}\n", parents[i]));
-                    }
-                }
-
-                bw.WriteRaw(String.Format("tree {0}\n", m.TreeID));
-                bw.WriteRaw(String.Format("committer {0}\n", m.Committer));
-                bw.WriteRaw(String.Format("date {0}\n\n", m.DateCommitted.ToString("u")));
-                bw.WriteRaw(m.Message);
-                bw.Flush();
+                WriteTo(ms);
 
                 // SHA-1 the data:
                 //var sha1 = SHA1.Create();
                 byte[] hash = sha1.ComputeHash(ms.ToArray());
-                return new CommitID(hash);
+                this.ID = new CommitID(hash);
             }
         }
     }
@@ -151,33 +163,41 @@ namespace IVO.Definition.Models
             return namedRefs;
         }
 
-        private static TreeID computeID(Builder m)
+        public void WriteTo(Stream ms)
         {
             // Sort refs by name:
-            var namedRefs = ComputeChildList(m.Trees, m.Blobs);
+            var namedRefs = ComputeChildList(Trees, Blobs);
 
+            var bw = new BinaryWriter(ms, Encoding.UTF8);
+
+            // Read the list back in sorted-by-name order:
+            foreach (var either in namedRefs.Values)
+            {
+                bw.WriteRaw(either.Collapse(
+                    tr => String.Format("tree {0} {1}\n", tr.TreeID, tr.Name),
+                    bl => String.Format("blob {0} {1}\n", bl.BlobID, bl.Name)
+                ));
+            }
+            bw.Flush();
+        }
+
+        private void computeID()
+        {
             // Calculate a quick-and-dirty expected capacity:
             int initialCapacity =
-                m.Trees.Sum(t => "tree ".Length + t.Name.Length + 1 + TreeID.ByteArrayLength * 2 + 1)
-              + m.Blobs.Sum(b => "blob ".Length + b.Name.Length + 1 + BlobID.ByteArrayLength * 2 + 1);
+                Trees.Sum(t => "tree ".Length + t.Name.Length + 1 + TreeID.ByteArrayLength * 2 + 1)
+              + Blobs.Sum(b => "blob ".Length + b.Name.Length + 1 + BlobID.ByteArrayLength * 2 + 1);
 
             using (var ms = new MemoryStream(initialCapacity))
-            using (var bw = new BinaryWriter(ms, Encoding.UTF8))
             {
-                // Read the list back in sorted-by-name order:
-                foreach (var either in namedRefs.Values)
-                {
-                    bw.WriteRaw(either.Collapse(
-                        tr => String.Format("tree {0} {1}\n", tr.TreeID, tr.Name),
-                        bl => String.Format("blob {0} {1}\n", bl.BlobID, bl.Name)
-                    ));
-                }
-                bw.Flush();
+                // Write the tree's data out to the stream:
+                this.WriteTo(ms);
 
                 // SHA-1 the data:
                 //var sha1 = SHA1.Create();
                 byte[] hash = sha1.ComputeHash(ms.ToArray());
-                return new TreeID(hash);
+
+                this.ID = new TreeID(hash);
             }
         }
     }
@@ -205,7 +225,7 @@ namespace IVO.Definition.Models
             SHA1 sh = SHA1.Create();
 
             const int bufsize = 8040 * 8 * 4;
-            
+
             byte[] dum = new byte[bufsize];
             int count = bufsize;
 

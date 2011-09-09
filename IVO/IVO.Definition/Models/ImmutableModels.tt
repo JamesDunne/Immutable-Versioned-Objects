@@ -137,12 +137,6 @@ namespace IVO.Definition.Models
         public <#= ty.name #>(Builder b)
         {
 <#
-        if (ty.idType != (string)null)
-        {
-#>
-            this.ID = computeID(b);
-<#
-        } // if (ty.idType != (string)null)
         // Property assignment statements:
         for (int j = 0; j < ty.members.Length; ++j)
         {
@@ -151,6 +145,12 @@ namespace IVO.Definition.Models
             this.<#= mbr.name #> = <#= mbr.convert == null ? "b." + mbr.name : String.Format(mbr.convert, "b." + mbr.name, mbr.type, mbr.bType) #>;
 <#
         } // for (int j = 0; j < ty.members.Length; ++j)
+        if (ty.idType != (string)null)
+        {
+#>
+            computeID();
+<#
+        } // if (ty.idType != (string)null)
 #>
         }
 
@@ -212,7 +212,7 @@ namespace IVO.Definition.Models
         {
 #>
 
-        //private static <#= ty.idType #> computeID(Builder b);
+        //public void computeID();
 <#
         } // if (ty.idType != (string)null)
 #>

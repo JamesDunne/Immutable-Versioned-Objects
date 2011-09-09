@@ -20,12 +20,12 @@ namespace IVO.Definition.Models
 
         public Commit(Builder b)
         {
-            this.ID = computeID(b);
             this.Parents = (b.Parents).ToArray((b.Parents).Count);
             this.TreeID = b.TreeID;
             this.Committer = b.Committer;
             this.DateCommitted = b.DateCommitted;
             this.Message = b.Message;
+            computeID();
         }
 
         public sealed class Builder
@@ -63,7 +63,7 @@ namespace IVO.Definition.Models
             }
         }
 
-        //private static CommitID computeID(Builder b);
+        //public void computeID();
 
         public static implicit operator Commit(Builder b)
         {
@@ -229,9 +229,9 @@ namespace IVO.Definition.Models
 
         public Tree(Builder b)
         {
-            this.ID = computeID(b);
             this.Trees = (b.Trees).ToArray((b.Trees).Count);
             this.Blobs = (b.Blobs).ToArray((b.Blobs).Count);
+            computeID();
         }
 
         public sealed class Builder
@@ -257,7 +257,7 @@ namespace IVO.Definition.Models
             }
         }
 
-        //private static TreeID computeID(Builder b);
+        //public void computeID();
 
         public static implicit operator Tree(Builder b)
         {
@@ -279,12 +279,12 @@ namespace IVO.Definition.Models
 
         public Tag(Builder b)
         {
-            this.ID = computeID(b);
             this.Name = b.Name;
             this.CommitID = b.CommitID;
             this.Tagger = b.Tagger;
             this.DateTagged = b.DateTagged;
             this.Message = b.Message;
+            computeID();
         }
 
         public sealed class Builder
@@ -322,7 +322,7 @@ namespace IVO.Definition.Models
             }
         }
 
-        //private static TagID computeID(Builder b);
+        //public void computeID();
 
         public static implicit operator Tag(Builder b)
         {
