@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using Asynq;
+using IVO.Definition;
 
 namespace TestIVO.SQLTest
 {
@@ -21,74 +22,86 @@ namespace TestIVO.SQLTest
             return new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=IVO;Integrated Security=SSPI");
         }
 
-#if false
+        private PersistingBlob[] createBlobs(int numBlobs)
+        {
+            PersistingBlob[] blobs = new PersistingBlob[numBlobs];
+            for (int i = 0; i < numBlobs; ++i)
+            {
+                string tmpFileName = System.IO.Path.GetTempFileName();
+                using (var fs = new FileStream(tmpFileName, FileMode.Open, FileAccess.Write, FileShare.Read, 1048576, true))
+                {
+                    new RandomDataStream(1048576 * 2).CopyTo(fs);
+
+                    blobs[i] = new PersistingBlob(() => new FileStream(tmpFileName, FileMode.Open, FileAccess.Read, FileShare.Read));
+                }
+            }
+            return blobs;
+        }
+
         /// <summary>
         ///A test for PersistBlobs
         ///</summary>
         [TestMethod()]
         public void PersistBlobsTest()
         {
-            DataContext db = getDataContext();
-            IBlobRepository blrepo = new BlobRepository(db);
+            TaskEx.RunEx(async () =>
+            {
+                DataContext db = getDataContext();
+                IBlobRepository blrepo = new BlobRepository(db);
 
-            const int numBlobs = 32;
+                const int numBlobs = 32;
 
-            // Create an immutable container that points to the new blobs:
-            Console.WriteLine("Creating {0} random blobs...", numBlobs);
-            // TODO
+                // Create an immutable container that points to the new blobs:
+                Console.WriteLine("Creating {0} random blobs...", numBlobs);
+                PersistingBlob[] blobs = createBlobs(numBlobs);
 
-            // Now persist those blobs to the filesystem:
-            Console.WriteLine("Persisting {0} random blobs...", numBlobs);
-            Stopwatch sw = Stopwatch.StartNew();
-            //blrepo.PersistBlobs(new PersistingBlob()).Wait();
-            Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, blobs.Values.Sum(b => b.Contents.Length) * 1000d / sw.ElapsedMilliseconds);
+                // Now persist those blobs to the filesystem:
+                Console.WriteLine("Persisting {0} random blobs...", numBlobs);
+                Stopwatch sw = Stopwatch.StartNew();
+                var streamedBlobs = await blrepo.PersistBlobs(blobs);
+
+                Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, streamedBlobs.Sum(b => b.Length) * 1000d / sw.ElapsedMilliseconds);
+            }).Wait();
         }
 
         [TestMethod]
         public void DeleteBlobsTest()
         {
-            var db = getDataContext();
-            IBlobRepository blrepo = new BlobRepository(db);
-
-            const int numBlobs = 32;
-            //var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
-            
-            // Persist the blobs:
-            //blrepo.PersistBlobs(blobs).Wait();
-
-            // Delete the newly persisted blobs:
-            //blrepo.DeleteBlobs(blobs.Keys.ToArray(numBlobs)).Wait();
-        }
-#endif
-
-        [TestMethod]
-        public void StreamedBlobTest()
-        {
-            BlobID constructedID = new BlobID(), retrievedID = new BlobID();
-
             TaskEx.RunEx(async () =>
             {
                 var db = getDataContext();
                 IBlobRepository blrepo = new BlobRepository(db);
 
-#if false
-                const int numBlobs = 1;
-                var blobs = new ImmutableContainer<BlobID, Blob>(bl => bl.ID, createBlobs(numBlobs));
+                const int numBlobs = 32;
 
                 // Persist the blobs:
-                blrepo.PersistBlobs(blobs).Wait();
+                PersistingBlob[] blobs = createBlobs(numBlobs);
+                var streamedBlobs = await blrepo.PersistBlobs(blobs);
+
+                // Delete the newly persisted blobs:
+                await blrepo.DeleteBlobs(streamedBlobs.Select(bl => bl.ID).ToArray(numBlobs));
+            }).Wait();
+        }
+
+        [TestMethod]
+        public void StreamedBlobTest()
+        {
+            TaskEx.RunEx(async () =>
+            {
+                var db = getDataContext();
+                IBlobRepository blrepo = new BlobRepository(db);
+
+                const int numBlobs = 1;
+                PersistingBlob[] blobs = createBlobs(numBlobs);
+
+                // Persist the blobs:
+                var streamedBlobs = await blrepo.PersistBlobs(blobs);
 
                 // Load a streamed blob:
                 Console.WriteLine("Awaiting fetch of streamed blob.");
-                constructedID = blobs.Values.First().ID;
-#else
-                constructedID = new BlobID("");
-#endif
-
-                IStreamedBlob[] strbls = await blrepo.GetBlobs(constructedID);
 
                 Console.WriteLine("Awaiting ReadStream to complete...");
-                await strbls[0].ReadStream(blsr =>
+                await streamedBlobs[0].ReadStream(blsr =>
                 {
                     Console.WriteLine("blob is {0} length", blsr.Length);
 
@@ -112,7 +125,7 @@ namespace TestIVO.SQLTest
 
                         byte[] hash = sha1.Hash;
 
-                        retrievedID = new BlobID(hash);
+                        BlobID retrievedID = new BlobID(hash);
                         Console.WriteLine("SHA1 is {0}", hash.ToHexString(0, hash.Length));
                     }
                     catch (Exception ex)
@@ -124,7 +137,6 @@ namespace TestIVO.SQLTest
                 Console.WriteLine("Cleaning up");
             }).Wait();
 
-            Assert.AreEqual(constructedID, retrievedID);
             Console.WriteLine("Test complete");
         }
     }

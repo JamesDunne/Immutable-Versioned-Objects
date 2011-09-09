@@ -107,47 +107,6 @@ namespace IVO.Implementation.FileSystem
                 {
                     // Copy the contents asynchronously:
                     await sr.CopyToAsync(fs, bufSize);
-#if false
-                    var state = new WriteBlobAsyncState()
-                    {
-                        OutputStream = fs,
-                        Blob = blob,
-                        BufferSize = bufSize,
-                        Offset = 0,
-                        BytesWritten = Math.Min(bufSize, (int)length)
-                    };
-
-                    // Asynchronously write the blob contents to the file:
-                    do
-                    {
-                        Debug.WriteLine(String.Format("Awaiting  write to '{0}', offs = {1,8}, count = {2,8}", state.OutputStream.Name, state.Offset, state.BytesWritten));
-                        try
-                        {
-                            await Task.Factory.FromAsync(
-                                state.OutputStream.BeginWrite,
-                                state.OutputStream.EndWrite,
-                                arg1: state.Blob.Contents,      // byte[] buffer
-                                arg2: state.Offset,             // int offset
-                                arg3: state.BytesWritten,       // int count
-                                state: state
-                            );
-                            Debug.WriteLine(String.Format("Completed write to '{0}', offs = {1,8}, count = {2,8}", state.OutputStream.Name, state.Offset, state.BytesWritten));
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine(String.Format("EXPECTION while writing to '{0}', offs = {1,8}, count = {2,8}:" + Environment.NewLine + ex.ToString(), state.OutputStream.Name, state.Offset, state.BytesWritten));
-                        }
-
-                        // Move the offset up by however much was written:
-                        state.Offset += state.BytesWritten;
-                        // Now calculate the new amount to write:
-                        state.BytesWritten = Math.Min(state.BufferSize, state.Blob.Contents.Length - state.Offset);
-                    } while (state.BytesWritten > 0);
-
-                    Debug.WriteLine(String.Format("Done persisting to '{0}'", state.OutputStream.Name));
-
-                    fs.Close();
-#endif
                 }
             }
 

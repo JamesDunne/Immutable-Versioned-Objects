@@ -46,6 +46,9 @@ namespace TestIVO.FileSystemTest
             return blobs;
         }
 
+        /// <summary>
+        ///A test for PersistBlobs
+        ///</summary>
         [TestMethod()]
         public void PersistBlobsTest()
         {
@@ -99,6 +102,8 @@ namespace TestIVO.FileSystemTest
         [TestMethod]
         public void StreamedBlobTest()
         {
+            BlobID constructedID = new BlobID(), retrievedID = new BlobID();
+
             TaskEx.RunEx(async () =>
             {
                 FileSystem system = getFileSystem();
@@ -138,7 +143,7 @@ namespace TestIVO.FileSystemTest
 
                         byte[] hash = sha1.Hash;
 
-                        BlobID retrievedID = new BlobID(hash);
+                        retrievedID = new BlobID(hash);
                         Console.WriteLine("SHA1 is {0}", hash.ToHexString(0, hash.Length));
                     }
                     catch (Exception ex)
