@@ -52,7 +52,7 @@ namespace TestIVO.FileSystemTest
             TaskEx.RunEx(async () =>
             {
                 FileSystem system = getFileSystem();
-                IStreamedBlobRepository blrepo = new BlobRepository(system);
+                IStreamedBlobRepository blrepo = new StreamedBlobRepository(system);
 
                 const int numBlobs = 64;
 
@@ -79,7 +79,7 @@ namespace TestIVO.FileSystemTest
             TaskEx.RunEx(async () =>
             {
                 FileSystem system = getFileSystem();
-                IStreamedBlobRepository blrepo = new BlobRepository(system);
+                IStreamedBlobRepository blrepo = new StreamedBlobRepository(system);
 
                 const int numBlobs = 32;
 
@@ -102,7 +102,7 @@ namespace TestIVO.FileSystemTest
             TaskEx.RunEx(async () =>
             {
                 FileSystem system = getFileSystem();
-                IStreamedBlobRepository blrepo = new BlobRepository(system);
+                IStreamedBlobRepository blrepo = new StreamedBlobRepository(system);
 
                 const int numBlobs = 64;
 
@@ -136,7 +136,7 @@ namespace TestIVO.FileSystemTest
             TaskEx.RunEx(async () =>
             {
                 FileSystem system = getFileSystem();
-                IStreamedBlobRepository blrepo = new BlobRepository(system);
+                IStreamedBlobRepository blrepo = new StreamedBlobRepository(system);
 
                 const int numBlobs = 1;
                 PersistingBlob[] blobs = createBlobs(numBlobs);

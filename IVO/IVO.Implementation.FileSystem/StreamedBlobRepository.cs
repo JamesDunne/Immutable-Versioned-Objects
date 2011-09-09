@@ -12,7 +12,7 @@ using System.Diagnostics;
 
 namespace IVO.Implementation.FileSystem
 {
-    public sealed class BlobRepository : IStreamedBlobRepository
+    public sealed class StreamedBlobRepository : IStreamedBlobRepository
     {
         private FileSystem system;
 
@@ -23,14 +23,14 @@ namespace IVO.Implementation.FileSystem
         /// </summary>
         private const int largeBufferSize = 1048576;
 
-        public BlobRepository(FileSystem system)
+        public StreamedBlobRepository(FileSystem system)
         {
             this.system = system;
         }
 
         #region IBlobRepository Members
 
-        private DirectoryInfo CreateObjectsDirectory()
+        internal DirectoryInfo CreateObjectsDirectory()
         {
             // Create the 'objects' subdirectory if it doesn't exist:
             DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(system.Root.FullName, "objects"));
@@ -39,7 +39,7 @@ namespace IVO.Implementation.FileSystem
             return objDir;
         }
 
-        private FileInfo getPathByID(BlobID id)
+        internal FileInfo getPathByID(BlobID id)
         {
             DirectoryInfo objDir = CreateObjectsDirectory();
             string idStr = id.ToString();
@@ -48,18 +48,7 @@ namespace IVO.Implementation.FileSystem
             return new FileInfo(path);
         }
 
-#if false
-        private class WriteBlobAsyncState
-        {
-            public Blob Blob;
-            public int Offset;
-            public int BufferSize;
-            public int BytesWritten;
-            public FileStream OutputStream;
-        }
-#endif
-
-        private async Task<IStreamedBlob> persistBlob(PersistingBlob blob, DirectoryInfo objDir)
+        private async Task<IStreamedBlob> persistBlob(PersistingBlob blob)
         {
             BlobID blid;
 
@@ -142,15 +131,13 @@ namespace IVO.Implementation.FileSystem
 
             // TODO: implement a filesystem lock?
 
-            DirectoryInfo objDir = CreateObjectsDirectory();
-
             // Persist each blob to the 'objects' folder asynchronously:
             Task<IStreamedBlob>[] persistTasks = new Task<IStreamedBlob>[blobs.Length];
             for (int i = 0; i < blobs.Length; ++i)
             {
                 var blob = blobs[i];
                 // Start a new task to contain each asynchronous task so that they can start up in parallel with one another:
-                persistTasks[i] = TaskEx.RunEx(() => persistBlob(blob, objDir));
+                persistTasks[i] = TaskEx.RunEx(() => persistBlob(blob));
             }
 
             Debug.WriteLine("Awaiting all persistence tasks...");
@@ -162,13 +149,12 @@ namespace IVO.Implementation.FileSystem
             return streamedBlobs;
         }
 
-        private void deleteBlob(BlobID id, DirectoryInfo objDir)
+        private void deleteBlob(BlobID id)
         {
-            string idStr = id.ToString();
-            string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
+            FileInfo path = getPathByID(id);
 
-            if (File.Exists(path))
-                File.Delete(path);
+            if (path.Exists)
+                path.Delete();
 
             return;
         }
@@ -178,14 +164,12 @@ namespace IVO.Implementation.FileSystem
             if (ids == null) throw new ArgumentNullException("ids");
             if (ids.Length == 0) return ids;
 
-            DirectoryInfo objDir = CreateObjectsDirectory();
-
             // Delete each blob asynchronously:
             Task[] deleteTasks = new Task[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
             {
                 BlobID id = ids[i];
-                deleteTasks[i] = TaskEx.Run(() => deleteBlob(id, objDir));
+                deleteTasks[i] = TaskEx.Run(() => deleteBlob(id));
             }
 
             // Wait for all blobs to be deleted:

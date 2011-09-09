@@ -42,10 +42,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BlobRepository.cs" />
+    <Compile Include="CommitRepository.cs" />
+    <Compile Include="TagRepository.cs" />
+    <Compile Include="RefRepository.cs" />
+    <Compile Include="StreamedBlobRepository.cs" />
     <Compile Include="FileSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StreamedBlob.cs" />
+    <Compile Include="TreePathStreamedBlobRepository.cs" />
+    <Compile Include="TreeRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IVO.Definition\IVO.Definition.csproj">

@@ -10,9 +10,9 @@ namespace IVO.Implementation.FileSystem
 {
     internal sealed class StreamedBlob : IStreamedBlob
     {
-        private BlobRepository blrepo;
+        private StreamedBlobRepository blrepo;
 
-        internal StreamedBlob(BlobRepository blrepo, BlobID id, long? length = null)
+        internal StreamedBlob(StreamedBlobRepository blrepo, BlobID id, long? length = null)
         {
             this.blrepo = blrepo;
             this.ID = id;
@@ -26,14 +26,13 @@ namespace IVO.Implementation.FileSystem
         {
             return TaskEx.Run(() =>
             {
-                string idStr = ID.ToString();
-                string path = System.IO.Path.Combine(blrepo.FileSystem.Root.FullName, "objects", idStr.Substring(0, 2), idStr.Substring(2));
+                FileInfo path = blrepo.getPathByID(this.ID);
 
                 // Or throw exception?
-                if (!File.Exists(path)) return default(TResult);
+                if (!path.Exists) return default(TResult);
 
                 // Open the file for reading and send it to the lambda function:
-                using (FileStream sr = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
                     return read(sr);
             });
         }
@@ -42,14 +41,13 @@ namespace IVO.Implementation.FileSystem
         {
             return TaskEx.Run(() =>
             {
-                string idStr = ID.ToString();
-                string path = System.IO.Path.Combine(blrepo.FileSystem.Root.FullName, "objects", idStr.Substring(0, 2), idStr.Substring(2));
+                FileInfo path = blrepo.getPathByID(this.ID);
 
                 // Or throw exception?
-                if (!File.Exists(path)) return;
+                if (!path.Exists) return;
 
                 // Open the file for reading and send it to the lambda function:
-                using (FileStream sr = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
                     read(sr);
             });
         }
