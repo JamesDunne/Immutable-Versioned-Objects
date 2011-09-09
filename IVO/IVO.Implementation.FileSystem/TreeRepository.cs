@@ -19,29 +19,27 @@ namespace IVO.Implementation.FileSystem
             this.system = system;
         }
 
-        private async Task<Tree> persistTree(Tree tr)
+        private void persistTree(Tree tr)
         {
             FileInfo fi = system.getPathByID(tr.ID);
-            if (fi.Exists) return tr;
+            if (fi.Exists) return;
 
             using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
                 tr.WriteTo(fs);
             }
-
-            return tr;
         }
 
         public async Task<Tree> PersistTree(TreeID rootid, ImmutableContainer<TreeID, Tree> trees)
         {
             // NOTE: We don't have to persist tree nodes in any particular order here if we implement a filesystem lock.
-            Task<Tree>[] tasks = new Task<Tree>[trees.Count];
+            Task[] tasks = new Task[trees.Count];
             using (var en = trees.Values.GetEnumerator())
             {
                 for (int i = 0; en.MoveNext(); ++i)
                 {
                     var tr = en.Current;
-                    tasks[i] = TaskEx.RunEx(() => persistTree(tr));
+                    tasks[i] = TaskEx.Run(() => persistTree(tr));
                 }
             }
 

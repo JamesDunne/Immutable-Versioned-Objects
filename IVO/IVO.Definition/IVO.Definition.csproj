@@ -44,6 +44,11 @@
     <Compile Include="Functional.cs" />
     <Compile Include="Models\AbsoluteBlobPath.cs" />
     <Compile Include="Models\AbsoluteTreePath.cs" />
+    <Compile Include="Models\Commit.cs" />
+    <Compile Include="Models\CommitPartial.cs" />
+    <Compile Include="Models\ICommit.cs" />
+    <Compile Include="Models\Tag.cs" />
+    <Compile Include="Models\Tree.cs" />
     <Compile Include="Models\TreePath.cs" />
     <Compile Include="Models\PersistingBlob.cs" />
     <Compile Include="Models\TreePathStreamedBlob.cs" />
@@ -66,7 +71,7 @@
       <LastGenOutput>ImmutableModels.generated.cs</LastGenOutput>
     </None>
     <Compile Include="Extensions.cs" />
-    <Compile Include="Models\ImmutableModels.cs" />
+    <Compile Include="Models\StreamedBlobMethods.cs" />
     <Compile Include="Models\ImmutableModels.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
