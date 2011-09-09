@@ -15,13 +15,13 @@ using System.Collections.Concurrent;
 
 namespace IVO.Implementation.SQL
 {
-    public sealed class BlobRepository : IBlobRepository
+    public sealed class StreamedBlobRepository : IStreamedBlobRepository
     {
         private DataContext db;
 
         internal DataContext DB { get { return db; } }
 
-        public BlobRepository(DataContext db)
+        public StreamedBlobRepository(DataContext db)
         {
             this.db = db;
         }
@@ -89,14 +89,6 @@ namespace IVO.Implementation.SQL
             for (int i = 0; i < ids.Length; ++i)
                 blobs[i] = new StreamedBlob(this, ids[i]);
             return TaskEx.FromResult(blobs);
-        }
-
-        public Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(params TreePath[] treePaths)
-        {
-            Task<TreePathStreamedBlob>[] tasks = new Task<TreePathStreamedBlob>[treePaths.Length];
-            for (int i = 0; i < treePaths.Length; ++i)
-                tasks[i] = db.ExecuteSingleQueryAsync(new QueryBlobByPath(this, treePaths[i]));
-            return TaskEx.WhenAll(tasks);
         }
     }
 }

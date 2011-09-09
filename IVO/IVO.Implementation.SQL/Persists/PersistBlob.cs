@@ -10,10 +10,10 @@ namespace IVO.Implementation.SQL.Persists
     public sealed class PersistBlob : IDataOperation<IStreamedBlob>
     {
         private PersistingBlob _bl;
-        private BlobRepository _blrepo;
+        private StreamedBlobRepository _blrepo;
         private long _length;
 
-        public PersistBlob(BlobRepository blrepo, PersistingBlob bl)
+        public PersistBlob(StreamedBlobRepository blrepo, PersistingBlob bl)
         {
             this._bl = bl;
             this._blrepo = blrepo;

@@ -52,7 +52,7 @@ namespace TestIVO.FileSystemTest
             TaskEx.RunEx(async () =>
             {
                 FileSystem system = getFileSystem();
-                IBlobRepository blrepo = new BlobRepository(system);
+                IStreamedBlobRepository blrepo = new BlobRepository(system);
 
                 const int numBlobs = 64;
 
@@ -79,7 +79,7 @@ namespace TestIVO.FileSystemTest
             TaskEx.RunEx(async () =>
             {
                 FileSystem system = getFileSystem();
-                IBlobRepository blrepo = new BlobRepository(system);
+                IStreamedBlobRepository blrepo = new BlobRepository(system);
 
                 const int numBlobs = 32;
 
@@ -96,13 +96,47 @@ namespace TestIVO.FileSystemTest
             }).Wait();
         }
 
+        [TestMethod()]
+        public void GetBlobsTest()
+        {
+            TaskEx.RunEx(async () =>
+            {
+                FileSystem system = getFileSystem();
+                IStreamedBlobRepository blrepo = new BlobRepository(system);
+
+                const int numBlobs = 64;
+
+                // Create an immutable container that points to the new blobs:
+                Console.WriteLine("Creating {0} random blobs...", numBlobs);
+                PersistingBlob[] blobs = createBlobs(numBlobs);
+
+                // Now persist those blobs to the filesystem:
+                Console.WriteLine("Persisting {0} random blobs...", numBlobs);
+                Stopwatch sw = Stopwatch.StartNew();
+                var streamedBlobs = await blrepo.PersistBlobs(blobs);
+
+                Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, streamedBlobs.Sum(b => b.Length) * 1000d / sw.ElapsedMilliseconds);
+
+                // Get the blobs:
+                var getBlobs = await blrepo.GetBlobs(blobs.Select(bl => bl.ComputedID).ToArray(blobs.Length));
+                for (int i = 0; i < getBlobs.Length; ++i)
+                {
+                    Console.WriteLine("{0}", getBlobs[i].ID);
+                }
+
+                // Clean up:
+                if (system.Root.Exists)
+                    system.Root.Delete(recursive: true);
+            }).Wait();
+        }
+
         [TestMethod]
         public void StreamedBlobTest()
         {
             TaskEx.RunEx(async () =>
             {
                 FileSystem system = getFileSystem();
-                IBlobRepository blrepo = new BlobRepository(system);
+                IStreamedBlobRepository blrepo = new BlobRepository(system);
 
                 const int numBlobs = 1;
                 PersistingBlob[] blobs = createBlobs(numBlobs);

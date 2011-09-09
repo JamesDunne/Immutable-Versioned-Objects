@@ -74,6 +74,7 @@
     <Compile Include="TagRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RefRepository.cs" />
+    <Compile Include="TreePathStreamedBlobRepository.cs" />
     <Compile Include="TreeRepository.cs" />
   </ItemGroup>
   <ItemGroup>

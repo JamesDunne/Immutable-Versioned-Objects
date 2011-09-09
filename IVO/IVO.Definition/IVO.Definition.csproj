@@ -54,10 +54,11 @@
     <Compile Include="Models\Path.cs" />
     <Compile Include="Models\RelativeTreePath.cs" />
     <Compile Include="RandomDataStream.cs" />
-    <Compile Include="Repositories\IBlobRepository.cs" />
+    <Compile Include="Repositories\IStreamedBlobRepository.cs" />
     <Compile Include="Repositories\ICommitRepository.cs" />
     <Compile Include="Repositories\IRefRepository.cs" />
     <Compile Include="Repositories\ITagRepository.cs" />
+    <Compile Include="Repositories\ITreePathStreamedBlobRepository.cs" />
     <Compile Include="Repositories\ITreeRepository.cs" />
     <Compile Include="Exceptions\TagIDMismatchException.cs" />
     <None Include="Models\ImmutableModels.tt">

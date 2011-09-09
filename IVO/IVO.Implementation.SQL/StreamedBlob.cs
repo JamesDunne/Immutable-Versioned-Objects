@@ -10,9 +10,9 @@ namespace IVO.Implementation.SQL
 {
     internal sealed class StreamedBlob : IStreamedBlob
     {
-        private BlobRepository blrepo;
+        private StreamedBlobRepository blrepo;
 
-        internal StreamedBlob(BlobRepository blrepo, BlobID id, long? length = null)
+        internal StreamedBlob(StreamedBlobRepository blrepo, BlobID id, long? length = null)
         {
             this.ID = id;
             this.blrepo = blrepo;

@@ -12,7 +12,7 @@ using System.Diagnostics;
 
 namespace IVO.Implementation.FileSystem
 {
-    public sealed class BlobRepository : IBlobRepository
+    public sealed class BlobRepository : IStreamedBlobRepository
     {
         private FileSystem system;
 
@@ -37,6 +37,15 @@ namespace IVO.Implementation.FileSystem
             if (!objDir.Exists)
                 objDir.Create();
             return objDir;
+        }
+
+        private FileInfo getPathByID(BlobID id)
+        {
+            DirectoryInfo objDir = CreateObjectsDirectory();
+            string idStr = id.ToString();
+
+            string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
+            return new FileInfo(path);
         }
 
 #if false
@@ -68,20 +77,18 @@ namespace IVO.Implementation.FileSystem
             Debug.WriteLine(String.Format("Starting persistence of blob {0}", id));
 
             // Create the blob's subdirectory under 'objects':
-            DirectoryInfo subdir = new DirectoryInfo(System.IO.Path.Combine(objDir.FullName, id.Substring(0, 2)));
+            FileInfo path = getPathByID(blid);
+            DirectoryInfo subdir = path.Directory;
             if (!subdir.Exists)
             {
                 Debug.WriteLine(String.Format("Create directory '{0}'", subdir.FullName));
                 subdir.Create();
             }
 
-            // Create the blob's file path:
-            string path = System.IO.Path.Combine(subdir.FullName, id.Substring(2));
-
             long length = -1;
 
             // Don't recreate an existing blob:
-            if (File.Exists(path))
+            if (path.Exists)
             {
                 Debug.WriteLine(String.Format("Blob already exists at path '{0}'", path));
                 goto verifyContents;
@@ -93,7 +100,7 @@ namespace IVO.Implementation.FileSystem
                 length = sr.Length;
 
                 // Create a new file and set its length so we can asynchronously write to it:
-                using (var tmpFi = File.Open(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                using (var tmpFi = File.Open(path.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 {
                     tmpFi.SetLength(length);
                     tmpFi.Close();
@@ -103,7 +110,7 @@ namespace IVO.Implementation.FileSystem
                 int bufSize = Math.Min((int)length, largeBufferSize);
 
                 // Open a new FileStream to asynchronously write the blob contents:
-                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Write, FileShare.Read, bufSize, useAsync: true))
+                using (var fs = new FileStream(path.FullName, FileMode.Open, FileAccess.Write, FileShare.Read, bufSize, useAsync: true))
                 {
                     // Copy the contents asynchronously:
                     await sr.CopyToAsync(fs, bufSize);
@@ -190,14 +197,20 @@ namespace IVO.Implementation.FileSystem
             return ids;
         }
 
-        public Task<IStreamedBlob[]> GetBlobs(params BlobID[] ids)
+        private Task<IStreamedBlob> getBlob(BlobID id)
         {
-            throw new NotImplementedException();
+            var fi = getPathByID(id);
+            if (!fi.Exists) return TaskEx.FromResult( (IStreamedBlob)null );
+
+            return TaskEx.FromResult( (IStreamedBlob)new StreamedBlob(this, id, fi.Length) );
         }
 
-        public Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(TreePath[] treePath)
+        public Task<IStreamedBlob[]> GetBlobs(params BlobID[] ids)
         {
-            throw new NotImplementedException();
+            Task<IStreamedBlob>[] tasks = new Task<IStreamedBlob>[ids.Length];
+            for (int i = 0; i < ids.Length; ++i)
+                tasks[i] = getBlob(ids[i]);
+            return TaskEx.WhenAll(tasks);
         }
 
         #endregion

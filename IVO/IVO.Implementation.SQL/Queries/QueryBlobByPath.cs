@@ -14,9 +14,9 @@ namespace IVO.Implementation.SQL.Queries
     public class QueryBlobByPath : IComplexDataQuery<TreePathStreamedBlob>
     {
         private TreePath _treePath;
-        private BlobRepository _blrepo;
+        private StreamedBlobRepository _blrepo;
 
-        public QueryBlobByPath(BlobRepository blrepo, TreePath treePath)
+        public QueryBlobByPath(StreamedBlobRepository blrepo, TreePath treePath)
         {
             this._blrepo = blrepo;
             this._treePath = treePath;

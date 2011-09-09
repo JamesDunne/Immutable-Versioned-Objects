@@ -12,9 +12,9 @@ namespace IVO.Implementation.SQL.Queries
     public sealed class QueryBlob : ISimpleDataQuery<IStreamedBlob>
     {
         private BlobID _id;
-        private BlobRepository _blrepo;
+        private StreamedBlobRepository _blrepo;
 
-        public QueryBlob(BlobRepository blrepo, BlobID id)
+        public QueryBlob(StreamedBlobRepository blrepo, BlobID id)
         {
             this._blrepo = blrepo;
             this._id = id;

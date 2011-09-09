@@ -47,7 +47,7 @@ namespace TestIVO.SQLTest
             TaskEx.RunEx(async () =>
             {
                 DataContext db = getDataContext();
-                IBlobRepository blrepo = new BlobRepository(db);
+                IStreamedBlobRepository blrepo = new StreamedBlobRepository(db);
 
                 const int numBlobs = 32;
 
@@ -70,7 +70,7 @@ namespace TestIVO.SQLTest
             TaskEx.RunEx(async () =>
             {
                 var db = getDataContext();
-                IBlobRepository blrepo = new BlobRepository(db);
+                IStreamedBlobRepository blrepo = new StreamedBlobRepository(db);
 
                 const int numBlobs = 32;
 
@@ -89,7 +89,7 @@ namespace TestIVO.SQLTest
             TaskEx.RunEx(async () =>
             {
                 var db = getDataContext();
-                IBlobRepository blrepo = new BlobRepository(db);
+                IStreamedBlobRepository blrepo = new StreamedBlobRepository(db);
 
                 const int numBlobs = 1;
                 PersistingBlob[] blobs = createBlobs(numBlobs);

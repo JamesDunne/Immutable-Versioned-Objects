@@ -8,7 +8,7 @@ using IVO.Definition.Containers;
 
 namespace IVO.Definition.Repositories
 {
-    public interface IBlobRepository
+    public interface IStreamedBlobRepository
     {
         /// <summary>
         /// Persists multiple Blobs asynchronously.
@@ -40,15 +40,5 @@ namespace IVO.Definition.Repositories
         /// <returns></returns>
         Task<IStreamedBlob[]> GetBlobs(params BlobID[] ids);
 
-        /// <summary>
-        /// Retrieves multiple Blobs by their canonicalized absolute paths relative to their root TreeIDs asynchronously.
-        /// </summary>
-        /// <remarks>
-        /// Input array length and order must be retained in the returned array.
-        /// </remarks>
-        /// <param name="rootid"></param>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(params TreePath[] treePaths);
     }
 }

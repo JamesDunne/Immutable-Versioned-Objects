@@ -22,4 +22,6 @@ TestResults/
 *.cmd
 *.7z
 *.patch
+*.mdf
+*.ldf
 screenlog.*
