@@ -26,7 +26,7 @@ namespace IVO.Implementation.FileSystem
         {
             return TaskEx.Run(() =>
             {
-                FileInfo path = blrepo.getPathByID(this.ID);
+                FileInfo path = blrepo.FileSystem.getPathByID(this.ID);
 
                 // Or throw exception?
                 if (!path.Exists) return default(TResult);
@@ -41,7 +41,7 @@ namespace IVO.Implementation.FileSystem
         {
             return TaskEx.Run(() =>
             {
-                FileInfo path = blrepo.getPathByID(this.ID);
+                FileInfo path = blrepo.FileSystem.getPathByID(this.ID);
 
                 // Or throw exception?
                 if (!path.Exists) return;

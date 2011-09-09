@@ -30,24 +30,6 @@ namespace IVO.Implementation.FileSystem
 
         #region IBlobRepository Members
 
-        internal DirectoryInfo CreateObjectsDirectory()
-        {
-            // Create the 'objects' subdirectory if it doesn't exist:
-            DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(system.Root.FullName, "objects"));
-            if (!objDir.Exists)
-                objDir.Create();
-            return objDir;
-        }
-
-        internal FileInfo getPathByID(BlobID id)
-        {
-            DirectoryInfo objDir = CreateObjectsDirectory();
-            string idStr = id.ToString();
-
-            string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
-            return new FileInfo(path);
-        }
-
         private async Task<IStreamedBlob> persistBlob(PersistingBlob blob)
         {
             BlobID blid;
@@ -66,7 +48,7 @@ namespace IVO.Implementation.FileSystem
             Debug.WriteLine(String.Format("Starting persistence of blob {0}", id));
 
             // Create the blob's subdirectory under 'objects':
-            FileInfo path = getPathByID(blid);
+            FileInfo path = system.getPathByID(blid);
             DirectoryInfo subdir = path.Directory;
             if (!subdir.Exists)
             {
@@ -151,7 +133,7 @@ namespace IVO.Implementation.FileSystem
 
         private void deleteBlob(BlobID id)
         {
-            FileInfo path = getPathByID(id);
+            FileInfo path = system.getPathByID(id);
 
             if (path.Exists)
                 path.Delete();
@@ -183,7 +165,7 @@ namespace IVO.Implementation.FileSystem
 
         private Task<IStreamedBlob> getBlob(BlobID id)
         {
-            var fi = getPathByID(id);
+            var fi = system.getPathByID(id);
             if (!fi.Exists) return TaskEx.FromResult( (IStreamedBlob)null );
 
             return TaskEx.FromResult( (IStreamedBlob)new StreamedBlob(this, id, fi.Length) );
