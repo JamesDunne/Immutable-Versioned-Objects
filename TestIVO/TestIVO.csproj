@@ -53,8 +53,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlobPaths.cs" />
-    <Compile Include="FileSystemTest\BlobRepositoryTest.cs" />
-    <Compile Include="SQLTest\BlobRepositoryTest.cs" />
+    <Compile Include="CommonTest\CommitRepositoryTestMethods.cs" />
+    <Compile Include="CommonTest\RefRepositoryTestMethods.cs" />
+    <Compile Include="CommonTest\TagRepositoryTestMethods.cs" />
+    <Compile Include="CommonTest\TreeRepositoryTestMethods.cs" />
+    <Compile Include="CommonTest\StreamedBlobRepositoryTestMethods.cs" />
+    <Compile Include="FileSystemTest\StreamedBlobRepositoryTest.cs" />
+    <Compile Include="SQLTest\StreamedBlobRepositoryTest.cs" />
     <Compile Include="TreePaths.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
