@@ -8,11 +8,6 @@ namespace IVO.Definition.Models
 {
     public sealed partial class Commit : ICommit
     {
-        /// <summary>
-        /// TODO: determine if this is thread-safe?
-        /// </summary>
-        private static readonly SHA1 sha1 = SHA1.Create();
-
         public bool IsComplete
         {
             get { return true; }
@@ -58,7 +53,8 @@ namespace IVO.Definition.Models
                 WriteTo(ms);
 
                 // SHA-1 the data:
-                //var sha1 = SHA1.Create();
+                // SHA1 instances are NOT thread-safe.
+                var sha1 = SHA1.Create();
                 byte[] hash = sha1.ComputeHash(ms.ToArray());
                 this.ID = new CommitID(hash);
             }

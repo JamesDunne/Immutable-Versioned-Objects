@@ -9,11 +9,6 @@ namespace IVO.Definition.Models
 {
     public sealed partial class Tree
     {
-        /// <summary>
-        /// TODO: determine if this is thread-safe?
-        /// </summary>
-        private static readonly SHA1 sha1 = SHA1.Create();
-
         public static SortedList<string, Either<TreeTreeReference, TreeBlobReference>> ComputeChildList(IEnumerable<TreeTreeReference> treeRefs, IEnumerable<TreeBlobReference> blobRefs)
         {
             // Sort refs by name:
@@ -71,7 +66,8 @@ namespace IVO.Definition.Models
                 this.WriteTo(ms);
 
                 // SHA-1 the data:
-                //var sha1 = SHA1.Create();
+                // SHA1 instances are NOT thread-safe.
+                var sha1 = SHA1.Create();
                 byte[] hash = sha1.ComputeHash(ms.ToArray());
 
                 this.ID = new TreeID(hash);
