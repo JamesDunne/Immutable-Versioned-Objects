@@ -52,17 +52,25 @@ namespace IVO.Implementation.SQL
             // Find the BlobIDs to persist:
             var blobsToPersist = blobs.Select(bl => bl.ID.Value).Except(existBlobs).ToList(blobs.Length - existBlobs.Count);
 
-            // Early-out case:
-            if (blobsToPersist.Count == 0)
-                return new IStreamedBlob[0];
-
             // Start persisting blobs:
-            Task<IStreamedBlob>[] tasks = new Task<IStreamedBlob>[blobsToPersist.Count];
+            Task<IStreamedBlob>[] tasks = new Task<IStreamedBlob>[blobs.Length];
             for (int i = 0; i < blobsToPersist.Count; ++i)
-                tasks[i] = db.ExecuteNonQueryAsync(new PersistBlob(this, blobs[blobIndexLookup[blobsToPersist[i]]]));
+            {
+                int index = blobIndexLookup[blobsToPersist[i]];
+                tasks[index] = db.ExecuteNonQueryAsync(new PersistBlob(this, blobs[index]));
+            }
+
+            // Fetch the remaining blobs' lengths:
+            for (int i = 0; i < blobs.Length; ++i)
+            {
+                // A non-null task means this blob was already retrieved:
+                if (tasks[i] != null) continue;
+                tasks[i] = db.ExecuteSingleQueryAsync(new QueryBlob(this, blobs[i].ComputedID));
+            }
 
             // When all persists are complete, roll up the results from all the tasks into a single array:
             var streamedBlobs = await TaskEx.WhenAll(tasks);
+
             return streamedBlobs;
         }
 

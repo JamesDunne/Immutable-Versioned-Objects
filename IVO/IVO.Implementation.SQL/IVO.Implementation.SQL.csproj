@@ -55,6 +55,7 @@
     <Compile Include="Persists\PersistRef.cs" />
     <Compile Include="Persists\PersistTag.cs" />
     <Compile Include="Persists\PersistTree.cs" />
+    <Compile Include="Queries\QueryBlob.cs" />
     <Compile Include="Queries\QueryStreamedBlob.cs" />
     <Compile Include="Queries\QueryBlobByPath.cs" />
     <Compile Include="Queries\QueryBlobsExist.cs" />
