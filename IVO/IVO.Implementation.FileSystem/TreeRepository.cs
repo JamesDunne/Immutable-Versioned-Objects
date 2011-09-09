@@ -52,13 +52,15 @@ namespace IVO.Implementation.FileSystem
                 {
                     if (line.StartsWith("tree "))
                     {
-                        int endpos = line.Length - (TreeID.ByteArrayLength * 2) - 1;
-                        tb.Trees.Add(new TreeTreeReference.Builder(line.Substring(5, endpos), new TreeID(line.Substring(endpos + 1))));
+                        string linked_treeid = line.Substring(5, (TreeID.ByteArrayLength * 2));
+                        string name = line.Substring(6 + (TreeID.ByteArrayLength * 2));
+                        tb.Trees.Add(new TreeTreeReference.Builder(name, new TreeID(linked_treeid)));
                     }
                     else if (line.StartsWith("blob "))
                     {
-                        int endpos = line.Length - (BlobID.ByteArrayLength * 2) - 1;
-                        tb.Blobs.Add(new TreeBlobReference.Builder(line.Substring(5, endpos), new BlobID(line.Substring(endpos + 1))));
+                        string linked_blobid = line.Substring(5, (TreeID.ByteArrayLength * 2));
+                        string name = line.Substring(6 + (TreeID.ByteArrayLength * 2));
+                        tb.Blobs.Add(new TreeBlobReference.Builder(name, new BlobID(linked_blobid)));
                     }
                 }
             }
@@ -75,6 +77,8 @@ namespace IVO.Implementation.FileSystem
         {
             FileInfo fi = system.getPathByID(tr.ID);
             if (fi.Exists) return;
+
+            if (!fi.Directory.Exists) fi.Directory.Create();
 
             using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
@@ -125,6 +129,7 @@ namespace IVO.Implementation.FileSystem
             Dictionary<TreeID, Tree> trees = new Dictionary<TreeID, Tree>();
 
             var root = await getTree(rootid);
+            throw new NotImplementedException();
 
             return new Tuple<TreeID, ImmutableContainer<TreeID, Tree>>(rootid, new ImmutableContainer<TreeID, Tree>(trees));
         }
