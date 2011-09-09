@@ -16,8 +16,8 @@ namespace TestIVO.CommonTest
 {
     class TreeRepositoryTestMethods
     {
-        private ITreeRepository trrepo;
         private IStreamedBlobRepository blrepo;
+        private ITreeRepository trrepo;
 
         internal TreeRepositoryTestMethods(IStreamedBlobRepository blrepo, ITreeRepository trrepo)
         {

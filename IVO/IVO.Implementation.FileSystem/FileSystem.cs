@@ -42,5 +42,14 @@ namespace IVO.Implementation.FileSystem
             string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
             return new FileInfo(path);
         }
+        
+        internal FileInfo getPathByID(CommitID id)
+        {
+            DirectoryInfo objDir = CreateObjectsDirectory();
+            string idStr = id.ToString();
+
+            string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
+            return new FileInfo(path);
+        }
     }
 }

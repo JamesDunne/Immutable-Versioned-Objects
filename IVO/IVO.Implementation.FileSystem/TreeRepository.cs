@@ -30,11 +30,12 @@ namespace IVO.Implementation.FileSystem
             if (!fi.Exists) return null;
 
             byte[] buf;
+            int nr = 0;
             using (var fs = new FileStream(fi.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, 16384, true))
             {
                 // TODO: implement an async buffered Stream:
                 buf = new byte[16384];
-                int nr = await fs.ReadAsync(buf, 0, 16384);
+                nr = await fs.ReadAsync(buf, 0, 16384);
                 if (nr >= 16384)
                 {
                     // My, what a large tree you have!
@@ -45,7 +46,7 @@ namespace IVO.Implementation.FileSystem
             Tree.Builder tb = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
 
             // Parse the Tree:
-            using (var ms = new MemoryStream(buf))
+            using (var ms = new MemoryStream(buf, 0, nr, false))
             using (var sr = new StreamReader(ms, Encoding.UTF8))
             {
                 string line;
@@ -83,7 +84,7 @@ namespace IVO.Implementation.FileSystem
             // Create directory if it doesn't exist:
             if (!fi.Directory.Exists)
             {
-                Debug.WriteLine(String.Format("New '{0}'", fi.Directory.FullName));
+                Debug.WriteLine(String.Format("New DIR '{0}'", fi.Directory.FullName));
                 fi.Directory.Create();
             }
 

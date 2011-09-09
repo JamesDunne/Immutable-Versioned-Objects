@@ -39,6 +39,7 @@
     <Compile Include="Containers\ImmutableContainer.cs" />
     <Compile Include="Exceptions\CommitIDMistmatchException.cs" />
     <Compile Include="Exceptions\BlobIDMistmatchException.cs" />
+    <Compile Include="Exceptions\ObjectParseException.cs" />
     <Compile Include="Exceptions\TreeIDMistmatchException.cs" />
     <Compile Include="Exceptions\InvalidPathException.cs" />
     <Compile Include="Functional.cs" />

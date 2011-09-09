@@ -33,7 +33,7 @@ namespace IVO.Definition.Models
 
             bw.WriteRaw(String.Format("tree {0}\n", TreeID));
             bw.WriteRaw(String.Format("committer {0}\n", Committer));
-            bw.WriteRaw(String.Format("date {0}\n\n", DateCommitted.ToString("u")));
+            bw.WriteRaw(String.Format("date {0}\n\n", DateCommitted.ToString()));
             bw.WriteRaw(Message);
             bw.Flush();
         }

@@ -28,8 +28,6 @@ namespace IVO.Implementation.FileSystem
             this.system = system;
         }
 
-        #region IBlobRepository Members
-
         private async Task<IStreamedBlob> persistBlob(PersistingBlob blob)
         {
             BlobID blid;
@@ -49,11 +47,10 @@ namespace IVO.Implementation.FileSystem
 
             // Create the blob's subdirectory under 'objects':
             FileInfo path = system.getPathByID(blid);
-            DirectoryInfo subdir = path.Directory;
-            if (!subdir.Exists)
+            if (!path.Directory.Exists)
             {
-                Debug.WriteLine(String.Format("Create directory '{0}'", subdir.FullName));
-                subdir.Create();
+                Debug.WriteLine(String.Format("New DIR '{0}'", path.Directory.FullName));
+                path.Directory.Create();
             }
 
             long length = -1;
@@ -61,7 +58,7 @@ namespace IVO.Implementation.FileSystem
             // Don't recreate an existing blob:
             if (path.Exists)
             {
-                Debug.WriteLine(String.Format("Blob already exists at path '{0}'", path));
+                Debug.WriteLine(String.Format("Blob already exists at path '{0}'", path.FullName));
                 goto verifyContents;
             }
 
@@ -73,6 +70,7 @@ namespace IVO.Implementation.FileSystem
                 // Create a new file and set its length so we can asynchronously write to it:
                 using (var tmpFi = File.Open(path.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 {
+                    Debug.WriteLine(String.Format("New BLOB '{0}' length {1}", path.FullName, length));
                     tmpFi.SetLength(length);
                     tmpFi.Close();
                 }
@@ -178,7 +176,5 @@ namespace IVO.Implementation.FileSystem
                 tasks[i] = getBlob(ids[i]);
             return TaskEx.WhenAll(tasks);
         }
-
-        #endregion
     }
 }
