@@ -31,6 +31,36 @@ namespace TestIVO.CommonTest
 
         private Tree trTemplate = null, trRoot = null;
 
+        internal static void RecursivePrint(TreeID treeID, ImmutableContainer<TreeID, Tree> trees, int depth = 1)
+        {
+            Tree tr;
+            if (!trees.TryGetValue(treeID, out tr))
+                return;
+
+            if (depth == 1)
+            {
+                Console.WriteLine("tree {1}: {0}/", new string('_', (depth - 1) * 2), tr.ID.ToString(firstLength: 7));
+            }
+
+            // Sort refs by name:
+            var namedRefs = Tree.ComputeChildList(tr.Trees, tr.Blobs);
+
+            foreach (var kv in namedRefs)
+            {
+                var nref = kv.Value;
+                switch (nref.Which)
+                {
+                    case Either<TreeTreeReference, TreeBlobReference>.Selected.Left:
+                        Console.WriteLine("tree {1}: {0}{2}/", new string('_', depth * 2), nref.Left.TreeID.ToString(firstLength: 7), nref.Left.Name);
+                        RecursivePrint(nref.Left.TreeID, trees, depth + 1);
+                        break;
+                    case Either<TreeTreeReference, TreeBlobReference>.Selected.Right:
+                        Console.WriteLine("blob {1}: {0}{2}", new string('_', depth * 2), nref.Right.BlobID.ToString(firstLength: 7), nref.Right.Name);
+                        break;
+                }
+            }
+        }
+
         private void createTrees()
         {
             PersistingBlob pbHeader;
@@ -54,6 +84,7 @@ namespace TestIVO.CommonTest
 
             rootId = trRoot.ID;
             trees = new ImmutableContainer<TreeID, Tree>(tr => tr.ID, trTemplate, trRoot);
+            RecursivePrint(trRoot.ID, trees);
         }
 
         internal async Task PersistTreeTest()

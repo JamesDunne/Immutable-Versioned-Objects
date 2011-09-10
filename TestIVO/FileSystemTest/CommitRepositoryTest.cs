@@ -62,5 +62,19 @@ namespace TestIVO.FileSystemTest
             getTestMethods().GetCommitTest().Wait();
             cleanUp();
         }
+
+        [TestMethod()]
+        public void GetCommitTreeTest()
+        {
+            getTestMethods().GetCommitTreeTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetCommitTreeTest2()
+        {
+            getTestMethods().GetCommitTreeTest2().Wait();
+            cleanUp();
+        }
     }
 }
