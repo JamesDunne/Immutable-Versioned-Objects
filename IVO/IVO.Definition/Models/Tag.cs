@@ -13,10 +13,10 @@ namespace IVO.Definition.Models
         {
             var bw = new BinaryWriter(ms, Encoding.UTF8);
 
-            bw.WriteRaw(String.Format("commit {0}\n", CommitID));
+            bw.WriteRaw(String.Format("commit {0}\n", CommitID.ToString()));
             bw.WriteRaw(String.Format("name {0}\n", Name));
             bw.WriteRaw(String.Format("tagger {0}\n", Tagger));
-            bw.WriteRaw(string.Format("date {0}\n\n", DateTagged.ToString("u")));
+            bw.WriteRaw(string.Format("date {0}\n\n", DateTagged.ToString()));
 
             if (!String.IsNullOrEmpty(Message))
             {

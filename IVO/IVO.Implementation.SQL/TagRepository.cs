@@ -38,12 +38,12 @@ namespace IVO.Implementation.SQL
             return db.ExecuteSingleQueryAsync(new QueryTag(tagName));
         }
 
-        public Task<TagID> DeleteTag(TagID id)
+        public Task<TagID?> DeleteTag(TagID id)
         {
             return db.ExecuteNonQueryAsync(new DestroyTag(id));
         }
 
-        public Task<TagID> DeleteTagByName(string tagName)
+        public Task<TagID?> DeleteTagByName(string tagName)
         {
             return db.ExecuteNonQueryAsync(new DestroyTagByName(tagName));
         }

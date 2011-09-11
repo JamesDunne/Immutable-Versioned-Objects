@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using IVO.Definition.Models;
 using IVO.Definition.Repositories;
+using System.IO;
+using System.Diagnostics;
+using IVO.Definition.Exceptions;
 
 namespace IVO.Implementation.FileSystem
 {
@@ -17,29 +20,180 @@ namespace IVO.Implementation.FileSystem
             this.system = system;
         }
 
-        public Task<Tag> PersistTag(Tag tg)
+        #region Private details
+
+        private void persistTag(Tag tg)
         {
-            throw new NotImplementedException();
+            FileInfo fi = system.getPathByID(tg.ID);
+            if (fi.Exists) return;
+
+            // Create directory if it doesn't exist:
+            if (!fi.Directory.Exists)
+            {
+                Debug.WriteLine(String.Format("New DIR '{0}'", fi.Directory.FullName));
+                fi.Directory.Create();
+            }
+
+            // Write the commit contents to the file:
+            using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                Debug.WriteLine(String.Format("New TAG '{0}'", fi.FullName));
+                tg.WriteTo(fs);
+            }
+
+            // Now keep track of the tag by its name:
+            FileInfo fiTracker = system.getTagPathByTagName(tg.Name);
+            using (var fs = new FileStream(fiTracker.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                Debug.WriteLine(String.Format("New TAG '{0}'", fiTracker.FullName));
+                byte[] rawID = Encoding.UTF8.GetBytes(tg.ID.ToString());
+                fs.Write(rawID, 0, rawID.Length);
+            }
         }
 
-        public Task<TagID> DeleteTag(TagID id)
+        private async Task<TagID?> getTagIDByName(string tagName)
         {
-            throw new NotImplementedException();
+            FileInfo fiTracker = system.getTagPathByTagName(tagName);
+            if (!fiTracker.Exists) return (TagID?)null;
+
+            byte[] buf;
+            int nr = 0;
+            using (var fs = new FileStream(fiTracker.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, 16384, true))
+            {
+                // TODO: implement an async buffered Stream:
+                buf = new byte[16384];
+                nr = await fs.ReadAsync(buf, 0, 16384);
+                if (nr >= 16384)
+                {
+                    // My, what a large tag you have!
+                    throw new NotSupportedException();
+                }
+            }
+
+            // Parse the TagID:
+            using (var ms = new MemoryStream(buf, 0, nr, false))
+            using (var sr = new StreamReader(ms, Encoding.UTF8))
+            {
+                string line = sr.ReadLine();
+                if (line == null) return (TagID?)null;
+
+                return (TagID?) new TagID(line);
+            }
         }
 
-        public Task<TagID> DeleteTagByName(string tagName)
+        private async Task<Tag> getTag(TagID id)
         {
-            throw new NotImplementedException();
+            FileInfo fi = system.getPathByID(id);
+            if (!fi.Exists) return null;
+
+            byte[] buf;
+            int nr = 0;
+            using (var fs = new FileStream(fi.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, 16384, true))
+            {
+                // TODO: implement an async buffered Stream:
+                buf = new byte[16384];
+                nr = await fs.ReadAsync(buf, 0, 16384);
+                if (nr >= 16384)
+                {
+                    // My, what a large tag you have!
+                    throw new NotSupportedException();
+                }
+            }
+
+            Tag.Builder tb = new Tag.Builder();
+
+            // Parse the Tag:
+            using (var ms = new MemoryStream(buf, 0, nr, false))
+            using (var sr = new StreamReader(ms, Encoding.UTF8))
+            {
+                string line = sr.ReadLine();
+
+                // Set CommitID:
+                if (line == null || !line.StartsWith("commit ")) throw new ObjectParseException("While parsing a commit, expected: 'commit'");
+                tb.CommitID = new CommitID(line.Substring("commit ".Length));
+
+                // Set Name:
+                line = sr.ReadLine();
+                if (line == null || !line.StartsWith("name ")) throw new ObjectParseException("While parsing a commit, expected: 'name'");
+                tb.Name = line.Substring("name ".Length);
+
+                // Set Tagger:
+                line = sr.ReadLine();
+                if (line == null || !line.StartsWith("tagger ")) throw new ObjectParseException("While parsing a commit, expected: 'tagger'");
+                tb.Tagger = line.Substring("tagger ".Length);
+
+                // Set DateTagged:
+                line = sr.ReadLine();
+                if (line == null || !line.StartsWith("date ")) throw new ObjectParseException("While parsing a commit, expected: 'date'");
+
+                // NOTE: date parsing will result in an inexact DateTimeOffset from what was created with, but it
+                // is close enough because the SHA-1 hash is calculated using the DateTimeOffset.ToString(), so
+                // only the ToString() representations of the DateTimeOffsets need to match.
+                tb.DateTagged = DateTimeOffset.Parse(line.Substring("date ".Length));
+
+                // Skip empty line:
+                line = sr.ReadLine();
+                if (line == null || line.Length != 0) throw new ObjectParseException("While parsing a commit, expected blank line");
+
+                // Set Message:
+                tb.Message = sr.ReadToEnd();
+            }
+
+            // Create the immutable Tag from the Builder:
+            Tag tg = tb;
+            // Validate the computed TagID:
+            if (tg.ID != id) throw new TagIDMismatchException(tg.ID, id);
+
+            return tg;
+        }
+
+        private void deleteTag(Tag tg)
+        {
+            FileInfo fi = system.getPathByID(tg.ID);
+            if (fi.Exists) fi.Delete();
+            FileInfo fiTracker = system.getTagPathByTagName(tg.Name);
+            if (fiTracker.Exists) fiTracker.Delete();
+        }
+
+        #endregion
+
+        public async Task<Tag> PersistTag(Tag tg)
+        {
+            await TaskEx.Run(() => persistTag(tg));
+            return tg;
+        }
+
+        public async Task<TagID?> DeleteTag(TagID id)
+        {
+            Tag tg = await getTag(id);
+            if (tg == null) return (TagID?)null;
+
+            await TaskEx.Run(() => deleteTag(tg));
+            return tg.ID;
+        }
+
+        public async Task<TagID?> DeleteTagByName(string tagName)
+        {
+            TagID? id = await getTagIDByName(tagName);
+            if (!id.HasValue) return null;
+            
+            Tag tg = await getTag(id.Value);
+            await TaskEx.Run(() => deleteTag(tg));
+            
+            return id;
         }
 
         public Task<Tag> GetTag(TagID id)
         {
-            throw new NotImplementedException();
+            return getTag(id);
         }
 
-        public Task<Tag> GetTagByName(string tagName)
+        public async Task<Tag> GetTagByName(string tagName)
         {
-            throw new NotImplementedException();
+            TagID? id = await getTagIDByName(tagName);
+            if (!id.HasValue) return null;
+
+            return await getTag(id.Value);
         }
     }
 }

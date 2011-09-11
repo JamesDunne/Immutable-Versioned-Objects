@@ -59,6 +59,7 @@
     <Compile Include="CommonTest\TreeRepositoryTestMethods.cs" />
     <Compile Include="CommonTest\StreamedBlobRepositoryTestMethods.cs" />
     <Compile Include="FileSystemTest\CommitRepositoryTest.cs" />
+    <Compile Include="FileSystemTest\TagRepositoryTest.cs" />
     <Compile Include="FileSystemTest\TreeRepositoryTest.cs" />
     <Compile Include="FileSystemTest\StreamedBlobRepositoryTest.cs" />
     <Compile Include="SQLTest\TreeRepositoryTest.cs" />

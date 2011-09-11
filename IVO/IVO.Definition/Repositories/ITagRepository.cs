@@ -11,9 +11,9 @@ namespace IVO.Definition.Repositories
     {
         Task<Tag> PersistTag(Tag tg);
 
-        Task<TagID> DeleteTag(TagID id);
+        Task<TagID?> DeleteTag(TagID id);
 
-        Task<TagID> DeleteTagByName(string tagName);
+        Task<TagID?> DeleteTagByName(string tagName);
 
         Task<Tag> GetTag(TagID id);
 

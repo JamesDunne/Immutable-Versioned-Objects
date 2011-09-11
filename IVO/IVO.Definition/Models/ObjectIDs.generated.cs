@@ -26,7 +26,7 @@ namespace IVO.Definition.Models
         public CommitID(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("TreeID hex string must be {0} characters in length", ByteArrayLength * 2));
+            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("CommitID hex string must be {0} characters in length", ByteArrayLength * 2));
 
             _idValue = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
@@ -89,6 +89,7 @@ namespace IVO.Definition.Models
 
         public override string ToString()
         {
+            if (_toString == null) return String.Empty;
             return _toString;
         }
 
@@ -96,6 +97,7 @@ namespace IVO.Definition.Models
         {
             if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
             if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (_toString == null) return String.Empty;
             return _toString.Substring(0, firstLength);
         }
 
@@ -197,6 +199,7 @@ namespace IVO.Definition.Models
 
         public override string ToString()
         {
+            if (_toString == null) return String.Empty;
             return _toString;
         }
 
@@ -204,6 +207,7 @@ namespace IVO.Definition.Models
         {
             if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
             if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (_toString == null) return String.Empty;
             return _toString.Substring(0, firstLength);
         }
 
@@ -242,7 +246,7 @@ namespace IVO.Definition.Models
         public BlobID(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("TreeID hex string must be {0} characters in length", ByteArrayLength * 2));
+            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("BlobID hex string must be {0} characters in length", ByteArrayLength * 2));
 
             _idValue = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
@@ -305,6 +309,7 @@ namespace IVO.Definition.Models
 
         public override string ToString()
         {
+            if (_toString == null) return String.Empty;
             return _toString;
         }
 
@@ -312,6 +317,7 @@ namespace IVO.Definition.Models
         {
             if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
             if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (_toString == null) return String.Empty;
             return _toString.Substring(0, firstLength);
         }
 
@@ -350,7 +356,7 @@ namespace IVO.Definition.Models
         public TagID(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("TreeID hex string must be {0} characters in length", ByteArrayLength * 2));
+            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("TagID hex string must be {0} characters in length", ByteArrayLength * 2));
 
             _idValue = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
@@ -413,6 +419,7 @@ namespace IVO.Definition.Models
 
         public override string ToString()
         {
+            if (_toString == null) return String.Empty;
             return _toString;
         }
 
@@ -420,6 +427,7 @@ namespace IVO.Definition.Models
         {
             if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
             if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (_toString == null) return String.Empty;
             return _toString.Substring(0, firstLength);
         }
 

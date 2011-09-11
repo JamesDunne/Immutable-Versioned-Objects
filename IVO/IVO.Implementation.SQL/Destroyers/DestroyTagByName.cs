@@ -7,7 +7,7 @@ using IVO.Definition.Models;
 
 namespace IVO.Implementation.SQL.Persists
 {
-    public sealed class DestroyTagByName : IDataOperation<TagID>
+    public sealed class DestroyTagByName : IDataOperation<TagID?>
     {
         private string _tagName;
 
@@ -21,7 +21,10 @@ namespace IVO.Implementation.SQL.Persists
             string pkName = Tables.TablePKs_Tag.Single();
             var cmdText = String.Format(
                 @"SELECT @{1} = [{1}] FROM {0} WHERE [name] = @tagname;
-DELETE FROM {0} WHERE [{1}] = @{1};",
+IF (@{1} IS NOT NULL)
+BEGIN
+    DELETE FROM {0} WHERE [{1}] = @{1};
+END",
                 Tables.TableName_Tag,
                 pkName
             );
@@ -32,9 +35,13 @@ DELETE FROM {0} WHERE [{1}] = @{1};",
             return cmd;
         }
 
-        public TagID Return(SqlCommand cmd, int rowsAffected)
+        public TagID? Return(SqlCommand cmd, int rowsAffected)
         {
-            return (TagID) ((SqlBinary)cmd.Parameters["@tagid"].SqlValue).Value;
+            SqlBinary tagId = (SqlBinary)cmd.Parameters["@tagid"].SqlValue;
+
+            if (tagId.IsNull) return (TagID?)null;
+
+            return (TagID) tagId.Value;
         }
     }
 }
