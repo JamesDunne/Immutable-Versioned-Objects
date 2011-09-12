@@ -1,88 +1,62 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using IVO.Definition.Containers;
-using IVO.Definition.Models;
+using Asynq;
 using IVO.Definition.Repositories;
 using IVO.Implementation.SQL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
-using System.Security.Cryptography;
-using Asynq;
-using IVO.Definition;
 
 namespace TestIVO.SQLTest
 {
     [TestClass()]
-    public class TreeRepositoryTest
+    public class TreeRepositoryTest : SQLTestBase<CommonTest.TreeRepositoryTestMethods>
     {
-        private DataContext getDataContext()
+        protected override CommonTest.TreeRepositoryTestMethods getTestMethods(DataContext db)
         {
-            return new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=IVO;Integrated Security=SSPI");
-        }
-
-        private CommonTest.TreeRepositoryTestMethods getTestMethods()
-        {
-            DataContext db = getDataContext();
             IStreamedBlobRepository blrepo = new StreamedBlobRepository(db);
             ITreeRepository trrepo = new TreeRepository(db);
 
             return new CommonTest.TreeRepositoryTestMethods(blrepo, trrepo);
         }
 
-        private void cleanUp()
-        {
-            // TODO: clear database data!
-        }
-
         [TestMethod()]
         public void PersistTreeTest()
         {
-            getTestMethods().PersistTreeTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.PersistTreeTest());
         }
 
         [TestMethod()]
         public void GetTreeTest()
         {
-            getTestMethods().GetTreeTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreeTest());
         }
 
         [TestMethod()]
         public void GetTreesTest()
         {
-            getTestMethods().GetTreesTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreesTest());
         }
 
         [TestMethod()]
         public void GetTreeIDByPathTest()
         {
-            getTestMethods().GetTreeIDByPathTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreeIDByPathTest());
         }
 
         [TestMethod()]
         public void GetTreeIDsByPathsTest()
         {
-            getTestMethods().GetTreeIDsByPathsTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreeIDsByPathsTest());
         }
 
         [TestMethod()]
         public void GetTreeRecursivelyTest()
         {
-            getTestMethods().GetTreeRecursivelyTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreeRecursivelyTest());
         }
 
         [TestMethod()]
         public void GetTreeRecursivelyFromPathTest()
         {
-            getTestMethods().GetTreeRecursivelyFromPathTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreeRecursivelyFromPathTest());
         }
 
         [TestMethod()]
@@ -91,8 +65,7 @@ namespace TestIVO.SQLTest
         [ExpectedException(typeof(AggregateException))]
         public void DeleteTreeRecursivelyTest()
         {
-            getTestMethods().DeleteTreeRecursivelyTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.DeleteTreeRecursivelyTest());
         }
     }
 }

@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TestIVO.CommonTest
 {
-    class CommitRepositoryTestMethods
+    public sealed class CommitRepositoryTestMethods
     {
         private IStreamedBlobRepository blrepo;
         private ITreeRepository trrepo;
@@ -22,11 +22,11 @@ namespace TestIVO.CommonTest
         private ITagRepository tgrepo;
         private IRefRepository rfrepo;
 
-        internal CommitRepositoryTestMethods(IStreamedBlobRepository blrepo, ITreeRepository trrepo, ICommitRepository cmrepo, ITagRepository tgrepo, IRefRepository rfrepo)
+        internal CommitRepositoryTestMethods(ICommitRepository cmrepo, IStreamedBlobRepository blrepo, ITreeRepository trrepo, ITagRepository tgrepo, IRefRepository rfrepo)
         {
+            this.cmrepo = cmrepo;
             this.blrepo = blrepo;
             this.trrepo = trrepo;
-            this.cmrepo = cmrepo;
             this.tgrepo = tgrepo;
             this.rfrepo = rfrepo;
         }

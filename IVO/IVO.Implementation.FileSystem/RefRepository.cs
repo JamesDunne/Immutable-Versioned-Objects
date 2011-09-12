@@ -84,12 +84,12 @@ namespace IVO.Implementation.FileSystem
             return rf;
         }
 
-        public Task<Ref> GetRef(RefName name)
+        public Task<Ref> GetRefByName(RefName name)
         {
             return getRefByName(name);
         }
 
-        public async Task<Ref> DestroyRef(RefName name)
+        public async Task<Ref> DeleteRefByName(RefName name)
         {
             var rf = await getRefByName(name);
             await TaskEx.Run(() => deleteRef(name));

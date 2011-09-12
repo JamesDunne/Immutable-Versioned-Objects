@@ -14,7 +14,7 @@ using IVO.Definition;
 namespace TestIVO.FileSystemTest
 {
     [TestClass()]
-    public class TagRepositoryTest
+    public class RefRepositoryTest
     {
         private FileSystem getFileSystem()
         {
@@ -32,12 +32,12 @@ namespace TestIVO.FileSystemTest
 
         FileSystem system;
 
-        private CommonTest.TagRepositoryTestMethods getTestMethods()
+        private CommonTest.RefRepositoryTestMethods getTestMethods()
         {
             system = getFileSystem();
-            ITagRepository tgrepo = new TagRepository(system);
+            IRefRepository rfrepo = new RefRepository(system);
 
-            return new CommonTest.TagRepositoryTestMethods(tgrepo);
+            return new CommonTest.RefRepositoryTestMethods(rfrepo);
         }
 
         private void cleanUp()
@@ -48,37 +48,23 @@ namespace TestIVO.FileSystemTest
         }
 
         [TestMethod()]
-        public void PersistTagTest()
+        public void PersistRefTest()
         {
-            getTestMethods().PersistTagTest().Wait();
+            getTestMethods().PersistRefTest().Wait();
             cleanUp();
         }
 
         [TestMethod()]
-        public void DeleteTagTest()
+        public void GetRefByNameTest()
         {
-            getTestMethods().DeleteTagTest().Wait();
+            getTestMethods().GetRefByNameTest().Wait();
             cleanUp();
         }
 
         [TestMethod()]
-        public void DeleteTagByName()
+        public void DeleteRefByNameTest()
         {
-            getTestMethods().DeleteTagByNameTest().Wait();
-            cleanUp();
-        }
-
-        [TestMethod()]
-        public void GetTagTest()
-        {
-            getTestMethods().GetTagTest().Wait();
-            cleanUp();
-        }
-
-        [TestMethod()]
-        public void GetTagByNameTest()
-        {
-            getTestMethods().GetTagByNameTest().Wait();
+            getTestMethods().DeleteRefByNameTest().Wait();
             cleanUp();
         }
     }

@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TestIVO.CommonTest
 {
-    class TreeRepositoryTestMethods
+    public sealed class TreeRepositoryTestMethods
     {
         private IStreamedBlobRepository blrepo;
         private ITreeRepository trrepo;

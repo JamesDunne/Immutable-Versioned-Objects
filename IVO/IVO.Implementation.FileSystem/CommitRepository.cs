@@ -169,7 +169,7 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Tuple<Ref, Commit>> GetCommitByRefName(RefName refName)
         {
-            var rf = await rfrepo.GetRef(refName);
+            var rf = await rfrepo.GetRefByName(refName);
             if (rf == null) return new Tuple<Ref, Commit>(rf, (Commit)null);
 
             var cm = await getCommit(rf.CommitID);

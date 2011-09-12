@@ -1,52 +1,36 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using IVO.Definition.Containers;
-using IVO.Definition.Models;
+﻿using Asynq;
 using IVO.Definition.Repositories;
 using IVO.Implementation.SQL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
-using System.Security.Cryptography;
-using Asynq;
-using IVO.Definition;
 
 namespace TestIVO.SQLTest
 {
     [TestClass()]
-    public class StreamedBlobRepositoryTest
+    public class StreamedBlobRepositoryTest : SQLTestBase<CommonTest.StreamedBlobRepositoryTestMethods>
     {
-        private DataContext getDataContext()
+        protected override CommonTest.StreamedBlobRepositoryTestMethods getTestMethods(DataContext db)
         {
-            return new DataContext(@"Data Source=.\SQLEXPRESS;Initial Catalog=IVO;Integrated Security=SSPI");
+            IStreamedBlobRepository blrepo = new StreamedBlobRepository(db);
+
+            return new CommonTest.StreamedBlobRepositoryTestMethods(blrepo);
         }
 
         [TestMethod()]
         public void PersistBlobsTest()
         {
-            DataContext db = getDataContext();
-            IStreamedBlobRepository blrepo = new StreamedBlobRepository(db);
-
-            new CommonTest.StreamedBlobRepositoryTestMethods(blrepo).PersistBlobsTest().Wait();
+            runTestMethod(tm => tm.PersistBlobsTest());
         }
 
         [TestMethod]
         public void DeleteBlobsTest()
         {
-            DataContext db = getDataContext();
-            IStreamedBlobRepository blrepo = new StreamedBlobRepository(db);
-
-            new CommonTest.StreamedBlobRepositoryTestMethods(blrepo).DeleteBlobsTest().Wait();
+            runTestMethod(tm => tm.DeleteBlobsTest());
         }
 
         [TestMethod]
         public void StreamedBlobTest()
         {
-            DataContext db = getDataContext();
-            IStreamedBlobRepository blrepo = new StreamedBlobRepository(db);
-
-            new CommonTest.StreamedBlobRepositoryTestMethods(blrepo).StreamedBlobTest().Wait();
+            runTestMethod(tm => tm.StreamedBlobTest());
         }
     }
 }

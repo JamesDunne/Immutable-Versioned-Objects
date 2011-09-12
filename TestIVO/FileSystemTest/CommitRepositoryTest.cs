@@ -41,7 +41,7 @@ namespace TestIVO.FileSystemTest
             ITagRepository tgrepo = new TagRepository(system);
             IRefRepository rfrepo = new RefRepository(system);
 
-            return new CommonTest.CommitRepositoryTestMethods(blrepo, trrepo, cmrepo, tgrepo, rfrepo);
+            return new CommonTest.CommitRepositoryTestMethods(cmrepo, blrepo, trrepo, tgrepo, rfrepo);
         }
 
         private void cleanUp()

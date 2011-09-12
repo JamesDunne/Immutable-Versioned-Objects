@@ -11,8 +11,8 @@ namespace IVO.Definition.Repositories
     {
         Task<Ref> PersistRef(Ref rf);
 
-        Task<Ref> GetRef(RefName name);
+        Task<Ref> GetRefByName(RefName name);
 
-        Task<Ref> DestroyRef(RefName name);
+        Task<Ref> DeleteRefByName(RefName name);
     }
 }

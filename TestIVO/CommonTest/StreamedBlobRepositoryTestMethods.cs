@@ -11,7 +11,7 @@ using IVO.TestSupport;
 
 namespace TestIVO.CommonTest
 {
-    class StreamedBlobRepositoryTestMethods
+    public sealed class StreamedBlobRepositoryTestMethods
     {
         private IStreamedBlobRepository blrepo;
 

@@ -13,7 +13,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TestIVO.CommonTest
 {
-    class TagRepositoryTestMethods
+    public sealed class TagRepositoryTestMethods
     {
         private ITagRepository tgrepo;
 
@@ -22,6 +22,7 @@ namespace TestIVO.CommonTest
             this.tgrepo = tgrepo;
         }
 
+        // FIXME!!!
         const string cmID = "0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a";
 
         internal async Task PersistTagTest()
@@ -49,7 +50,7 @@ namespace TestIVO.CommonTest
             Assert.IsNull(rtgPost);
         }
 
-        internal async Task DeleteTagByName()
+        internal async Task DeleteTagByNameTest()
         {
             Tag tg = new Tag.Builder((TagName)"v1.0", new CommitID(cmID), "James S. Dunne", DateTimeOffset.Now, "Testing tags");
             await tgrepo.PersistTag(tg);
