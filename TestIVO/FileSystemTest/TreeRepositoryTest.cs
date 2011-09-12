@@ -14,94 +14,62 @@ using IVO.Definition;
 namespace TestIVO.FileSystemTest
 {
     [TestClass()]
-    public class TreeRepositoryTest
+    public class TreeRepositoryTest : FileSystemTestBase<CommonTest.TreeRepositoryTestMethods>
     {
-        private FileSystem getFileSystem()
+        protected override CommonTest.TreeRepositoryTestMethods getTestMethods(FileSystem system)
         {
-            string tmpPath = System.IO.Path.GetTempPath();
-            string tmpRoot = System.IO.Path.Combine(tmpPath, "ivo");
-
-            // Delete our temporary 'ivo' folder:
-            var tmpdi = new DirectoryInfo(tmpRoot);
-            if (tmpdi.Exists)
-                tmpdi.Delete(recursive: true);
-
-            FileSystem system = new FileSystem(new DirectoryInfo(tmpRoot));
-            return system;
-        }
-
-        FileSystem system;
-
-        private CommonTest.TreeRepositoryTestMethods getTestMethods()
-        {
-            system = getFileSystem();
             IStreamedBlobRepository blrepo = new StreamedBlobRepository(system);
             ITreeRepository trrepo = new TreeRepository(system);
 
             return new CommonTest.TreeRepositoryTestMethods(blrepo, trrepo);
         }
 
-        private void cleanUp()
-        {
-            // Clean up:
-            if (system.Root.Exists)
-                system.Root.Delete(recursive: true);
-        }
-
         [TestMethod()]
         public void PersistTreeTest()
         {
-            getTestMethods().PersistTreeTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.PersistTreeTest());
         }
 
         [TestMethod()]
         public void GetTreeTest()
         {
-            getTestMethods().GetTreeTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreeTest());
         }
 
         [TestMethod()]
         public void GetTreesTest()
         {
-            getTestMethods().GetTreesTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreesTest());
         }
 
         [TestMethod()]
         public void GetTreeIDByPathTest()
         {
-            getTestMethods().GetTreeIDByPathTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreeIDByPathTest());
         }
 
         [TestMethod()]
         public void GetTreeIDsByPathsTest()
         {
-            getTestMethods().GetTreeIDsByPathsTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreeIDsByPathsTest());
         }
 
         [TestMethod()]
         public void GetTreeRecursivelyTest()
         {
-            getTestMethods().GetTreeRecursivelyTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreeRecursivelyTest());
         }
 
         [TestMethod()]
         public void GetTreeRecursivelyFromPathTest()
         {
-            getTestMethods().GetTreeRecursivelyFromPathTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTreeRecursivelyFromPathTest());
         }
 
         [TestMethod()]
         public void DeleteTreeRecursivelyTest()
         {
-            getTestMethods().DeleteTreeRecursivelyTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.DeleteTreeRecursivelyTest());
         }
     }
 }

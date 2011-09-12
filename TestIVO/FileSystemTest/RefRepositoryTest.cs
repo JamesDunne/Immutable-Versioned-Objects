@@ -14,58 +14,31 @@ using IVO.Definition;
 namespace TestIVO.FileSystemTest
 {
     [TestClass()]
-    public class RefRepositoryTest
+    public class RefRepositoryTest : FileSystemTestBase<CommonTest.RefRepositoryTestMethods>
     {
-        private FileSystem getFileSystem()
+        protected override CommonTest.RefRepositoryTestMethods getTestMethods(FileSystem system)
         {
-            string tmpPath = System.IO.Path.GetTempPath();
-            string tmpRoot = System.IO.Path.Combine(tmpPath, "ivo");
-
-            // Delete our temporary 'ivo' folder:
-            var tmpdi = new DirectoryInfo(tmpRoot);
-            if (tmpdi.Exists)
-                tmpdi.Delete(recursive: true);
-
-            FileSystem system = new FileSystem(new DirectoryInfo(tmpRoot));
-            return system;
-        }
-
-        FileSystem system;
-
-        private CommonTest.RefRepositoryTestMethods getTestMethods()
-        {
-            system = getFileSystem();
             IRefRepository rfrepo = new RefRepository(system);
 
             return new CommonTest.RefRepositoryTestMethods(rfrepo);
         }
 
-        private void cleanUp()
-        {
-            // Clean up:
-            if (system.Root.Exists)
-                system.Root.Delete(recursive: true);
-        }
-
         [TestMethod()]
         public void PersistRefTest()
         {
-            getTestMethods().PersistRefTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.PersistRefTest());
         }
 
         [TestMethod()]
         public void GetRefByNameTest()
         {
-            getTestMethods().GetRefByNameTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetRefByNameTest());
         }
 
         [TestMethod()]
         public void DeleteRefByNameTest()
         {
-            getTestMethods().DeleteRefByNameTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.DeleteRefByNameTest());
         }
     }
 }

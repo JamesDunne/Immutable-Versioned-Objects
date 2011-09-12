@@ -14,27 +14,10 @@ using IVO.Definition;
 namespace TestIVO.FileSystemTest
 {
     [TestClass()]
-    public class CommitRepositoryTest
+    public class CommitRepositoryTest : FileSystemTestBase<CommonTest.CommitRepositoryTestMethods>
     {
-        private FileSystem getFileSystem()
+        protected override CommonTest.CommitRepositoryTestMethods getTestMethods(FileSystem system)
         {
-            string tmpPath = System.IO.Path.GetTempPath();
-            string tmpRoot = System.IO.Path.Combine(tmpPath, "ivo");
-
-            // Delete our temporary 'ivo' folder:
-            var tmpdi = new DirectoryInfo(tmpRoot);
-            if (tmpdi.Exists)
-                tmpdi.Delete(recursive: true);
-
-            FileSystem system = new FileSystem(new DirectoryInfo(tmpRoot));
-            return system;
-        }
-
-        FileSystem system;
-
-        private CommonTest.CommitRepositoryTestMethods getTestMethods()
-        {
-            system = getFileSystem();
             IStreamedBlobRepository blrepo = new StreamedBlobRepository(system);
             ITreeRepository trrepo = new TreeRepository(system);
             ICommitRepository cmrepo = new CommitRepository(system);
@@ -44,60 +27,46 @@ namespace TestIVO.FileSystemTest
             return new CommonTest.CommitRepositoryTestMethods(cmrepo, blrepo, trrepo, tgrepo, rfrepo);
         }
 
-        private void cleanUp()
-        {
-            // Clean up:
-            if (system.Root.Exists)
-                system.Root.Delete(recursive: true);
-        }
-
         [TestMethod()]
         public void PersistCommitTest()
         {
-            getTestMethods().PersistCommitTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.PersistCommitTest());
         }
 
         [TestMethod()]
         public void GetCommitTest()
         {
-            getTestMethods().GetCommitTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetCommitTest());
         }
 
         [TestMethod()]
         public void GetCommitTreeTest()
         {
-            getTestMethods().GetCommitTreeTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetCommitTreeTest());
         }
 
         [TestMethod()]
         public void GetCommitTreeTest2()
         {
-            getTestMethods().GetCommitTreeTest2().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetCommitTreeTest2());
         }
 
         [TestMethod()]
         public void GetCommitByTagTest()
         {
-            getTestMethods().GetCommitByTagTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetCommitByTagTest());
         }
 
         [TestMethod()]
         public void GetCommitByTagNameTest()
         {
-            getTestMethods().GetCommitByTagNameTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetCommitByTagNameTest());
         }
 
         [TestMethod()]
         public void GetCommitByRefNameTest()
         {
-            getTestMethods().GetCommitByRefNameTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetCommitByRefNameTest());
         }
     }
 }

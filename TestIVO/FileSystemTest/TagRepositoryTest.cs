@@ -14,72 +14,43 @@ using IVO.Definition;
 namespace TestIVO.FileSystemTest
 {
     [TestClass()]
-    public class TagRepositoryTest
+    public class TagRepositoryTest : FileSystemTestBase<CommonTest.TagRepositoryTestMethods>
     {
-        private FileSystem getFileSystem()
+        protected override CommonTest.TagRepositoryTestMethods getTestMethods(FileSystem system)
         {
-            string tmpPath = System.IO.Path.GetTempPath();
-            string tmpRoot = System.IO.Path.Combine(tmpPath, "ivo");
-
-            // Delete our temporary 'ivo' folder:
-            var tmpdi = new DirectoryInfo(tmpRoot);
-            if (tmpdi.Exists)
-                tmpdi.Delete(recursive: true);
-
-            FileSystem system = new FileSystem(new DirectoryInfo(tmpRoot));
-            return system;
-        }
-
-        FileSystem system;
-
-        private CommonTest.TagRepositoryTestMethods getTestMethods()
-        {
-            system = getFileSystem();
             ITagRepository tgrepo = new TagRepository(system);
 
             return new CommonTest.TagRepositoryTestMethods(tgrepo);
         }
 
-        private void cleanUp()
-        {
-            // Clean up:
-            if (system.Root.Exists)
-                system.Root.Delete(recursive: true);
-        }
-
         [TestMethod()]
         public void PersistTagTest()
         {
-            getTestMethods().PersistTagTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.PersistTagTest());
         }
 
         [TestMethod()]
         public void DeleteTagTest()
         {
-            getTestMethods().DeleteTagTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.DeleteTagTest());
         }
 
         [TestMethod()]
-        public void DeleteTagByName()
+        public void DeleteTagByNameTest()
         {
-            getTestMethods().DeleteTagByNameTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.DeleteTagByNameTest());
         }
 
         [TestMethod()]
         public void GetTagTest()
         {
-            getTestMethods().GetTagTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTagTest());
         }
 
         [TestMethod()]
         public void GetTagByNameTest()
         {
-            getTestMethods().GetTagByNameTest().Wait();
-            cleanUp();
+            runTestMethod(tm => tm.GetTagByNameTest());
         }
     }
 }
