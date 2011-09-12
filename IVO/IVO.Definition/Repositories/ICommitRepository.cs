@@ -18,9 +18,9 @@ namespace IVO.Definition.Repositories
 
         Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id);
 
-        Task<Tuple<Tag, Commit>> GetCommitByTagName(string tagName);
+        Task<Tuple<Tag, Commit>> GetCommitByTagName(TagName tagName);
 
-        Task<Tuple<Ref, Commit>> GetCommitByRef(string refName);
+        Task<Tuple<Ref, Commit>> GetCommitByRefName(RefName refName);
 
         Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTree(CommitID id, int depth = 10);
     }

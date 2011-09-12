@@ -109,22 +109,22 @@ namespace IVO.Implementation.FileSystem
                 string line = sr.ReadLine();
 
                 // Set CommitID:
-                if (line == null || !line.StartsWith("commit ")) throw new ObjectParseException("While parsing a commit, expected: 'commit'");
+                if (line == null || !line.StartsWith("commit ")) throw new ObjectParseException("While parsing a tag, expected: 'commit'");
                 tb.CommitID = new CommitID(line.Substring("commit ".Length));
 
                 // Set Name:
                 line = sr.ReadLine();
-                if (line == null || !line.StartsWith("name ")) throw new ObjectParseException("While parsing a commit, expected: 'name'");
+                if (line == null || !line.StartsWith("name ")) throw new ObjectParseException("While parsing a tag, expected: 'name'");
                 tb.Name = (TagName) line.Substring("name ".Length);
 
                 // Set Tagger:
                 line = sr.ReadLine();
-                if (line == null || !line.StartsWith("tagger ")) throw new ObjectParseException("While parsing a commit, expected: 'tagger'");
+                if (line == null || !line.StartsWith("tagger ")) throw new ObjectParseException("While parsing a tag, expected: 'tagger'");
                 tb.Tagger = line.Substring("tagger ".Length);
 
                 // Set DateTagged:
                 line = sr.ReadLine();
-                if (line == null || !line.StartsWith("date ")) throw new ObjectParseException("While parsing a commit, expected: 'date'");
+                if (line == null || !line.StartsWith("date ")) throw new ObjectParseException("While parsing a tag, expected: 'date'");
 
                 // NOTE: date parsing will result in an inexact DateTimeOffset from what was created with, but it
                 // is close enough because the SHA-1 hash is calculated using the DateTimeOffset.ToString(), so

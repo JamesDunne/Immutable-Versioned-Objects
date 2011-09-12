@@ -10,9 +10,9 @@ namespace IVO.Implementation.SQL.Queries
 {
     public sealed class QueryCommitByTagName : IComplexDataQuery<Tuple<Tag, Commit>>
     {
-        private string _tagName;
+        private TagName _tagName;
 
-        public QueryCommitByTagName(string tagName)
+        public QueryCommitByTagName(TagName tagName)
         {
             this._tagName = tagName;
         }
@@ -35,7 +35,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             );
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@tagname", new SqlString(this._tagName));
+            cmd.AddInParameter("@tagname", new SqlString(this._tagName.ToString()));
             cmd.AddOutParameter("@commitid", System.Data.SqlDbType.Binary, 20);
             return cmd;
         }

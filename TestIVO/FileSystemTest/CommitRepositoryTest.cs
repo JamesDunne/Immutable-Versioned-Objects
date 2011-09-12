@@ -38,8 +38,10 @@ namespace TestIVO.FileSystemTest
             IStreamedBlobRepository blrepo = new StreamedBlobRepository(system);
             ITreeRepository trrepo = new TreeRepository(system);
             ICommitRepository cmrepo = new CommitRepository(system);
+            ITagRepository tgrepo = new TagRepository(system);
+            IRefRepository rfrepo = new RefRepository(system);
 
-            return new CommonTest.CommitRepositoryTestMethods(blrepo, trrepo, cmrepo);
+            return new CommonTest.CommitRepositoryTestMethods(blrepo, trrepo, cmrepo, tgrepo, rfrepo);
         }
 
         private void cleanUp()
@@ -74,6 +76,27 @@ namespace TestIVO.FileSystemTest
         public void GetCommitTreeTest2()
         {
             getTestMethods().GetCommitTreeTest2().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetCommitByTagTest()
+        {
+            getTestMethods().GetCommitByTagTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetCommitByTagNameTest()
+        {
+            getTestMethods().GetCommitByTagNameTest().Wait();
+            cleanUp();
+        }
+
+        [TestMethod()]
+        public void GetCommitByRefNameTest()
+        {
+            getTestMethods().GetCommitByRefNameTest().Wait();
             cleanUp();
         }
     }

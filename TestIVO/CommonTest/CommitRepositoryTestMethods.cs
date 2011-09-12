@@ -19,12 +19,16 @@ namespace TestIVO.CommonTest
         private IStreamedBlobRepository blrepo;
         private ITreeRepository trrepo;
         private ICommitRepository cmrepo;
+        private ITagRepository tgrepo;
+        private IRefRepository rfrepo;
 
-        internal CommitRepositoryTestMethods(IStreamedBlobRepository blrepo, ITreeRepository trrepo, ICommitRepository cmrepo)
+        internal CommitRepositoryTestMethods(IStreamedBlobRepository blrepo, ITreeRepository trrepo, ICommitRepository cmrepo, ITagRepository tgrepo, IRefRepository rfrepo)
         {
             this.blrepo = blrepo;
             this.trrepo = trrepo;
             this.cmrepo = cmrepo;
+            this.tgrepo = tgrepo;
+            this.rfrepo = rfrepo;
         }
 
         internal static void RecursivePrint(CommitID cmID, ImmutableContainer<CommitID, ICommit> commits, int depth = 1)
@@ -147,6 +151,57 @@ namespace TestIVO.CommonTest
             Assert.AreEqual(cmHead.ID, rcmHeadTree.Item1);
 
             RecursivePrint(rcmHeadTree.Item1, rcmHeadTree.Item2);
+        }
+
+        internal async Task GetCommitByTagTest()
+        {
+            await createCommits();
+
+            Tag tg = new Tag.Builder((TagName)"v1.0", cmRoot.ID, "James S. Dunne", DateTimeOffset.Now, "Tagged!");
+            await tgrepo.PersistTag(tg);
+
+            var tgcm = await cmrepo.GetCommitByTag(tg.ID);
+            Assert.IsNotNull(tgcm);
+            Assert.IsNotNull(tgcm.Item1);
+            Assert.IsNotNull(tgcm.Item2);
+            Assert.AreEqual(cmRoot.ID, tgcm.Item2.ID);
+            Assert.AreEqual(cmRoot.DateCommitted.ToString(), tgcm.Item2.DateCommitted.ToString());
+            Assert.AreEqual(cmRoot.Committer, tgcm.Item2.Committer);
+            Assert.AreEqual(cmRoot.Message, tgcm.Item2.Message);
+        }
+
+        internal async Task GetCommitByTagNameTest()
+        {
+            await createCommits();
+
+            Tag tg = new Tag.Builder((TagName)"v1.0", cmRoot.ID, "James S. Dunne", DateTimeOffset.Now, "Tagged!");
+            await tgrepo.PersistTag(tg);
+
+            var tgcm = await cmrepo.GetCommitByTagName(tg.Name);
+            Assert.IsNotNull(tgcm);
+            Assert.IsNotNull(tgcm.Item1);
+            Assert.IsNotNull(tgcm.Item2);
+            Assert.AreEqual(cmRoot.ID, tgcm.Item2.ID);
+            Assert.AreEqual(cmRoot.DateCommitted.ToString(), tgcm.Item2.DateCommitted.ToString());
+            Assert.AreEqual(cmRoot.Committer, tgcm.Item2.Committer);
+            Assert.AreEqual(cmRoot.Message, tgcm.Item2.Message);
+        }
+
+        internal async Task GetCommitByRefNameTest()
+        {
+            await createCommits();
+
+            Ref rf = new Ref.Builder((RefName)"v1.0", cmRoot.ID);
+            await rfrepo.PersistRef(rf);
+
+            var rfcm = await cmrepo.GetCommitByRefName(rf.Name);
+            Assert.IsNotNull(rfcm);
+            Assert.IsNotNull(rfcm.Item1);
+            Assert.IsNotNull(rfcm.Item2);
+            Assert.AreEqual(cmRoot.ID, rfcm.Item2.ID);
+            Assert.AreEqual(cmRoot.DateCommitted.ToString(), rfcm.Item2.DateCommitted.ToString());
+            Assert.AreEqual(cmRoot.Committer, rfcm.Item2.Committer);
+            Assert.AreEqual(cmRoot.Message, rfcm.Item2.Message);
         }
     }
 }

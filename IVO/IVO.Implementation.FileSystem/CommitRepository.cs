@@ -15,10 +15,14 @@ namespace IVO.Implementation.FileSystem
     public sealed class CommitRepository : ICommitRepository
     {
         private FileSystem system;
+        private TagRepository tgrepo;
+        private RefRepository rfrepo;
 
-        public CommitRepository(FileSystem system)
+        public CommitRepository(FileSystem system, TagRepository tgrepo = null, RefRepository rfrepo = null)
         {
             this.system = system;
+            this.tgrepo = tgrepo ?? new TagRepository(system);
+            this.rfrepo = rfrepo ?? new RefRepository(system);
         }
 
         #region Private details
@@ -145,19 +149,31 @@ namespace IVO.Implementation.FileSystem
             return getCommit(id);
         }
 
-        public Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id)
+        public async Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id)
         {
-            throw new NotImplementedException();
+            var tg = await tgrepo.GetTag(id);
+            if (tg == null) return new Tuple<Tag, Commit>(tg, (Commit)null);
+
+            var cm = await getCommit(tg.CommitID);
+            return new Tuple<Tag, Commit>(tg, cm);
         }
 
-        public Task<Tuple<Tag, Commit>> GetCommitByTagName(string tagName)
+        public async Task<Tuple<Tag, Commit>> GetCommitByTagName(TagName tagName)
         {
-            throw new NotImplementedException();
+            var tg = await tgrepo.GetTagByName(tagName);
+            if (tg == null) return new Tuple<Tag, Commit>(tg, (Commit)null);
+
+            var cm = await getCommit(tg.CommitID);
+            return new Tuple<Tag, Commit>(tg, cm);
         }
 
-        public Task<Tuple<Ref, Commit>> GetCommitByRef(string refName)
+        public async Task<Tuple<Ref, Commit>> GetCommitByRefName(RefName refName)
         {
-            throw new NotImplementedException();
+            var rf = await rfrepo.GetRef(refName);
+            if (rf == null) return new Tuple<Ref, Commit>(rf, (Commit)null);
+
+            var cm = await getCommit(rf.CommitID);
+            return new Tuple<Ref, Commit>(rf, cm);
         }
 
         private async Task<Commit[]> getCommitsRecursively(CommitID id, int depthLevel, int depthMaximum)

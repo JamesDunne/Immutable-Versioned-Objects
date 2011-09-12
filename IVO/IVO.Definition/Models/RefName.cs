@@ -32,9 +32,6 @@ namespace IVO.Definition.Models
         {
             if (String.IsNullOrWhiteSpace(path)) throw new InvalidPathException("Ref name cannot be empty");
 
-            // Remove trailing path separator char for parsing:
-            if (path[path.Length - 1] == PathSeparatorChar) path = path.Substring(0, path.Length - 1);
-
             string[] parts = SplitPath(path);
 
             validateCanonicalTreePath(parts);
@@ -50,7 +47,7 @@ namespace IVO.Definition.Models
         {
             if (Parts.Count == 0) return PathSeparatorString;
 
-            return String.Concat(String.Join(PathSeparatorString, Parts), PathSeparatorString);
+            return String.Join(PathSeparatorString, Parts);
         }
     }
 }

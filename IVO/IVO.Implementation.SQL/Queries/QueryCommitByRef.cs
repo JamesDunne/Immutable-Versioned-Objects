@@ -11,9 +11,9 @@ namespace IVO.Implementation.SQL.Queries
 {
     public sealed class QueryCommitByRefName : IComplexDataQuery<Tuple<Ref, Commit>>
     {
-        private string _refName;
+        private RefName _refName;
 
-        public QueryCommitByRefName(string refName)
+        public QueryCommitByRefName(RefName refName)
         {
             this._refName = refName;
         }
@@ -36,7 +36,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             );
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@refname", new SqlString(this._refName));
+            cmd.AddInParameter("@refname", new SqlString(this._refName.ToString()));
             cmd.AddOutParameter("@commitid", System.Data.SqlDbType.Binary, 20);
             return cmd;
         }

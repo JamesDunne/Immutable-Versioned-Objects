@@ -58,12 +58,14 @@
     <Compile Include="CommonTest\TagRepositoryTestMethods.cs" />
     <Compile Include="CommonTest\TreeRepositoryTestMethods.cs" />
     <Compile Include="CommonTest\StreamedBlobRepositoryTestMethods.cs" />
+    <Compile Include="RefNameTest.cs" />
     <Compile Include="FileSystemTest\CommitRepositoryTest.cs" />
     <Compile Include="FileSystemTest\TagRepositoryTest.cs" />
     <Compile Include="FileSystemTest\TreeRepositoryTest.cs" />
     <Compile Include="FileSystemTest\StreamedBlobRepositoryTest.cs" />
     <Compile Include="SQLTest\TreeRepositoryTest.cs" />
     <Compile Include="SQLTest\StreamedBlobRepositoryTest.cs" />
+    <Compile Include="TagNameTest.cs" />
     <Compile Include="TreePaths.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

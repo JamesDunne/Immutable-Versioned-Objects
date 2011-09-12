@@ -12,11 +12,13 @@ namespace IVO.Implementation.FileSystem
     {
         private FileSystem system;
         private StreamedBlobRepository blrepo;
+        private TreeRepository trrepo;
 
-        public TreePathStreamedBlobRepository(FileSystem system, StreamedBlobRepository blrepo, TreeRepository trrepo)
+        public TreePathStreamedBlobRepository(FileSystem system, TreeRepository trrepo = null, StreamedBlobRepository blrepo = null)
         {
             this.system = system;
-            this.blrepo = blrepo;
+            this.trrepo = trrepo ?? new TreeRepository(system);
+            this.blrepo = blrepo ?? new StreamedBlobRepository(system);
         }
 
         public Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(params TreeBlobPath[] treePaths)

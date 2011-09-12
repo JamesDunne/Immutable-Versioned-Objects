@@ -43,12 +43,12 @@ namespace IVO.Implementation.SQL
             return db.ExecuteSingleQueryAsync(new QueryCommitByTagID(id));
         }
 
-        public Task<Tuple<Tag, Commit>> GetCommitByTagName(string tagName)
+        public Task<Tuple<Tag, Commit>> GetCommitByTagName(TagName tagName)
         {
             return db.ExecuteSingleQueryAsync(new QueryCommitByTagName(tagName));
         }
 
-        public Task<Tuple<Ref, Commit>> GetCommitByRef(string refName)
+        public Task<Tuple<Ref, Commit>> GetCommitByRefName(RefName refName)
         {
             return db.ExecuteSingleQueryAsync(new QueryCommitByRefName(refName));
         }
