@@ -63,15 +63,15 @@ namespace IVO.Implementation.SQL.Queries
         {
             TagID id = (TagID) dr.GetSqlBinary(0).Value;
 
-            Tag.Builder b = new Tag.Builder(
-                pName:          (TagName) dr.GetSqlString(0).Value,
-                pCommitID:      (CommitID)dr.GetSqlBinary(1).Value,
-                pTagger:        dr.GetSqlString(2).Value,
-                pDateTagged:    dr.GetDateTimeOffset(3),
-                pMessage:       dr.GetSqlString(4).Value
+            Tag.Builder tb = new Tag.Builder(
+                pName:          (TagName) dr.GetSqlString(1).Value,
+                pCommitID:      (CommitID)dr.GetSqlBinary(2).Value,
+                pTagger:        dr.GetSqlString(3).Value,
+                pDateTagged:    dr.GetDateTimeOffset(4),
+                pMessage:       dr.GetSqlString(5).Value
             );
 
-            Tag tg = b;
+            Tag tg = tb;
             if (tg.ID != id) throw new TagIDMismatchException(tg.ID, id);
 
             return tg;
