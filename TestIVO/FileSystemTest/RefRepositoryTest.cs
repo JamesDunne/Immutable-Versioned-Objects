@@ -18,9 +18,13 @@ namespace TestIVO.FileSystemTest
     {
         protected override CommonTest.RefRepositoryTestMethods getTestMethods(FileSystem system)
         {
+            IStreamedBlobRepository blrepo = new StreamedBlobRepository(system);
+            ITreeRepository trrepo = new TreeRepository(system);
+            ICommitRepository cmrepo = new CommitRepository(system);
+            ITagRepository tgrepo = new TagRepository(system);
             IRefRepository rfrepo = new RefRepository(system);
 
-            return new CommonTest.RefRepositoryTestMethods(rfrepo);
+            return new CommonTest.RefRepositoryTestMethods(cmrepo, blrepo, trrepo, tgrepo, rfrepo);
         }
 
         [TestMethod()]

@@ -25,7 +25,7 @@ namespace TestIVO.SQLTest
             ITagRepository tgrepo = new TagRepository(db);
             IRefRepository rfrepo = new RefRepository(db);
 
-            return new CommonTest.RefRepositoryTestMethods(rfrepo);
+            return new CommonTest.RefRepositoryTestMethods(cmrepo, blrepo, trrepo, tgrepo, rfrepo);
         }
 
         [TestMethod()]
