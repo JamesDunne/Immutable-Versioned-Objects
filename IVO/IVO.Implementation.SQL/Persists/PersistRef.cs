@@ -32,8 +32,8 @@ END",
             );
 
             var cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@name", new SqlString(_rf.Name));
-            cmd.AddInParameter("@commitid", new SqlBinary((byte[])_rf.CommitID));
+            cmd.AddInParameter("@name", new SqlString(this._rf.Name.ToString()));
+            cmd.AddInParameter("@commitid", new SqlBinary((byte[])this._rf.CommitID));
             return cmd;
         }
 

@@ -9,9 +9,9 @@ namespace IVO.Implementation.SQL.Persists
 {
     public sealed class DestroyTagByName : IDataOperation<TagID?>
     {
-        private string _tagName;
+        private TagName _tagName;
 
-        public DestroyTagByName(string tagName)
+        public DestroyTagByName(TagName tagName)
         {
             this._tagName = tagName;
         }
@@ -31,7 +31,7 @@ END",
 
             var cmd = new SqlCommand(cmdText, cn);
             cmd.AddOutParameter("@tagid", System.Data.SqlDbType.Binary, 20);
-            cmd.AddInParameter("@tagname", new SqlString(_tagName));
+            cmd.AddInParameter("@tagname", new SqlString(this._tagName.ToString()));
             return cmd;
         }
 

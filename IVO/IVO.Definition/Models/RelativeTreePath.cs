@@ -9,7 +9,7 @@ namespace IVO.Definition.Models
     /// <summary>
     /// A relative tree path is a path to a tree that is relative to an absolute tree path.
     /// </summary>
-    public sealed class RelativeTreePath : Path
+    public sealed class RelativeTreePath : PathObjectModel
     {
         private RelativeTreePath(IList<string> parts)
         {

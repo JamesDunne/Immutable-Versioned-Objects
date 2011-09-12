@@ -9,9 +9,9 @@ namespace IVO.Implementation.SQL.Persists
 {
     public sealed class DestroyRefByName : IDataOperation<int>
     {
-        private string _refName;
+        private RefName _refName;
 
-        public DestroyRefByName(string refName)
+        public DestroyRefByName(RefName refName)
         {
             this._refName = refName;
         }
@@ -24,7 +24,7 @@ namespace IVO.Implementation.SQL.Persists
             );
 
             var cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@refname", new SqlString(_refName));
+            cmd.AddInParameter("@refname", new SqlString(this._refName.ToString()));
             return cmd;
         }
 

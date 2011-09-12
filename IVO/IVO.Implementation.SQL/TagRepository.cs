@@ -33,7 +33,7 @@ namespace IVO.Implementation.SQL
             return db.ExecuteSingleQueryAsync(new QueryTag(id));
         }
 
-        public Task<Tag> GetTagByName(string tagName)
+        public Task<Tag> GetTagByName(TagName tagName)
         {
             return db.ExecuteSingleQueryAsync(new QueryTag(tagName));
         }
@@ -43,7 +43,7 @@ namespace IVO.Implementation.SQL
             return db.ExecuteNonQueryAsync(new DestroyTag(id));
         }
 
-        public Task<TagID?> DeleteTagByName(string tagName)
+        public Task<TagID?> DeleteTagByName(TagName tagName)
         {
             return db.ExecuteNonQueryAsync(new DestroyTagByName(tagName));
         }

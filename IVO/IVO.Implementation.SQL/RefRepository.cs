@@ -28,12 +28,12 @@ namespace IVO.Implementation.SQL
             return db.ExecuteNonQueryAsync(new PersistRef(rf));
         }
 
-        public Task<Ref> GetRef(string name)
+        public Task<Ref> GetRef(RefName name)
         {
             return db.ExecuteSingleQueryAsync(new QueryRef(name));
         }
 
-        public async Task<Ref> DestroyRefByName(string name)
+        public async Task<Ref> DestroyRef(RefName name)
         {
             // Grab the ref before we destroy it, just in case:
             var rf = await db.ExecuteSingleQueryAsync(new QueryRef(name));

@@ -271,7 +271,7 @@ namespace IVO.Definition.Models
     public sealed partial class Tag
     {
         public TagID ID { get; private set; }
-        public string Name { get; private set; }
+        public TagName Name { get; private set; }
         public CommitID CommitID { get; private set; }
         public string Tagger { get; private set; }
         public DateTimeOffset DateTagged { get; private set; }
@@ -289,7 +289,7 @@ namespace IVO.Definition.Models
 
         public sealed class Builder
         {
-            public string Name { get; set; }
+            public TagName Name { get; set; }
             public CommitID CommitID { get; set; }
             public string Tagger { get; set; }
             public DateTimeOffset DateTagged { get; set; }
@@ -307,7 +307,7 @@ namespace IVO.Definition.Models
             }
 
             public Builder(
-                string pName
+                TagName pName
                ,CommitID pCommitID
                ,string pTagger
                ,DateTimeOffset pDateTagged
@@ -335,7 +335,7 @@ namespace IVO.Definition.Models
     /// </summary>
     public sealed partial class Ref
     {
-        public string Name { get; private set; }
+        public RefName Name { get; private set; }
         public CommitID CommitID { get; private set; }
 
         public Ref(Builder b)
@@ -346,7 +346,7 @@ namespace IVO.Definition.Models
 
         public sealed class Builder
         {
-            public string Name { get; set; }
+            public RefName Name { get; set; }
             public CommitID CommitID { get; set; }
 
             public Builder() { }
@@ -358,7 +358,7 @@ namespace IVO.Definition.Models
             }
 
             public Builder(
-                string pName
+                RefName pName
                ,CommitID pCommitID
             )
             {

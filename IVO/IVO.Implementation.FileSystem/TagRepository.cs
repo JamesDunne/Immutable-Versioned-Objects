@@ -51,7 +51,7 @@ namespace IVO.Implementation.FileSystem
             }
         }
 
-        private async Task<TagID?> getTagIDByName(string tagName)
+        private async Task<TagID?> getTagIDByName(TagName tagName)
         {
             FileInfo fiTracker = system.getTagPathByTagName(tagName);
             if (!fiTracker.Exists) return (TagID?)null;
@@ -115,7 +115,7 @@ namespace IVO.Implementation.FileSystem
                 // Set Name:
                 line = sr.ReadLine();
                 if (line == null || !line.StartsWith("name ")) throw new ObjectParseException("While parsing a commit, expected: 'name'");
-                tb.Name = line.Substring("name ".Length);
+                tb.Name = (TagName) line.Substring("name ".Length);
 
                 // Set Tagger:
                 line = sr.ReadLine();
@@ -172,7 +172,7 @@ namespace IVO.Implementation.FileSystem
             return tg.ID;
         }
 
-        public async Task<TagID?> DeleteTagByName(string tagName)
+        public async Task<TagID?> DeleteTagByName(TagName tagName)
         {
             TagID? id = await getTagIDByName(tagName);
             if (!id.HasValue) return null;
@@ -188,7 +188,7 @@ namespace IVO.Implementation.FileSystem
             return getTag(id);
         }
 
-        public async Task<Tag> GetTagByName(string tagName)
+        public async Task<Tag> GetTagByName(TagName tagName)
         {
             TagID? id = await getTagIDByName(tagName);
             if (!id.HasValue) return null;

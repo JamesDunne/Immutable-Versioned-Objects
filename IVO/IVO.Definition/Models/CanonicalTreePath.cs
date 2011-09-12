@@ -10,7 +10,7 @@ namespace IVO.Definition.Models
     /// <summary>
     /// A canonicalized tree path is an absolute tree path that is guaranteed to contain no directory traversals and is in a normalized form.
     /// </summary>
-    public sealed class CanonicalTreePath : Path
+    public sealed class CanonicalTreePath : PathObjectModel
     {
         internal CanonicalTreePath(IList<string> parts)
         {

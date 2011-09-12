@@ -26,19 +26,19 @@ namespace TestIVO.CommonTest
 
         internal async Task PersistTagTest()
         {
-            Tag tg = new Tag.Builder("v1.0", new CommitID(cmID), "James S. Dunne", DateTimeOffset.Now, "Testing tags");
+            Tag tg = new Tag.Builder((TagName)"v1.0", new CommitID(cmID), "James S. Dunne", DateTimeOffset.Now, "Testing tags");
             await tgrepo.PersistTag(tg);
         }
 
         internal async Task DeleteTagTest()
         {
-            Tag tg = new Tag.Builder("v1.0", new CommitID(cmID), "James S. Dunne", DateTimeOffset.Now, "Testing tags");
+            Tag tg = new Tag.Builder((TagName)"v1.0", new CommitID(cmID), "James S. Dunne", DateTimeOffset.Now, "Testing tags");
             await tgrepo.PersistTag(tg);
 
             Tag rtgPre = await tgrepo.GetTag(tg.ID);
             Assert.IsNotNull(rtgPre);
             Assert.AreEqual(tg.ID, rtgPre.ID);
-            Assert.AreEqual(tg.Name, rtgPre.Name);
+            Assert.AreEqual(tg.Name.ToString(), rtgPre.Name.ToString());
             Assert.AreEqual(tg.CommitID, rtgPre.CommitID);
             Assert.AreEqual(tg.Tagger, rtgPre.Tagger);
             Assert.AreEqual(tg.DateTagged.ToString(), rtgPre.DateTagged.ToString());
@@ -51,18 +51,18 @@ namespace TestIVO.CommonTest
 
         internal async Task DeleteTagByName()
         {
-            Tag tg = new Tag.Builder("v1.0", new CommitID(cmID), "James S. Dunne", DateTimeOffset.Now, "Testing tags");
+            Tag tg = new Tag.Builder((TagName)"v1.0", new CommitID(cmID), "James S. Dunne", DateTimeOffset.Now, "Testing tags");
             await tgrepo.PersistTag(tg);
 
             Tag rtgPre = await tgrepo.GetTag(tg.ID);
             Assert.IsNotNull(rtgPre);
             Assert.AreEqual(tg.ID, rtgPre.ID);
-            Assert.AreEqual(tg.Name, rtgPre.Name);
+            Assert.AreEqual(tg.Name.ToString(), rtgPre.Name.ToString());
             Assert.AreEqual(tg.CommitID, rtgPre.CommitID);
             Assert.AreEqual(tg.Tagger, rtgPre.Tagger);
             Assert.AreEqual(tg.DateTagged.ToString(), rtgPre.DateTagged.ToString());
 
-            await tgrepo.DeleteTagByName("v1.0");
+            await tgrepo.DeleteTagByName((TagName)"v1.0");
 
             Tag rtgPost = await tgrepo.GetTag(tg.ID);
             Assert.IsNull(rtgPost);
@@ -70,13 +70,13 @@ namespace TestIVO.CommonTest
 
         internal async Task GetTagTest()
         {
-            Tag tg = new Tag.Builder("v1.0", new CommitID(cmID), "James S. Dunne", DateTimeOffset.Now, "Testing tags");
+            Tag tg = new Tag.Builder((TagName)"v1.0", new CommitID(cmID), "James S. Dunne", DateTimeOffset.Now, "Testing tags");
             await tgrepo.PersistTag(tg);
 
             Tag rtg = await tgrepo.GetTag(tg.ID);
             Assert.IsNotNull(rtg);
             Assert.AreEqual(tg.ID, rtg.ID);
-            Assert.AreEqual(tg.Name, rtg.Name);
+            Assert.AreEqual(tg.Name.ToString(), rtg.Name.ToString());
             Assert.AreEqual(tg.CommitID, rtg.CommitID);
             Assert.AreEqual(tg.Tagger, rtg.Tagger);
             Assert.AreEqual(tg.DateTagged.ToString(), rtg.DateTagged.ToString());
@@ -84,13 +84,13 @@ namespace TestIVO.CommonTest
 
         internal async Task GetTagByNameTest()
         {
-            Tag tg = new Tag.Builder("v1.0", new CommitID(cmID), "James S. Dunne", DateTimeOffset.Now, "Testing tags");
+            Tag tg = new Tag.Builder((TagName)"v1.0", new CommitID(cmID), "James S. Dunne", DateTimeOffset.Now, "Testing tags");
             await tgrepo.PersistTag(tg);
 
-            Tag rtg = await tgrepo.GetTagByName("v1.0");
+            Tag rtg = await tgrepo.GetTagByName((TagName)"v1.0");
             Assert.IsNotNull(rtg);
             Assert.AreEqual(tg.ID, rtg.ID);
-            Assert.AreEqual(tg.Name, rtg.Name);
+            Assert.AreEqual(tg.Name.ToString(), rtg.Name.ToString());
             Assert.AreEqual(tg.CommitID, rtg.CommitID);
             Assert.AreEqual(tg.Tagger, rtg.Tagger);
             Assert.AreEqual(tg.DateTagged.ToString(), rtg.DateTagged.ToString());

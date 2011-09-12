@@ -53,11 +53,11 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
 
             TagID tgid = (TagID)dr.GetSqlBinary(0).Value;
             Tag.Builder tgb = new Tag.Builder(
-                pName: dr.GetSqlString(1).Value,
-                pCommitID: (CommitID)dr.GetSqlBinary(2).Value,
-                pTagger: dr.GetSqlString(3).Value,
-                pDateTagged: dr.GetDateTimeOffset(4),
-                pMessage: dr.GetSqlString(5).Value
+                pName:          (TagName) dr.GetSqlString(1).Value,
+                pCommitID:      (CommitID)dr.GetSqlBinary(2).Value,
+                pTagger:        dr.GetSqlString(3).Value,
+                pDateTagged:    dr.GetDateTimeOffset(4),
+                pMessage:       dr.GetSqlString(5).Value
             );
 
             Tag tg = tgb;

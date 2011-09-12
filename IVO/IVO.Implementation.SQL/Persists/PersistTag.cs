@@ -26,12 +26,12 @@ namespace IVO.Implementation.SQL.Persists
             );
 
             var cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@tagid", new SqlBinary((byte[])_tg.ID));
-            cmd.AddInParameter("@name", new SqlString(_tg.Name));
-            cmd.AddInParameter("@commitid", new SqlBinary((byte[])_tg.CommitID));
-            cmd.AddInParameter("@tagger", new SqlString(_tg.Tagger));
-            cmd.AddInParameter("@date_tagged", _tg.DateTagged);
-            cmd.AddInParameter("@message", new SqlString(_tg.Message));
+            cmd.AddInParameter("@tagid", new SqlBinary((byte[])this._tg.ID));
+            cmd.AddInParameter("@name", new SqlString(this._tg.Name.ToString()));
+            cmd.AddInParameter("@commitid", new SqlBinary((byte[])this._tg.CommitID));
+            cmd.AddInParameter("@tagger", new SqlString(this._tg.Tagger));
+            cmd.AddInParameter("@date_tagged", this._tg.DateTagged);
+            cmd.AddInParameter("@message", new SqlString(this._tg.Message));
             return cmd;
         }
 

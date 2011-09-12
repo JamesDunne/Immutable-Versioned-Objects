@@ -47,6 +47,9 @@
     <Compile Include="Models\AbsoluteTreePath.cs" />
     <Compile Include="Models\Commit.cs" />
     <Compile Include="Models\CommitPartial.cs" />
+    <Compile Include="Models\TagName.cs" />
+    <Compile Include="Models\RefName.cs" />
+    <Compile Include="Models\Ref.cs" />
     <Compile Include="Models\TreeIDPathMapping.cs" />
     <Compile Include="Models\TreeTreePath.cs" />
     <Compile Include="Models\ICommit.cs" />
@@ -59,7 +62,7 @@
     <Compile Include="Models\CanonicalBlobPath.cs" />
     <Compile Include="Models\IStreamedBlob.cs" />
     <Compile Include="Models\RelativeBlobPath.cs" />
-    <Compile Include="Models\Path.cs" />
+    <Compile Include="Models\PathObjectModel.cs" />
     <Compile Include="Models\RelativeTreePath.cs" />
     <Compile Include="Repositories\IStreamedBlobRepository.cs" />
     <Compile Include="Repositories\ICommitRepository.cs" />

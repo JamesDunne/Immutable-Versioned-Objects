@@ -13,10 +13,10 @@ namespace IVO.Definition.Repositories
 
         Task<TagID?> DeleteTag(TagID id);
 
-        Task<TagID?> DeleteTagByName(string tagName);
+        Task<TagID?> DeleteTagByName(TagName tagName);
 
         Task<Tag> GetTag(TagID id);
 
-        Task<Tag> GetTagByName(string tagName);
+        Task<Tag> GetTagByName(TagName tagName);
     }
 }

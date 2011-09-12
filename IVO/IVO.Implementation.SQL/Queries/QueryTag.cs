@@ -12,14 +12,14 @@ namespace IVO.Implementation.SQL.Queries
 {
     public sealed class QueryTag : ISimpleDataQuery<Tag>
     {
-        private Either<TagID, string> _idOrName;
+        private Either<TagID, TagName> _idOrName;
 
         public QueryTag(TagID id)
         {
             this._idOrName = id;
         }
 
-        public QueryTag(string name)
+        public QueryTag(TagName name)
         {
             this._idOrName = name;
         }
@@ -29,7 +29,7 @@ namespace IVO.Implementation.SQL.Queries
             string cmdText;
             switch (_idOrName.Which)
             {
-                case Either<TagID,string>.Selected.Left:
+                case Either<TagID, TagName>.Selected.Left:
                     cmdText = String.Format(
                         @"SELECT {0} FROM {1}{2}{3} WHERE [tagid] = @tagid",
                         Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameCommaList(),
@@ -38,7 +38,7 @@ namespace IVO.Implementation.SQL.Queries
                         Tables.TableFromHint_Tag
                     );
                     break;
-                case Either<TagID,string>.Selected.Right:
+                case Either<TagID, TagName>.Selected.Right:
                     cmdText = String.Format(
                         @"SELECT {0} FROM {1}{2}{3} WHERE [name] = @name",
                         Tables.TablePKs_Tag.Concat(Tables.ColumnNames_Tag).NameCommaList(),
@@ -52,10 +52,10 @@ namespace IVO.Implementation.SQL.Queries
             }
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            if (_idOrName.Which == Either<TagID,string>.Selected.Left)
+            if (_idOrName.Which == Either<TagID, TagName>.Selected.Left)
                 cmd.AddInParameter("@tagid", new SqlBinary((byte[])_idOrName.Left));
             else
-                cmd.AddInParameter("@name", new SqlString(_idOrName.Right));
+                cmd.AddInParameter("@name", new SqlString(this._idOrName.Right.ToString()));
             return cmd;
         }
 
@@ -64,7 +64,7 @@ namespace IVO.Implementation.SQL.Queries
             TagID id = (TagID) dr.GetSqlBinary(0).Value;
 
             Tag.Builder b = new Tag.Builder(
-                pName:          dr.GetSqlString(0).Value,
+                pName:          (TagName) dr.GetSqlString(0).Value,
                 pCommitID:      (CommitID)dr.GetSqlBinary(1).Value,
                 pTagger:        dr.GetSqlString(2).Value,
                 pDateTagged:    dr.GetDateTimeOffset(3),

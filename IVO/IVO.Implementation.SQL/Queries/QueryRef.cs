@@ -10,9 +10,9 @@ namespace IVO.Implementation.SQL.Queries
 {
     public sealed class QueryRef : ISimpleDataQuery<Ref>
     {
-        private string _name;
+        private RefName _name;
 
-        public QueryRef(string name)
+        public QueryRef(RefName name)
         {
             this._name = name;
         }
@@ -28,14 +28,14 @@ namespace IVO.Implementation.SQL.Queries
             );
 
             SqlCommand cmd = new SqlCommand(cmdText, cn);
-            cmd.AddInParameter("@name", new SqlString(this._name));
+            cmd.AddInParameter("@name", new SqlString(this._name.ToString()));
             return cmd;
         }
 
         public Ref Project(SqlCommand cmd, SqlDataReader dr)
         {
             Ref.Builder b = new Ref.Builder(
-                pName:      dr.GetSqlString(0).Value,
+                pName:      (RefName) dr.GetSqlString(0).Value,
                 pCommitID:  (CommitID)dr.GetSqlBinary(1).Value
             );
 

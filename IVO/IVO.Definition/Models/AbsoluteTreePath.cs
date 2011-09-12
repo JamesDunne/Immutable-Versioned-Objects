@@ -10,7 +10,7 @@ namespace IVO.Definition.Models
     /// <summary>
     /// An absolute tree path refers to a tree node with an absolute path that may contain directory traversals such as '.' and '..'.
     /// </summary>
-    public sealed class AbsoluteTreePath : Path
+    public sealed class AbsoluteTreePath : PathObjectModel
     {
         internal AbsoluteTreePath(IList<string> parts)
         {

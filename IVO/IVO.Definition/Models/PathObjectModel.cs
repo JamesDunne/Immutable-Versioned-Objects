@@ -6,7 +6,7 @@ using IVO.Definition.Exceptions;
 
 namespace IVO.Definition.Models
 {
-    public abstract class Path
+    public abstract class PathObjectModel
     {
         public const char PathSeparatorChar = '/';
         public static readonly char[] PathSeparatorCharArray = new char[1] { PathSeparatorChar };

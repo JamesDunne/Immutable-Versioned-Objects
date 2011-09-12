@@ -79,11 +79,21 @@ namespace IVO.Implementation.FileSystem
             return new FileInfo(path);
         }
 
-        internal FileInfo getTagPathByTagName(string tagName)
+        internal FileInfo getTagPathByTagName(TagName tagName)
         {
             DirectoryInfo tagDir = CreateTagsDirectory();
 
-            string path = System.IO.Path.Combine(tagDir.FullName, tagName);
+            string[] parts = new string[1] { tagDir.FullName }.Concat(tagName.Parts).ToArray(tagName.Parts.Count + 1);
+            string path = System.IO.Path.Combine(parts);
+            return new FileInfo(path);
+        }
+
+        internal FileInfo getRefPathByRefName(RefName refName)
+        {
+            DirectoryInfo refDir = CreateRefsDirectory();
+
+            string[] parts = new string[1] { refDir.FullName }.Concat(refName.Parts).ToArray(refName.Parts.Count + 1);
+            string path = System.IO.Path.Combine(parts);
             return new FileInfo(path);
         }
     }

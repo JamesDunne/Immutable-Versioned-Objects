@@ -9,7 +9,7 @@ namespace IVO.Definition.Models
     /// <summary>
     /// A relative blob path is a path to a blob relative to some absolute tree path.
     /// </summary>
-    public sealed class RelativeBlobPath : Path
+    public sealed class RelativeBlobPath : PathObjectModel
     {
         /// <summary>
         /// Creates a relative blob path from a relative tree path and a blob name.

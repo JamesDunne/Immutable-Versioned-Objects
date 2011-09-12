@@ -47,8 +47,8 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             if (!dr.Read()) return null;
 
             Ref.Builder rfb = new Ref.Builder(
-                pName: dr.GetSqlString(0).Value,
-                pCommitID: (CommitID)dr.GetSqlBinary(1).Value
+                pName:      (RefName) dr.GetSqlString(0).Value,
+                pCommitID:  (CommitID)dr.GetSqlBinary(1).Value
             );
 
             Ref rf = rfb;
@@ -58,11 +58,11 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             CommitID id = (CommitID)dr.GetSqlBinary(0 + offs).Value;
 
             Commit.Builder cmb = new Commit.Builder(
-                pParents: new System.Collections.Generic.List<CommitID>(2),
-                pTreeID: (TreeID)dr.GetSqlBinary(1 + offs).Value,
-                pCommitter: dr.GetSqlString(2 + offs).Value,
+                pParents:       new System.Collections.Generic.List<CommitID>(2),
+                pTreeID:        (TreeID)dr.GetSqlBinary(1 + offs).Value,
+                pCommitter:     dr.GetSqlString(2 + offs).Value,
                 pDateCommitted: dr.GetDateTimeOffset(3 + offs),
-                pMessage: dr.GetSqlString(4 + offs).Value
+                pMessage:       dr.GetSqlString(4 + offs).Value
             );
 
             // Read the parent commit ids from the second result:

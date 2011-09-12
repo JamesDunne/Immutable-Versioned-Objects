@@ -9,7 +9,7 @@ namespace IVO.Definition.Models
     /// <summary>
     /// An absolute blob path is a blob name hanging off of an absolute tree, which may contain directory traversals such as '.' and '..'.
     /// </summary>
-    public sealed class AbsoluteBlobPath : Path
+    public sealed class AbsoluteBlobPath : PathObjectModel
     {
         /// <summary>
         /// Creates an absolute blob path from an absolute tree path and a blob name.

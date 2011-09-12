@@ -67,7 +67,7 @@
             comment = "An immutable tag that points to a specific commit.",
             idType = "TagID",
             members = new [] {
-                new { name = "Name",        type = "string",            bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "Name",        type = "TagName",           bType = (string)null, convert = (string)null, revert = (string)null },
                 new { name = "CommitID",    type = "CommitID",          bType = (string)null, convert = (string)null, revert = (string)null },
                 new { name = "Tagger",      type = "string",            bType = (string)null, convert = (string)null, revert = (string)null },
                 new { name = "DateTagged",  type = "DateTimeOffset",    bType = (string)null, convert = (string)null, revert = (string)null },
@@ -80,7 +80,7 @@
             comment = "A mutable reference that points to a specific commit; usable for tracking branch heads.",
             idType = (string)null,
             members = new [] {
-                new { name = "Name",        type = "string",    bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "Name",        type = "RefName",   bType = (string)null, convert = (string)null, revert = (string)null },
                 new { name = "CommitID",    type = "CommitID",  bType = (string)null, convert = (string)null, revert = (string)null },
             }
         }

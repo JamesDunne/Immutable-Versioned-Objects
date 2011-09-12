@@ -9,7 +9,7 @@ namespace IVO.Definition.Models
     /// <summary>
     /// A canonicalized absolute blob path is a canonical tree path guaranteed to not contain directory traversals with a blob name hanging off of it.
     /// </summary>
-    public sealed class CanonicalBlobPath : Path
+    public sealed class CanonicalBlobPath : PathObjectModel
     {
         /// <summary>
         /// Creates a canonical blob path from a canonical tree path and a blob name.
