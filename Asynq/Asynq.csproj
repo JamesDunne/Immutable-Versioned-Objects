@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AsyncCtpLibrary">
+      <HintPath>..\IVO\References\AsyncCtpLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -43,6 +46,7 @@
   <ItemGroup>
     <Compile Include="BlobReaderStream.cs" />
     <Compile Include="DataContext.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="IComplexDataQuery.cs" />
     <Compile Include="IDataOperation.cs" />
     <Compile Include="ISimpleDataQuery.cs" />

@@ -40,39 +40,29 @@ namespace Asynq
         /// <param name="expectedCapacity"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<List<T>> ExecuteListQueryAsync<T>(ISimpleDataQuery<T> query, int expectedCapacity = 10, TaskFactory<List<T>> factory = null)
+        public async Task<List<T>> ExecuteListQueryAsync<T>(ISimpleDataQuery<T> query, int expectedCapacity = 10, TaskFactory<List<T>> factory = null)
         {
             if (expectedCapacity < 0) expectedCapacity = 0;
             if (factory == null) factory = new TaskFactory<List<T>>();
 
-            var cn = new SqlConnection(this.connectionString);
-            var cmd = query.ConstructCommand(cn);
-            cn.Open();
+            using (var cn = new SqlConnection(this.connectionString))
+            {
+                var cmd = query.ConstructCommand(cn);
+                cn.Open();
 
-            return factory.FromAsync(
-                cmd.BeginExecuteReader(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)),
-                ar =>
+                using (SqlDataReader dr = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)))
                 {
-                    try
+                    // Build up the result list:
+                    List<T> results = new List<T>(expectedCapacity);
+                    while (dr.Read())
                     {
-                        var dr = cmd.EndExecuteReader(ar);
-
-                        // Build up the result list:
-                        List<T> results = new List<T>(expectedCapacity);
-                        while (dr.Read())
-                        {
-                            var row = query.Project(cmd, dr);
-                            results.Add(row);
-                        }
-
-                        return results;
+                        var row = query.Project(cmd, dr);
+                        results.Add(row);
                     }
-                    finally
-                    {
-                        cn.Close();
-                    }
+
+                    return results;
                 }
-            );
+            }
         }
 
         /// <summary>
@@ -83,31 +73,21 @@ namespace Asynq
         /// <param name="expectedCapacity"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<T> ExecuteListQueryAsync<T>(IComplexDataQuery<T> query, int expectedCapacity = 10, TaskFactory<T> factory = null)
+        public async Task<T> ExecuteListQueryAsync<T>(IComplexDataQuery<T> query, int expectedCapacity = 10, TaskFactory<T> factory = null)
         {
             if (expectedCapacity < 0) expectedCapacity = 0;
             if (factory == null) factory = new TaskFactory<T>();
 
-            var cn = new SqlConnection(this.connectionString);
-            var cmd = query.ConstructCommand(cn);
-            cn.Open();
+            using (var cn = new SqlConnection(this.connectionString))
+            {
+                var cmd = query.ConstructCommand(cn);
+                cn.Open();
 
-            return factory.FromAsync(
-                cmd.BeginExecuteReader(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)),
-                ar =>
+                using (SqlDataReader dr = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)))
                 {
-                    try
-                    {
-                        var dr = cmd.EndExecuteReader(ar);
-
-                        return query.Retrieve(cmd, dr, expectedCapacity);
-                    }
-                    finally
-                    {
-                        cn.Close();
-                    }
+                    return query.Retrieve(cmd, dr, expectedCapacity);
                 }
-            );
+            }
         }
 
         /// <summary>
@@ -117,35 +97,25 @@ namespace Asynq
         /// <param name="query"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<T> ExecuteSingleQueryAsync<T>(ISimpleDataQuery<T> query, TaskFactory<T> factory = null)
+        public async Task<T> ExecuteSingleQueryAsync<T>(ISimpleDataQuery<T> query, TaskFactory<T> factory = null)
         {
             if (factory == null) factory = new TaskFactory<T>();
 
-            var cn = new SqlConnection(this.connectionString);
-            var cmd = query.ConstructCommand(cn);
-            cn.Open();
+            using (var cn = new SqlConnection(this.connectionString))
+            {
+                var cmd = query.ConstructCommand(cn);
+                cn.Open();
 
-            return factory.FromAsync(
-                cmd.BeginExecuteReader(CommandBehavior.CloseConnection | CommandBehavior.SingleRow | query.GetCustomCommandBehaviors(cn, cmd)),
-                ar =>
+                using (SqlDataReader dr = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection | CommandBehavior.SingleRow | query.GetCustomCommandBehaviors(cn, cmd)))
                 {
-                    try
-                    {
-                        var dr = cmd.EndExecuteReader(ar);
+                    // If no row read, return the default:
+                    if (!dr.Read()) return default(T);
 
-                        // If no row read, return the default:
-                        if (!dr.Read()) return default(T);
+                    var row = query.Project(cmd, dr);
 
-                        var row = query.Project(cmd, dr);
-
-                        return row;
-                    }
-                    finally
-                    {
-                        cn.Close();
-                    }
+                    return row;
                 }
-            );
+            }
         }
 
         /// <summary>
@@ -155,32 +125,22 @@ namespace Asynq
         /// <param name="query"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<T> ExecuteSingleQueryAsync<T>(IComplexDataQuery<T> query, TaskFactory<T> factory = null)
+        public async Task<T> ExecuteSingleQueryAsync<T>(IComplexDataQuery<T> query, TaskFactory<T> factory = null)
         {
             if (factory == null) factory = new TaskFactory<T>();
 
-            var cn = new SqlConnection(this.connectionString);
-            var cmd = query.ConstructCommand(cn);
-            cn.Open();
+            using (var cn = new SqlConnection(this.connectionString))
+            {
+                var cmd = query.ConstructCommand(cn);
+                cn.Open();
 
-            return factory.FromAsync(
-                cmd.BeginExecuteReader(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)),
-                ar =>
+                using (SqlDataReader dr = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)))
                 {
-                    try
-                    {
-                        var dr = cmd.EndExecuteReader(ar);
+                    T row = query.Retrieve(cmd, dr);
 
-                        var row = query.Retrieve(cmd, dr);
-
-                        return row;
-                    }
-                    finally
-                    {
-                        cn.Close();
-                    }
+                    return row;
                 }
-            );
+            }
         }
 
         /// <summary>
@@ -189,30 +149,19 @@ namespace Asynq
         /// <param name="op"></param>
         /// <param name="factory"></param>
         /// <returns></returns>
-        public Task<T> ExecuteNonQueryAsync<T>(IDataOperation<T> op, TaskFactory<T> factory = null)
+        public async Task<T> ExecuteNonQueryAsync<T>(IDataOperation<T> op, TaskFactory<T> factory = null)
         {
             if (factory == null) factory = new TaskFactory<T>();
 
-            var cn = new SqlConnection(this.connectionString);
-            var cmd = op.ConstructCommand(cn);
-            cn.Open();
+            using (var cn = new SqlConnection(this.connectionString))
+            {
+                var cmd = op.ConstructCommand(cn);
+                cn.Open();
 
-            return factory.FromAsync(
-                cmd.BeginExecuteNonQuery(),
-                ar =>
-                {
-                    try
-                    {
-                        int rc = cmd.EndExecuteNonQuery(ar);
+                int rc = await cmd.ExecuteNonQueryAsync();
 
-                        return op.Return(cmd, rc);
-                    }
-                    finally
-                    {
-                        cn.Close();
-                    }
-                }
-            );
+                return op.Return(cmd, rc);
+            }
         }
     }
 }
