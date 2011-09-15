@@ -81,6 +81,8 @@ namespace IVO.Implementation.FileSystem
 
         internal FileInfo getTagPathByTagName(TagName tagName)
         {
+            if (tagName == null) throw new ArgumentNullException("tagName");
+
             DirectoryInfo tagDir = CreateTagsDirectory();
 
             string[] parts = new string[1] { tagDir.FullName }.Concat(tagName.Parts).ToArray(tagName.Parts.Count + 1);
@@ -90,6 +92,8 @@ namespace IVO.Implementation.FileSystem
 
         internal FileInfo getRefPathByRefName(RefName refName)
         {
+            if (refName == null) throw new ArgumentNullException("refName");
+
             DirectoryInfo refDir = CreateRefsDirectory();
 
             string[] parts = new string[1] { refDir.FullName }.Concat(refName.Parts).ToArray(refName.Parts.Count + 1);

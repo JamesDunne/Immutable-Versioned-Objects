@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using IVO.Definition.Exceptions;
@@ -10,6 +11,7 @@ namespace IVO.Definition.Models
     /// <summary>
     /// A ref name.
     /// </summary>
+    [TypeConverter(typeof(RefNameStringConverter))]
     public sealed class RefName : PathObjectModel
     {
         internal RefName(IList<string> parts)
@@ -48,6 +50,26 @@ namespace IVO.Definition.Models
             if (Parts.Count == 0) return PathSeparatorString;
 
             return String.Join(PathSeparatorString, Parts);
+        }
+    }
+
+    public sealed class RefNameStringConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            if (typeof(string) == sourceType)
+                return true;
+            else
+                return base.CanConvertFrom(context, sourceType);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        {
+            string strValue = value as string;
+            if (strValue != null)
+                return (RefName)strValue;
+
+            return base.ConvertFrom(context, culture, value);
         }
     }
 }
