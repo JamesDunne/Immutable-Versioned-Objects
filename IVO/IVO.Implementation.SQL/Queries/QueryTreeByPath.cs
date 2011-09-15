@@ -8,6 +8,7 @@ using IVO.Definition.Containers;
 using IVO.Definition.Models;
 using IVO.Definition.Exceptions;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -45,7 +46,7 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
             return cmd;
         }
 
-        public Tree Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public async Task<Tree> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             Tree.Builder tb = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
 

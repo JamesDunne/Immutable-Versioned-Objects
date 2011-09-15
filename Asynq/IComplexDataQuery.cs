@@ -1,6 +1,7 @@
 ﻿using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace Asynq
 {
@@ -37,6 +38,6 @@ namespace Asynq
         /// instead.
         /// </remarks>
         /// <returns></returns>
-        T Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10);
+        Task<T> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10);
     }
 }

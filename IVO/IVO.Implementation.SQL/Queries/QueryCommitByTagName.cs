@@ -5,6 +5,7 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -40,7 +41,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return cmd;
         }
 
-        public Tuple<Tag, Commit> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Tuple<Tag, Commit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return QueryCommitByTagID.retrieve(cmd, dr);
         }

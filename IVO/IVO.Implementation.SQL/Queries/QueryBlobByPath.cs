@@ -8,6 +8,7 @@ using IVO.Definition.Containers;
 using IVO.Definition.Models;
 using IVO.Definition.Exceptions;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -47,7 +48,7 @@ WHERE tr.[path] + trbl.name = @path;";
             return cmd;
         }
 
-        public TreePathStreamedBlob Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public async Task<TreePathStreamedBlob> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             if (!dr.Read()) return null;
 

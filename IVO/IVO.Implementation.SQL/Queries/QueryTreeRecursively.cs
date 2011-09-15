@@ -8,6 +8,7 @@ using IVO.Definition.Containers;
 using IVO.Definition.Models;
 using IVO.Definition.Exceptions;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -46,7 +47,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
             return cmd;
         }
 
-        public Tuple<TreeID, ImmutableContainer<TreeID, Tree>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public async Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             Dictionary<TreeID, Tree.Builder> trees = new Dictionary<TreeID, Tree.Builder>(expectedCount);
 

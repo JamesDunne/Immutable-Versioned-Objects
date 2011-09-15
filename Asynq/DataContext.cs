@@ -85,7 +85,7 @@ namespace Asynq
 
                 using (SqlDataReader dr = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)))
                 {
-                    return query.Retrieve(cmd, dr, expectedCapacity);
+                    return await query.Retrieve(cmd, dr, expectedCapacity);
                 }
             }
         }
@@ -136,13 +136,13 @@ namespace Asynq
 
                 using (SqlDataReader dr = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)))
                 {
-                    T row = query.Retrieve(cmd, dr);
+                    T row = await query.Retrieve(cmd, dr);
 
                     return row;
                 }
             }
         }
-
+        
         /// <summary>
         /// Asynchronously execute the given data operation expected to not return any values.
         /// </summary>
@@ -163,5 +163,34 @@ namespace Asynq
                 return op.Return(cmd, rc);
             }
         }
+
+        #region Synchronous
+
+        /// <summary>
+        /// Synchronously execute the given query expected to return 0 or 1 items.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="factory"></param>
+        /// <returns></returns>
+        public T ExecuteSingleQuery<T>(IComplexDataQuery<T> query)
+        {
+            using (var cn = new SqlConnection(this.connectionString))
+            {
+                var cmd = query.ConstructCommand(cn);
+                cn.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)))
+                {
+                    var retTask = query.Retrieve(cmd, dr);
+                    retTask.Wait();
+                    T row = retTask.Result;
+
+                    return row;
+                }
+            }
+        }
+
+        #endregion
     }
 }

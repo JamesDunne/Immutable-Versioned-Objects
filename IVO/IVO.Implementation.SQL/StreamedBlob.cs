@@ -22,14 +22,14 @@ namespace IVO.Implementation.SQL
         public BlobID ID { get; private set; }
         public long? Length { get; private set; }
 
-        public Task<TResult> ReadStream<TResult>(Func<System.IO.Stream, TResult> read)
+        public Task<TResult> ReadStream<TResult>(Func<System.IO.Stream, Task<TResult>> read)
         {
             return blrepo.DB.ExecuteSingleQueryAsync(new QueryStreamedBlob<TResult>(this.ID, read));
         }
 
-        public Task ReadStream(Action<System.IO.Stream> read)
+        public Task ReadStream(Func<System.IO.Stream, Task> read)
         {
-            return blrepo.DB.ExecuteSingleQueryAsync(new QueryStreamedBlob<int>(this.ID, (sr) => { read(sr); return 0; }));
+            return blrepo.DB.ExecuteSingleQueryAsync(new QueryStreamedBlob<int>(this.ID, async sr => { await read(sr); return 0; }));
         }
     }
 }

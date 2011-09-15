@@ -29,7 +29,7 @@ namespace IVO.Definition.Models
         /// <typeparam name="TResult"></typeparam>
         /// <param name="read">Reads content from the underlying Stream until complete.</param>
         /// <returns></returns>
-        Task<TResult> ReadStream<TResult>(Func<System.IO.Stream, TResult> read);
+        Task<TResult> ReadStream<TResult>(Func<System.IO.Stream, Task<TResult>> read);
 
         /// <summary>
         /// Starts a Task to open the data stream from the persistence store, passes it to the <paramref name="read"/>
@@ -38,6 +38,6 @@ namespace IVO.Definition.Models
         /// </summary>
         /// <param name="read">Reads content from the underlying Stream until complete.</param>
         /// <returns></returns>
-        Task ReadStream(Action<System.IO.Stream> read);
+        Task ReadStream(Func<System.IO.Stream, Task> read);
     }
 }

@@ -6,15 +6,16 @@ using Asynq;
 using IVO.Definition.Models;
 using IVO.Definition.Exceptions;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
     public sealed class QueryStreamedBlob<TResult> : IComplexDataQuery<TResult>
     {
         private BlobID _id;
-        private Func<System.IO.Stream, TResult> read;
+        private Func<System.IO.Stream, Task<TResult>> read;
 
-        public QueryStreamedBlob(BlobID id, Func<System.IO.Stream, TResult> read)
+        public QueryStreamedBlob(BlobID id, Func<System.IO.Stream, Task<TResult>> read)
         {
             this._id = id;
             this.read = read;
@@ -41,7 +42,7 @@ namespace IVO.Implementation.SQL.Queries
             return CommandBehavior.SequentialAccess;
         }
         
-        public TResult Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public async Task<TResult> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             if (!dr.Read()) return default(TResult);
 
@@ -53,7 +54,7 @@ namespace IVO.Implementation.SQL.Queries
             long datalength = dr.GetSqlInt64(1).Value;
 
             // Use the lambda to read from the contents stream:
-            TResult result = this.read(new BlobReaderStream(dr, 2, length: datalength));
+            TResult result = await this.read(new BlobReaderStream(dr, 2, length: datalength));
             return result;
         }
     }

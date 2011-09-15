@@ -99,7 +99,7 @@ namespace TestIVO.CommonTest
             Console.WriteLine("Awaiting fetch of streamed blob.");
 
             Console.WriteLine("Awaiting ReadStream to complete...");
-            await streamedBlobs[0].ReadStream(blsr =>
+            await streamedBlobs[0].ReadStream(async blsr =>
             {
                 Console.WriteLine("blob is {0} length", blsr.Length);
 

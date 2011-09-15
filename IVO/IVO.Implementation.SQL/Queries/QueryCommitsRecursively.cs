@@ -9,6 +9,7 @@ using IVO.Definition.Containers;
 using System.Diagnostics;
 using IVO.Definition.Exceptions;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -46,7 +47,7 @@ WHERE   cm.depth <= @depth";
             return cmd;
         }
 
-        public Tuple<CommitID, ImmutableContainer<CommitID, ICommit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public async Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             Dictionary<CommitID, Commit.Builder> commits = new Dictionary<CommitID, Commit.Builder>(expectedCount);
             CommitPartial.Builder cmPartial = null;

@@ -21,22 +21,16 @@ namespace IVO.TestSupport
 
         public BlobID ID { get; private set; }
 
-        public Task<TResult> ReadStream<TResult>(Func<System.IO.Stream, TResult> read)
+        public async Task<TResult> ReadStream<TResult>(Func<System.IO.Stream, Task<TResult>> read)
         {
-            return TaskEx.Run(() =>
-            {
-                using (var ms = new System.IO.MemoryStream(buf))
-                    return read(ms);
-            });
+            using (var ms = new System.IO.MemoryStream(buf))
+                return await read(ms);
         }
 
-        public Task ReadStream(Action<System.IO.Stream> read)
+        public async Task ReadStream(Func<System.IO.Stream, Task> read)
         {
-            return TaskEx.Run(() =>
-            {
-                using (var ms = new System.IO.MemoryStream(buf))
-                    read(ms);
-            });
+            using (var ms = new System.IO.MemoryStream(buf))
+                await read(ms);
         }
 
         public long? Length { get { return buf.LongLength; } }

@@ -22,34 +22,28 @@ namespace IVO.Implementation.FileSystem
         public BlobID ID { get; private set; }
         public long? Length { get; private set; }
 
-        public Task<TResult> ReadStream<TResult>(Func<System.IO.Stream, TResult> read)
+        public async Task<TResult> ReadStream<TResult>(Func<System.IO.Stream, Task<TResult>> read)
         {
-            return TaskEx.Run(() =>
-            {
-                FileInfo path = blrepo.FileSystem.getPathByID(this.ID);
+            FileInfo path = blrepo.FileSystem.getPathByID(this.ID);
 
-                // Or throw exception?
-                if (!path.Exists) return default(TResult);
+            // Or throw exception?
+            if (!path.Exists) return default(TResult);
 
-                // Open the file for reading and send it to the lambda function:
-                using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    return read(sr);
-            });
+            // Open the file for reading and send it to the lambda function:
+            using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                return await read(sr);
         }
 
-        public Task ReadStream(Action<System.IO.Stream> read)
+        public async Task ReadStream(Func<System.IO.Stream, Task> read)
         {
-            return TaskEx.Run(() =>
-            {
-                FileInfo path = blrepo.FileSystem.getPathByID(this.ID);
+            FileInfo path = blrepo.FileSystem.getPathByID(this.ID);
 
-                // Or throw exception?
-                if (!path.Exists) return;
+            // Or throw exception?
+            if (!path.Exists) return;
 
-                // Open the file for reading and send it to the lambda function:
-                using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    read(sr);
-            });
+            // Open the file for reading and send it to the lambda function:
+            using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                await read(sr);
         }
     }
 }

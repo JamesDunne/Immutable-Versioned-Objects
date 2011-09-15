@@ -9,6 +9,7 @@ using IVO.Definition.Models;
 using IVO.Definition.Exceptions;
 using System.Data;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
@@ -51,7 +52,7 @@ SELECT  [tr].linked_treeid AS [treeid], tr.[path] FROM rec tr WHERE tr.[path] IN
             return cmd;
         }
 
-        public ReadOnlyCollection<TreeIDPathMapping> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public async Task<ReadOnlyCollection<TreeIDPathMapping>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             List<TreeIDPathMapping> mappings = new List<TreeIDPathMapping>();
 
