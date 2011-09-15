@@ -17,8 +17,6 @@ namespace IVO.Implementation.SQL
             this.blrepo = blrepo;
         }
 
-        #region ITreePathStreamedBlobRepository Members
-
         public Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(params TreeBlobPath[] treePaths)
         {
             Task<TreePathStreamedBlob>[] tasks = new Task<TreePathStreamedBlob>[treePaths.Length];
@@ -27,6 +25,9 @@ namespace IVO.Implementation.SQL
             return TaskEx.WhenAll(tasks);
         }
 
-        #endregion
+        public Task<TreePathStreamedBlob> GetBlobByTreePath(TreeBlobPath treePath)
+        {
+            return db.ExecuteSingleQueryAsync(new QueryBlobByPath(blrepo, treePath));
+        }
     }
 }

@@ -49,6 +49,11 @@ namespace IVO.Implementation.FileSystem
                 // Get the blob out of this tree:
                 // TODO: standardize name comparison semantics:
                 var trbl = tr.Blobs.SingleOrDefault(x => x.Name == tp.Path.Name);
+                if (trbl == null)
+                {
+                    blobs[i] = null;
+                    continue;
+                }
                 
                 // Finally return the streamed blob:
                 // TODO: unknown length of blob; is it a problem?
@@ -57,6 +62,24 @@ namespace IVO.Implementation.FileSystem
 
             return blobs;
 #endif
+        }
+
+        public async Task<TreePathStreamedBlob> GetBlobByTreePath(TreeBlobPath treePath)
+        {
+            var trm = await trrepo.GetTreeIDByPath(new TreeTreePath(treePath.RootTreeID, treePath.Path.Tree));
+            if (!trm.TreeID.HasValue)
+                return null;
+
+            // Get the tree:
+            var tr = await trrepo.GetTree(trm.TreeID.Value);
+
+            // Get the blob out of this tree:
+            // TODO: standardize name comparison semantics:
+            var trbl = tr.Blobs.SingleOrDefault(x => x.Name == treePath.Path.Name);
+            if (trbl == null)
+                return null;
+
+            return new TreePathStreamedBlob(treePath, new StreamedBlob(blrepo, trbl.BlobID));
         }
     }
 }

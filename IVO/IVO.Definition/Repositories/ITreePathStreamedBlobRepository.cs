@@ -10,6 +10,14 @@ namespace IVO.Definition.Repositories
     public interface ITreePathStreamedBlobRepository
     {
         /// <summary>
+        /// Retrieves a single Blob by its canonicalized absolute path relative to its root TreeID asynchronously.
+        /// </summary>
+        /// <param name="rootid"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        Task<TreePathStreamedBlob> GetBlobByTreePath(TreeBlobPath treePath);
+
+        /// <summary>
         /// Retrieves multiple Blobs by their canonicalized absolute paths relative to their root TreeIDs asynchronously.
         /// </summary>
         /// <remarks>
