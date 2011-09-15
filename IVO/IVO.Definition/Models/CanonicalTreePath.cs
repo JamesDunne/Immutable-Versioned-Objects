@@ -12,10 +12,13 @@ namespace IVO.Definition.Models
     /// </summary>
     public sealed class CanonicalTreePath : PathObjectModel
     {
+        private string _asString;
+
         internal CanonicalTreePath(IList<string> parts)
         {
             // parts must be already validated with validateCanonicalPath().
             this.Parts = new ReadOnlyCollection<string>(parts);
+            this._asString = (Parts.Count == 0) ? PathSeparatorString : String.Concat(PathSeparatorString, String.Join(PathSeparatorString, Parts), PathSeparatorString);
         }
 
         internal CanonicalTreePath(IEnumerable<string> parts, int initialCapacity = 4)
@@ -63,9 +66,7 @@ namespace IVO.Definition.Models
         /// <returns></returns>
         public override string ToString()
         {
-            if (Parts.Count == 0) return PathSeparatorString;
-
-            return String.Concat(PathSeparatorString, String.Join(PathSeparatorString, Parts), PathSeparatorString);
+            return this._asString;
         }
 
         /// <summary>

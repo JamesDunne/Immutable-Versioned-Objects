@@ -11,6 +11,7 @@ namespace IVO.Definition.Models
     /// </summary>
     public sealed class CanonicalBlobPath : PathObjectModel
     {
+        private string _asString;
         /// <summary>
         /// Creates a canonical blob path from a canonical tree path and a blob name.
         /// </summary>
@@ -20,6 +21,7 @@ namespace IVO.Definition.Models
         {
             this.Tree = tree;
             this.Name = name;
+            this._asString = String.Concat(Tree.ToString(), Name);
         }
 
         /// <summary>
@@ -66,7 +68,7 @@ namespace IVO.Definition.Models
         /// <returns></returns>
         public override string ToString()
         {
-            return String.Concat(Tree.ToString(), Name);
+            return this._asString;
         }
     }
 }
