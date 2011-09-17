@@ -10,6 +10,7 @@
 #>
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -25,6 +26,7 @@ namespace IVO.Definition.Models
 <#
         }
 #>
+	[TypeConverter(typeof(<#= types[i] #>TypeConverter))]
     public struct <#= types[i] #> : IEquatable<<#= types[i] #>>
     {
         public const int ByteArrayLength = 20;
@@ -132,6 +134,26 @@ namespace IVO.Definition.Models
                 }
                 return 0;
             }
+        }
+    }
+
+    public sealed class <#= types[i] #>TypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            if (typeof(string) == sourceType)
+                return true;
+            else
+                return base.CanConvertFrom(context, sourceType);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        {
+            string strValue = value as string;
+            if (strValue != null)
+				return new <#= types[i] #>(strValue);
+
+            return base.ConvertFrom(context, culture, value);
         }
     }
 <#

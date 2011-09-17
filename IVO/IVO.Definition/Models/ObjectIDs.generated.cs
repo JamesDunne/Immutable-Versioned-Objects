@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
 namespace IVO.Definition.Models
 {
+	[TypeConverter(typeof(CommitIDTypeConverter))]
     public struct CommitID : IEquatable<CommitID>
     {
         public const int ByteArrayLength = 20;
@@ -115,6 +117,27 @@ namespace IVO.Definition.Models
         }
     }
 
+    public sealed class CommitIDTypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            if (typeof(string) == sourceType)
+                return true;
+            else
+                return base.CanConvertFrom(context, sourceType);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        {
+            string strValue = value as string;
+            if (strValue != null)
+				return new CommitID(strValue);
+
+            return base.ConvertFrom(context, culture, value);
+        }
+    }
+
+	[TypeConverter(typeof(TreeIDTypeConverter))]
     public struct TreeID : IEquatable<TreeID>
     {
         public const int ByteArrayLength = 20;
@@ -225,6 +248,27 @@ namespace IVO.Definition.Models
         }
     }
 
+    public sealed class TreeIDTypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            if (typeof(string) == sourceType)
+                return true;
+            else
+                return base.CanConvertFrom(context, sourceType);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        {
+            string strValue = value as string;
+            if (strValue != null)
+				return new TreeID(strValue);
+
+            return base.ConvertFrom(context, culture, value);
+        }
+    }
+
+	[TypeConverter(typeof(BlobIDTypeConverter))]
     public struct BlobID : IEquatable<BlobID>
     {
         public const int ByteArrayLength = 20;
@@ -335,6 +379,27 @@ namespace IVO.Definition.Models
         }
     }
 
+    public sealed class BlobIDTypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            if (typeof(string) == sourceType)
+                return true;
+            else
+                return base.CanConvertFrom(context, sourceType);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        {
+            string strValue = value as string;
+            if (strValue != null)
+				return new BlobID(strValue);
+
+            return base.ConvertFrom(context, culture, value);
+        }
+    }
+
+	[TypeConverter(typeof(TagIDTypeConverter))]
     public struct TagID : IEquatable<TagID>
     {
         public const int ByteArrayLength = 20;
@@ -442,6 +507,26 @@ namespace IVO.Definition.Models
                 }
                 return 0;
             }
+        }
+    }
+
+    public sealed class TagIDTypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            if (typeof(string) == sourceType)
+                return true;
+            else
+                return base.CanConvertFrom(context, sourceType);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        {
+            string strValue = value as string;
+            if (strValue != null)
+				return new TagID(strValue);
+
+            return base.ConvertFrom(context, culture, value);
         }
     }
 }
