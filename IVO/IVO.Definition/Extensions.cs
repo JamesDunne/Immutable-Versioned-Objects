@@ -83,14 +83,17 @@ namespace System
         }
     }
 
-    public static class ArrayExtensions
+    namespace Linq
     {
-        public static TResult[] SelectAsArray<T, TResult>(this T[] arr, Func<T, TResult> projection)
+        public static class ArrayExtensions
         {
-            TResult[] res = new TResult[arr.Length];
-            for (int i = 0; i < arr.Length; ++i)
-                res[i] = projection(arr[i]);
-            return res;
+            public static TResult[] SelectAsArray<T, TResult>(this T[] arr, Func<T, TResult> projection)
+            {
+                TResult[] res = new TResult[arr.Length];
+                for (int i = 0; i < arr.Length; ++i)
+                    res[i] = projection(arr[i]);
+                return res;
+            }
         }
     }
 }
