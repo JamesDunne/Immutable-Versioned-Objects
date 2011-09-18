@@ -29,9 +29,9 @@ namespace TestIVO.CommonTest
                 using (var fs = new FileStream(tmpFileName, FileMode.Open, FileAccess.Write, FileShare.Read, 1048576, true))
                 {
                     new RandomDataStream(1048576 * 2).CopyTo(fs);
-
-                    blobs[i] = new PersistingBlob(() => new FileStream(tmpFileName, FileMode.Open, FileAccess.Read, FileShare.Read));
                 }
+
+                blobs[i] = new PersistingBlob(new FileStream(tmpFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 8040, true));
             }
             return blobs;
         }
@@ -80,7 +80,7 @@ namespace TestIVO.CommonTest
             Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, streamedBlobs.Sum(b => b.Length) * 1000d / sw.ElapsedMilliseconds);
 
             // Get the blobs:
-            var getBlobs = await blrepo.GetBlobs(blobs.Select(bl => bl.ComputedID).ToArray(blobs.Length));
+            var getBlobs = await blrepo.GetBlobs(streamedBlobs.Select(bl => bl.ID).ToArray(streamedBlobs.Length));
             for (int i = 0; i < getBlobs.Length; ++i)
             {
                 Console.WriteLine("{0}", getBlobs[i].ID);

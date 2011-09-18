@@ -22,50 +22,18 @@ namespace IVO.Implementation.SQL.Persists
 
         public SqlCommand ConstructCommand(SqlConnection cn)
         {
-            // MERGE .. WHEN NOT MATCHED is used in SQL2008 to avoid primary key constraint race condition
-            // when INSERTing records with duplicate SHA-1 ids.
-            var cmdText = String.Format(
-@"SET NOCOUNT, XACT_ABORT ON;
-MERGE {0} WITH (HOLDLOCK) AS curr_blob
-USING (SELECT {3} AS {1}) AS new_blob ON curr_blob.{1} = new_blob.{1}
-WHEN NOT MATCHED THEN INSERT ({2}) VALUES ({4});",
-                Tables.TableName_Blob,  // 0
-                Tables.TablePKs_Blob.Single(),  // 1
-                Tables.TablePKs_Blob.Concat(Tables.ColumnNames_Blob).NameCommaList(),    // 2
-                "@" + Tables.TablePKs_Blob.Single(),    // 3
-                Tables.TablePKs_Blob.Concat(Tables.ColumnNames_Blob).ParameterCommaList()    // 4
-            );
-
-            var cmd = new SqlCommand(cmdText, cn);
-
-            BlobID blid;
-            if (_bl.ID.HasValue)
-                blid = _bl.ID.Value;
-            else
-            {
-                // TODO: asynchrony!
-                blid = _bl.ComputeID();
-            }
-
-            cmd.AddInParameter("@blobid", new SqlBinary((byte[])blid));
-
-            // Open a new stream of the source contents to upload to the database:
-            using (var sr = _bl.GetNewStream())
-            {
-                this._length = sr.Length;
-                byte[] dum = new byte[_length];
-
-                // TODO: chunked xactional update to [contents] in multiples of 8040 bytes.
-                sr.Read(dum, 0, (int)_length);
-
-                cmd.AddInParameter("@contents", new SqlBinary(dum), size: (int)_length);
-            }
-            return cmd;
+            // TODO: stream blob contents into database with UPDATE blob SET contents.WRITE(@chunk, NULL, NULL)
+            // to append to contents, initially supply a temporary blobid (use an extra byte, binary(21) and set
+            // the last byte to 0xFF to indicate temporary, 0x00 indicates normal).
+            // Create a Write-only Stream class that uploads contents to the blob table using above.
+            // Use the Write-only Stream wrapped in SHA1StreamWriter to calculate SHA1 during writing.
+            // Get the final BlobID from the SHA1StreamWriter and update the blobid of the temporary record.
+            return null;
         }
 
         public IStreamedBlob Return(SqlCommand cmd, int rowsAffected)
         {
-            return new StreamedBlob(_blrepo, _bl.ComputedID, _length);
+            return new StreamedBlob(_blrepo, new BlobID(), _length);
         }
     }
 }

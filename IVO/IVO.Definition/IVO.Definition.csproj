@@ -71,6 +71,7 @@
     <Compile Include="Repositories\ITreePathStreamedBlobRepository.cs" />
     <Compile Include="Repositories\ITreeRepository.cs" />
     <Compile Include="Exceptions\TagIDMismatchException.cs" />
+    <Compile Include="SHA1StreamWriter.cs" />
     <None Include="Models\ImmutableModels.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ImmutableModels.generated.cs</LastGenOutput>

@@ -9,6 +9,7 @@ using IVO.Definition.Exceptions;
 using IVO.Definition.Models;
 using IVO.Definition.Repositories;
 using System.Diagnostics;
+using IVO.Definition;
 
 namespace IVO.Implementation.FileSystem
 {
@@ -30,77 +31,66 @@ namespace IVO.Implementation.FileSystem
 
         private async Task<IStreamedBlob> persistBlob(PersistingBlob blob)
         {
+            Debug.WriteLine(String.Format("Starting persistence of blob"));
+
+            // Find a temporary filename:
+            string objDir = system.CreateObjectsDirectory().FullName;
+            FileInfo tmpPath;
+            do
+            {
+                tmpPath = new FileInfo(Path.Combine(objDir, Path.GetRandomFileName()));
+            } while (tmpPath.Exists);
+
+            long length = -1;
             BlobID blid;
 
-            if (blob.ID.HasValue)
-                blid = blob.ID.Value;
-            else
+            // Open a new stream to the source blob contents:
+            using (var sr = blob.Stream)
             {
-                // Asynchronously compute the BlobID from a stream of the contents:
-                blid = await TaskEx.Run((Func<BlobID>)blob.ComputeID);
+                length = sr.Length;
+
+                // Create a new file and set its length so we can asynchronously write to it:
+                using (var tmpFi = File.Open(tmpPath.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                {
+                    Debug.WriteLine(String.Format("New BLOB temp '{0}' length {1}", tmpPath.FullName, length));
+                    tmpFi.SetLength(length);
+                    tmpFi.Close();
+                }
+
+                // Determine the best buffer size to use for writing contents:
+                int bufSize = Math.Min(Math.Max((int)length, 8), largeBufferSize);
+
+                // Open a new FileStream to asynchronously write the blob contents:
+                using (var fs = new FileStream(tmpPath.FullName, FileMode.Open, FileAccess.Write, FileShare.Read, bufSize, useAsync: true))
+                using (var sha1 = new SHA1StreamWriter(fs))
+                {
+                    // Copy the contents asynchronously (expected copy in order):
+                    await sr.CopyToAsync(sha1, bufSize);
+
+                    // Create the BlobID from the SHA1 hash calculated during copy:
+                    blid = new BlobID(sha1.GetHash());
+                }
             }
-
-            // Get the hex string of the BlobID:
-            string id = blid.ToString();
-
-            Debug.WriteLine(String.Format("Starting persistence of blob {0}", id));
-
+            
             // Create the blob's subdirectory under 'objects':
             FileInfo path = system.getPathByID(blid);
+            path.Refresh();
             if (!path.Directory.Exists)
             {
                 Debug.WriteLine(String.Format("New DIR '{0}'", path.Directory.FullName));
                 path.Directory.Create();
             }
 
-            long length = -1;
-
             // Don't recreate an existing blob:
             if (path.Exists)
             {
-                Debug.WriteLine(String.Format("Blob already exists at path '{0}'", path.FullName));
-                goto verifyContents;
+                Debug.WriteLine(String.Format("Blob already exists at path '{0}', deleting...", path.FullName));
+                path.Delete();
             }
 
-            // Open a new stream to the source blob contents:
-            using (var sr = blob.GetNewStream())
-            {
-                length = sr.Length;
+            // Move the temp file to the final blob filename:
+            File.Move(tmpPath.FullName, path.FullName);
 
-                // Create a new file and set its length so we can asynchronously write to it:
-                using (var tmpFi = File.Open(path.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-                {
-                    Debug.WriteLine(String.Format("New BLOB '{0}' length {1}", path.FullName, length));
-                    tmpFi.SetLength(length);
-                    tmpFi.Close();
-                }
-
-                // Determine the best buffer size to use for writing contents:
-                int bufSize = Math.Min((int)length, largeBufferSize);
-
-                // Open a new FileStream to asynchronously write the blob contents:
-                using (var fs = new FileStream(path.FullName, FileMode.Open, FileAccess.Write, FileShare.Read, bufSize, useAsync: true))
-                {
-                    // Copy the contents asynchronously:
-                    await sr.CopyToAsync(fs, bufSize);
-                }
-            }
-
-        verifyContents:
-#if VerifyContents
-            // This kills performance, naturally.
-            // Only used for debugging.
-            Debug.WriteLine(String.Format("Verifying contents of '{0}'", path));
-
-            byte[] readContents = File.ReadAllBytes(path);
-                    
-            if (readContents.Length != blob.Contents.Length)
-                throw new Exception("Written length != blob length");
-
-            for (int x = 0; x < readContents.Length; ++x)
-                if (readContents[x] != blob.Contents[x])
-                    throw new Exception(String.Format("Written byte at position {0} != blob byte", x));
-#endif
             return (IStreamedBlob)new StreamedBlob(this, blid, length);
         }
 

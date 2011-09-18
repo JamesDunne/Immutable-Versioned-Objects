@@ -56,18 +56,22 @@ namespace TestIVO.CommonTest
 
         private async Task createCommits()
         {
-            PersistingBlob pblReadme;
+            PersistingBlob pblReadme = new PersistingBlob("Readme file.".ToStream());
+
+            var sblobs = await blrepo.PersistBlobs(pblReadme);
 
             trRoot = new Tree.Builder(
                 new List<TreeTreeReference>(0),
                 new List<TreeBlobReference>
                 {
-                    new TreeBlobReference.Builder(
-                        "README",
-                        (pblReadme = new PersistingBlob(() => "Readme file.".ToStream())).ComputedID
-                    )
+                    new TreeBlobReference.Builder("README", sblobs[0].ID)
                 }
             );
+
+            var trees = new ImmutableContainer<TreeID, Tree>(tr => tr.ID, trRoot);
+            await trrepo.PersistTree(trRoot.ID, trees);
+
+            TreeRepositoryTestMethods.RecursivePrint(trRoot.ID, trees);
 
             cmRoot = new Commit.Builder(
                 new List<CommitID>(0),
@@ -76,14 +80,6 @@ namespace TestIVO.CommonTest
                 DateTimeOffset.Now,
                 "Hello world."
             );
-
-            PersistingBlob[] pblobs = new PersistingBlob[] { pblReadme };
-            await blrepo.PersistBlobs(pblobs);
-
-            var trees = new ImmutableContainer<TreeID, Tree>(tr => tr.ID, trRoot);
-            await trrepo.PersistTree(trRoot.ID, trees);
-
-            TreeRepositoryTestMethods.RecursivePrint(trRoot.ID, trees);
 
             await cmrepo.PersistCommit(cmRoot);
         }

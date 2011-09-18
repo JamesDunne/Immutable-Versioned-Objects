@@ -27,9 +27,9 @@ namespace TestIVO.CommonTest
 
         private TreeID rootId;
         private ImmutableContainer<TreeID, Tree> trees;
-        private PersistingBlob[] pblobs;
 
         private Tree trTemplate = null, trRoot = null;
+        private IStreamedBlob[] sblobs;
 
         internal static void RecursivePrint(TreeID treeID, ImmutableContainer<TreeID, Tree> trees, int depth = 1)
         {
@@ -61,17 +61,16 @@ namespace TestIVO.CommonTest
             }
         }
 
-        private void createTrees()
+        private async Task createTrees()
         {
-            PersistingBlob pbHeader;
-            pblobs = new PersistingBlob[1] {
-                pbHeader = new PersistingBlob(() => "<div>Header</div>".ToStream())
-            };
+            PersistingBlob pbHeader = new PersistingBlob("<div>Header</div>".ToStream());
+
+            sblobs = await blrepo.PersistBlobs(pbHeader);
 
             trTemplate = new Tree.Builder(
                 new List<TreeTreeReference>(0),
                 new List<TreeBlobReference> {
-                    new TreeBlobReference.Builder("header", pbHeader.ComputedID)
+                    new TreeBlobReference.Builder("header", sblobs[0].ID)
                 }
             );
 
@@ -91,7 +90,6 @@ namespace TestIVO.CommonTest
         {
             createTrees();
 
-            await blrepo.PersistBlobs(pblobs);
             await trrepo.PersistTree(rootId, trees);
         }
 
@@ -99,7 +97,6 @@ namespace TestIVO.CommonTest
         {
             createTrees();
 
-            await blrepo.PersistBlobs(pblobs);
             await trrepo.PersistTree(rootId, trees);
 
             // Now retrieve those trees:
@@ -113,7 +110,6 @@ namespace TestIVO.CommonTest
         {
             createTrees();
 
-            await blrepo.PersistBlobs(pblobs);
             await trrepo.PersistTree(rootId, trees);
 
             // Retrieve a single tree node:
@@ -129,7 +125,6 @@ namespace TestIVO.CommonTest
         {
             createTrees();
 
-            await blrepo.PersistBlobs(pblobs);
             await trrepo.PersistTree(rootId, trees);
 
             // Retrieve a single TreeID mapping:
@@ -145,7 +140,6 @@ namespace TestIVO.CommonTest
         {
             createTrees();
 
-            await blrepo.PersistBlobs(pblobs);
             await trrepo.PersistTree(rootId, trees);
 
             // Retrieve some TreeID mappings by Paths:
@@ -172,7 +166,6 @@ namespace TestIVO.CommonTest
         {
             createTrees();
 
-            await blrepo.PersistBlobs(pblobs);
             await trrepo.PersistTree(rootId, trees);
 
             // Retrieve the tree recursively:
@@ -186,7 +179,6 @@ namespace TestIVO.CommonTest
         {
             createTrees();
 
-            await blrepo.PersistBlobs(pblobs);
             await trrepo.PersistTree(rootId, trees);
 
             // Retrieve a subtree recursively by path:
@@ -200,7 +192,6 @@ namespace TestIVO.CommonTest
         {
             createTrees();
 
-            await blrepo.PersistBlobs(pblobs);
             await trrepo.PersistTree(rootId, trees);
 
             // Retrieve a subtree recursively by path:

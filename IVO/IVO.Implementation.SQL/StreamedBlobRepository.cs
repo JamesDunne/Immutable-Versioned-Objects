@@ -28,44 +28,11 @@ namespace IVO.Implementation.SQL
 
         public async Task<IStreamedBlob[]> PersistBlobs(params PersistingBlob[] blobs)
         {
-            var blobIndexLookup = new ConcurrentDictionary<BlobID, int>(Environment.ProcessorCount * 2, blobs.Length);
-
-            // Compute all our BlobIDs first:
-            Task<BlobID>[] computeIDTasks = new Task<BlobID>[blobs.Length];
-            for (int i = 0; i < blobs.Length; ++i)
-            {
-                int index = i;
-                PersistingBlob blob = blobs[index];
-                if (blob.ID.HasValue)
-                    computeIDTasks[index] = TaskEx.FromResult(blob.ID.Value);
-                else
-                    computeIDTasks[index] = TaskEx.Run((Func<BlobID>)blob.ComputeID);
-
-                // Update the lookup dictionary:
-                computeIDTasks[index] = computeIDTasks[index].ContinueWith(blidTask => { blobIndexLookup.AddOrUpdate(blidTask.Result, index, (k, v) => index); return blidTask.Result; });
-            }
-            await TaskEx.WhenAll(computeIDTasks);
-
-            // Query which BlobIDs already exist:
-            var existBlobs = await db.ExecuteListQueryAsync(new QueryBlobsExist(blobs.Select(bl => bl.ID.Value)), expectedCapacity: blobs.Length);
-
-            // Find the BlobIDs to persist:
-            var blobsToPersist = blobs.Select(bl => bl.ID.Value).Except(existBlobs).ToList(blobs.Length - existBlobs.Count);
-
             // Start persisting blobs:
             Task<IStreamedBlob>[] tasks = new Task<IStreamedBlob>[blobs.Length];
-            for (int i = 0; i < blobsToPersist.Count; ++i)
-            {
-                int index = blobIndexLookup[blobsToPersist[i]];
-                tasks[index] = db.ExecuteNonQueryAsync(new PersistBlob(this, blobs[index]));
-            }
-
-            // Fetch the remaining blobs' lengths:
             for (int i = 0; i < blobs.Length; ++i)
             {
-                // A non-null task means this blob was already retrieved:
-                if (tasks[i] != null) continue;
-                tasks[i] = db.ExecuteSingleQueryAsync(new QueryBlob(this, blobs[i].ComputedID));
+                tasks[i] = db.ExecuteNonQueryAsync(new PersistBlob(this, blobs[i]));
             }
 
             // When all persists are complete, roll up the results from all the tasks into a single array:
