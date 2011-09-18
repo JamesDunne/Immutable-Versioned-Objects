@@ -22,10 +22,28 @@ namespace IVO.Implementation.FileSystem
 
         #region Private details
 
-        private void persistTag(Tag tg)
+        private async Task persistTag(Tag tg)
         {
+            FileInfo fiTracker = system.getTagPathByTagName(tg.Name);
+            if (fiTracker.Exists)
+            {
+                TagID? tgID = await getTagIDByName(tg.Name);
+                if (tgID.HasValue)
+                {
+                    var gtg = await getTag(tgID.Value);
+                    if (gtg.Name != tg.Name)
+                        throw new InvalidOperationException();
+
+                    // FIXME: assuming rest of the contents are the same.
+                }
+                return;
+            }
+
             FileInfo fi = system.getPathByID(tg.ID);
-            if (fi.Exists) return;
+            if (fi.Exists)
+            {
+                return;
+            }
 
             // Create directory if it doesn't exist:
             if (!fi.Directory.Exists)
@@ -42,7 +60,6 @@ namespace IVO.Implementation.FileSystem
             }
 
             // Now keep track of the tag by its name:
-            FileInfo fiTracker = system.getTagPathByTagName(tg.Name);
             using (var fs = new FileStream(fiTracker.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
                 Debug.WriteLine(String.Format("New TAG '{0}'", fiTracker.FullName));
@@ -159,7 +176,7 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Tag> PersistTag(Tag tg)
         {
-            await TaskEx.Run(() => persistTag(tg));
+            await persistTag(tg);
             return tg;
         }
 
@@ -193,7 +210,10 @@ namespace IVO.Implementation.FileSystem
             TagID? id = await getTagIDByName(tagName);
             if (!id.HasValue) return null;
 
-            return await getTag(id.Value);
+            var tg = await getTag(id.Value);
+            if (tg.Name != tagName)
+                throw new InvalidOperationException();
+            return tg;
         }
     }
 }

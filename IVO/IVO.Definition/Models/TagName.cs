@@ -51,6 +51,30 @@ namespace IVO.Definition.Models
 
             return String.Join(PathSeparatorString, Parts);
         }
+
+        public static bool operator ==(TagName a, TagName b)
+        {
+            if (Object.ReferenceEquals(a, null) && !Object.ReferenceEquals(b, null)) return false;
+            if (!Object.ReferenceEquals(a, null) && Object.ReferenceEquals(b, null)) return false;
+            return a.ToString() == b.ToString();
+        }
+
+        public static bool operator !=(TagName a, TagName b)
+        {
+            if (Object.ReferenceEquals(a, null) && !Object.ReferenceEquals(b, null)) return true;
+            if (!Object.ReferenceEquals(a, null) && Object.ReferenceEquals(b, null)) return true;
+            return a.ToString() != b.ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return this.ToString().Equals(obj.ToString());
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ToString().GetHashCode();
+        }
     }
 
     public sealed class TagNameStringConverter : TypeConverter
