@@ -155,6 +155,22 @@ namespace IVO.Definition.Models
 
             return base.ConvertFrom(context, culture, value);
         }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return true;
+            else
+                return base.CanConvertTo(context, destinationType);
+        }
+
+        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return ((<#= types[i] #>)value).ToString();
+            else
+                return base.ConvertTo(context, culture, value, destinationType);
+        }
     }
 <#
     } // for (int i = 0; i < types.Length; ++i)

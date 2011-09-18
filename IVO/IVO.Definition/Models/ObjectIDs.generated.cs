@@ -135,6 +135,22 @@ namespace IVO.Definition.Models
 
             return base.ConvertFrom(context, culture, value);
         }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return true;
+            else
+                return base.CanConvertTo(context, destinationType);
+        }
+
+        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return ((CommitID)value).ToString();
+            else
+                return base.ConvertTo(context, culture, value, destinationType);
+        }
     }
 
 	[TypeConverter(typeof(TreeIDTypeConverter))]
@@ -265,6 +281,22 @@ namespace IVO.Definition.Models
 				return new TreeID(strValue);
 
             return base.ConvertFrom(context, culture, value);
+        }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return true;
+            else
+                return base.CanConvertTo(context, destinationType);
+        }
+
+        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return ((TreeID)value).ToString();
+            else
+                return base.ConvertTo(context, culture, value, destinationType);
         }
     }
 
@@ -397,6 +429,22 @@ namespace IVO.Definition.Models
 
             return base.ConvertFrom(context, culture, value);
         }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return true;
+            else
+                return base.CanConvertTo(context, destinationType);
+        }
+
+        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return ((BlobID)value).ToString();
+            else
+                return base.ConvertTo(context, culture, value, destinationType);
+        }
     }
 
 	[TypeConverter(typeof(TagIDTypeConverter))]
@@ -527,6 +575,22 @@ namespace IVO.Definition.Models
 				return new TagID(strValue);
 
             return base.ConvertFrom(context, culture, value);
+        }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return true;
+            else
+                return base.CanConvertTo(context, destinationType);
+        }
+
+        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return ((TagID)value).ToString();
+            else
+                return base.ConvertTo(context, culture, value, destinationType);
         }
     }
 }
