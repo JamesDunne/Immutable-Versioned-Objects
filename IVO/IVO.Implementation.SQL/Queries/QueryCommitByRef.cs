@@ -42,7 +42,17 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return cmd;
         }
 
-        public async Task<Tuple<Ref, Commit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Tuple<Ref, Commit>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return TaskEx.FromResult(retrieve(cmd, dr));
+        }
+
+        public Tuple<Ref, Commit> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return retrieve(cmd, dr);
+        }
+
+        public Tuple<Ref, Commit> retrieve(SqlCommand cmd, SqlDataReader dr)
         {
             // If no result, return null:
             if (!dr.Read()) return null;

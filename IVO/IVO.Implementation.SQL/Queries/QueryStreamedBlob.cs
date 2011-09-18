@@ -13,9 +13,16 @@ namespace IVO.Implementation.SQL.Queries
     public sealed class QueryStreamedBlob<TResult> : IComplexDataQuery<TResult>
     {
         private BlobID _id;
-        private Func<System.IO.Stream, Task<TResult>> read;
+        private Func<System.IO.Stream, Task<TResult>> readAsync;
+        private Func<System.IO.Stream, TResult> read;
 
-        public QueryStreamedBlob(BlobID id, Func<System.IO.Stream, Task<TResult>> read)
+        public QueryStreamedBlob(BlobID id, Func<System.IO.Stream, Task<TResult>> readAsync)
+        {
+            this._id = id;
+            this.readAsync = readAsync;
+        }
+
+        public QueryStreamedBlob(BlobID id, Func<System.IO.Stream, TResult> read)
         {
             this._id = id;
             this.read = read;
@@ -42,7 +49,7 @@ namespace IVO.Implementation.SQL.Queries
             return CommandBehavior.SequentialAccess;
         }
         
-        public async Task<TResult> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public async Task<TResult> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             if (!dr.Read()) return default(TResult);
 
@@ -54,7 +61,23 @@ namespace IVO.Implementation.SQL.Queries
             long datalength = dr.GetSqlInt64(1).Value;
 
             // Use the lambda to read from the contents stream:
-            TResult result = await this.read(new BlobReaderStream(dr, 2, length: datalength));
+            TResult result = await this.readAsync(new BlobReaderStream(dr, 2, length: datalength));
+            return result;
+        }
+
+        public TResult Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            if (!dr.Read()) return default(TResult);
+
+            // Read the BlobID:
+            BlobID id = (BlobID)dr.GetSqlBinary(0).Value;
+            if (id != this._id) throw new BlobIDMismatchException(this._id, id);
+
+            // Read the length of the contents:
+            long datalength = dr.GetSqlInt64(1).Value;
+
+            // Use the lambda to read from the contents stream:
+            TResult result = this.read(new BlobReaderStream(dr, 2, length: datalength));
             return result;
         }
     }

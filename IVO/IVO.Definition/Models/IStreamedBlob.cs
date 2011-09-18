@@ -29,7 +29,7 @@ namespace IVO.Definition.Models
         /// <typeparam name="TResult"></typeparam>
         /// <param name="read">Reads content from the underlying Stream until complete.</param>
         /// <returns></returns>
-        Task<TResult> ReadStream<TResult>(Func<System.IO.Stream, Task<TResult>> read);
+        Task<TResult> ReadStreamAsync<TResult>(Func<System.IO.Stream, Task<TResult>> read);
 
         /// <summary>
         /// Starts a Task to open the data stream from the persistence store, passes it to the <paramref name="read"/>
@@ -38,6 +38,25 @@ namespace IVO.Definition.Models
         /// </summary>
         /// <param name="read">Reads content from the underlying Stream until complete.</param>
         /// <returns></returns>
-        Task ReadStream(Func<System.IO.Stream, Task> read);
+        Task ReadStreamAsync(Func<System.IO.Stream, Task> read);
+
+        /// <summary>
+        /// Opens the data stream from the persistence store, passes it to the <paramref name="read"/>
+        /// function to read from and then closes the underlying Stream when the lambda returns. The Stream must not
+        /// leave the lambda's scope. This method returns the value returned from the <paramref name="read"/> function.
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="read">Reads content from the underlying Stream until complete.</param>
+        /// <returns></returns>
+        TResult ReadStream<TResult>(Func<System.IO.Stream, TResult> read);
+
+        /// <summary>
+        /// Opens the data stream from the persistence store, passes it to the <paramref name="read"/>
+        /// function to read from and then closes the underlying Stream when the lambda returns. The Stream must not
+        /// leave the lambda's scope.
+        /// </summary>
+        /// <param name="read">Reads content from the underlying Stream until complete.</param>
+        /// <returns></returns>
+        void ReadStream(Action<System.IO.Stream> read);
     }
 }

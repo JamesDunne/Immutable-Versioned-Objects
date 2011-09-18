@@ -46,7 +46,17 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
             return cmd;
         }
 
-        public async Task<Tree> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Tree> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return TaskEx.FromResult(retrieve(cmd, dr, expectedCapacity));
+        }
+
+        public Tree Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return retrieve(cmd, dr, expectedCapacity);
+        }
+
+        public Tree retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             Tree.Builder tb = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
 

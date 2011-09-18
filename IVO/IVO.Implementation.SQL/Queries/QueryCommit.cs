@@ -35,7 +35,17 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return cmd;
         }
 
-        public async Task<Commit> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Commit> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return TaskEx.FromResult(retrieve(cmd, dr));
+        }
+
+        public Commit Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return retrieve(cmd, dr);
+        }
+
+        private Commit retrieve(SqlCommand cmd, SqlDataReader dr)
         {
             // If no result, return null:
             if (!dr.Read()) return null;

@@ -47,7 +47,17 @@ WHERE   cm.depth <= @depth";
             return cmd;
         }
 
-        public async Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        {
+            return TaskEx.FromResult(retrieve(cmd, dr, expectedCount));
+        }
+
+        public Tuple<CommitID, ImmutableContainer<CommitID, ICommit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        {
+            return retrieve(cmd, dr, expectedCount);
+        }
+
+        public Tuple<CommitID, ImmutableContainer<CommitID, ICommit>> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             Dictionary<CommitID, Commit.Builder> commits = new Dictionary<CommitID, Commit.Builder>(expectedCount);
             CommitPartial.Builder cmPartial = null;

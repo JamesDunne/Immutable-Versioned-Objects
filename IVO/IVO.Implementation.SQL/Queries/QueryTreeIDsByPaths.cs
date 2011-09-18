@@ -51,8 +51,18 @@ SELECT  [tr].linked_treeid AS [treeid], tr.[path] FROM rec tr WHERE tr.[path] IN
             cmd.AddInParameter("@rootid", new SqlBinary((byte[])this._rootid));
             return cmd;
         }
+        
+        public Task<ReadOnlyCollection<TreeIDPathMapping>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return TaskEx.FromResult(retrieve(cmd, dr, expectedCapacity));
+        }
 
-        public async Task<ReadOnlyCollection<TreeIDPathMapping>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public ReadOnlyCollection<TreeIDPathMapping> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return retrieve(cmd, dr, expectedCapacity);
+        }
+
+        public ReadOnlyCollection<TreeIDPathMapping> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             List<TreeIDPathMapping> mappings = new List<TreeIDPathMapping>();
 

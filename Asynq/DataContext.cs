@@ -85,7 +85,7 @@ namespace Asynq
 
                 using (SqlDataReader dr = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)))
                 {
-                    return await query.Retrieve(cmd, dr, expectedCapacity);
+                    return await query.RetrieveAsync(cmd, dr, expectedCapacity);
                 }
             }
         }
@@ -136,7 +136,7 @@ namespace Asynq
 
                 using (SqlDataReader dr = await cmd.ExecuteReaderAsync(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)))
                 {
-                    T row = await query.Retrieve(cmd, dr);
+                    T row = await query.RetrieveAsync(cmd, dr);
 
                     return row;
                 }
@@ -182,9 +182,7 @@ namespace Asynq
 
                 using (SqlDataReader dr = cmd.ExecuteReader(CommandBehavior.CloseConnection | query.GetCustomCommandBehaviors(cn, cmd)))
                 {
-                    var retTask = query.Retrieve(cmd, dr);
-                    retTask.Wait();
-                    T row = retTask.Result;
+                    T row = query.Retrieve(cmd, dr);
 
                     return row;
                 }

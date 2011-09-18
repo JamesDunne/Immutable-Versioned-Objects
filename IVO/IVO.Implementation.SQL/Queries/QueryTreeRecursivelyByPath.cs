@@ -60,10 +60,20 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
             cmd.AddOutParameter("@treeid", System.Data.SqlDbType.Binary, 20);
             return cmd;
         }
-
-        public async Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        
+        public Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            Dictionary<TreeID, Tree.Builder> trees = new Dictionary<TreeID, Tree.Builder>(expectedCount);
+            return TaskEx.FromResult(retrieve(cmd, dr, expectedCapacity));
+        }
+
+        public Tuple<TreeID, ImmutableContainer<TreeID, Tree>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return retrieve(cmd, dr, expectedCapacity);
+        }
+
+        public Tuple<TreeID, ImmutableContainer<TreeID, Tree>> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            Dictionary<TreeID, Tree.Builder> trees = new Dictionary<TreeID, Tree.Builder>(expectedCapacity);
 
             TreeID? root = null;
 

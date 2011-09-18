@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using IVO.Definition.Exceptions;
+using System.ComponentModel;
 
 namespace IVO.Definition.Models
 {
     /// <summary>
     /// A canonicalized absolute blob path is a canonical tree path guaranteed to not contain directory traversals with a blob name hanging off of it.
     /// </summary>
+    [TypeConverter(typeof(CanonicalBlobPathTypeConverter))]
     public sealed class CanonicalBlobPath : PathObjectModel
     {
         private string _asString;
@@ -69,6 +71,26 @@ namespace IVO.Definition.Models
         public override string ToString()
         {
             return this._asString;
+        }
+    }
+
+    public sealed class CanonicalBlobPathTypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            if (typeof(string) == sourceType)
+                return true;
+            else
+                return base.CanConvertFrom(context, sourceType);
+        }
+
+        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        {
+            string strValue = value as string;
+            if (strValue != null)
+                return (CanonicalBlobPath)strValue;
+            else
+                return base.ConvertFrom(context, culture, value);
         }
     }
 }

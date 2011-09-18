@@ -47,8 +47,18 @@ WHERE tr.[path] + trbl.name = @path;";
             cmd.AddInParameter("@path", new SqlString(this._treePath.Path.ToString()));
             return cmd;
         }
+        
+        public Task<TreePathStreamedBlob> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return TaskEx.FromResult(retrieve(cmd, dr));
+        }
 
-        public async Task<TreePathStreamedBlob> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public TreePathStreamedBlob Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return retrieve(cmd, dr);
+        }
+
+        public TreePathStreamedBlob retrieve(SqlCommand cmd, SqlDataReader dr)
         {
             if (!dr.Read()) return null;
 

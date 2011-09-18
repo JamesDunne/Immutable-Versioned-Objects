@@ -38,6 +38,8 @@ namespace Asynq
         /// instead.
         /// </remarks>
         /// <returns></returns>
-        Task<T> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10);
+        Task<T> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10);
+
+        T Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10);
     }
 }

@@ -41,7 +41,12 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return cmd;
         }
 
-        public Task<Tuple<Tag, Commit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Tuple<Tag, Commit>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return TaskEx.FromResult(QueryCommitByTagID.retrieve(cmd, dr));
+        }
+
+        public Tuple<Tag, Commit> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return QueryCommitByTagID.retrieve(cmd, dr);
         }
