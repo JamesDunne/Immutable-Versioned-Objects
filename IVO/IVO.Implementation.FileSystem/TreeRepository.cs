@@ -35,7 +35,7 @@ namespace IVO.Implementation.FileSystem
             {
                 // TODO: implement an async buffered Stream:
                 buf = new byte[16384];
-                nr = await fs.ReadAsync(buf, 0, 16384);
+                nr = await fs.ReadAsync(buf, 0, 16384).ConfigureAwait(continueOnCapturedContext: false);
                 if (nr >= 16384)
                 {
                     // My, what a large tree you have!
@@ -106,7 +106,7 @@ namespace IVO.Implementation.FileSystem
 
         private async Task<Tree[]> getTreeRecursively(TreeID id)
         {
-            var root = await getTree(id);
+            var root = await getTree(id).ConfigureAwait(continueOnCapturedContext: false);
             var rootArr = new Tree[1] { root };
 
             if (root.Trees.Length == 0)
@@ -119,7 +119,7 @@ namespace IVO.Implementation.FileSystem
             }
 
             // Await all the tree retrievals:
-            var allTrees = await TaskEx.WhenAll(tasks);
+            var allTrees = await TaskEx.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
 
             // Flatten out the tree arrays:
             var flattened =
@@ -134,7 +134,7 @@ namespace IVO.Implementation.FileSystem
         private async Task<TreeIDPathMapping> getTreeIDByPath(TreeTreePath path)
         {
             // Get the root Tree:
-            var root = await getTree(path.RootTreeID);
+            var root = await getTree(path.RootTreeID).ConfigureAwait(continueOnCapturedContext: false);
 
             ReadOnlyCollection<string> parts = path.Path.Parts;
             if (parts.Count == 0) return new TreeIDPathMapping(path, path.RootTreeID);
@@ -158,7 +158,7 @@ namespace IVO.Implementation.FileSystem
                         if (++j == parts.Count) return new TreeIDPathMapping(path, (TreeID?)nextID);
 
                         // Load up the next node so we can scan through its child nodes:
-                        nextNode = await getTree(nextID);
+                        nextNode = await getTree(nextID).ConfigureAwait(continueOnCapturedContext: false);
                         break;
                     }
 
@@ -174,6 +174,8 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Tree> PersistTree(TreeID rootid, ImmutableContainer<TreeID, Tree> trees)
         {
+            if (trees == null) throw new ArgumentNullException("trees");
+
             // NOTE: We don't have to persist tree nodes in any particular order here if we implement a filesystem lock.
             Task[] tasks = new Task[trees.Count];
             using (var en = trees.Values.GetEnumerator())
@@ -181,12 +183,13 @@ namespace IVO.Implementation.FileSystem
                 for (int i = 0; en.MoveNext(); ++i)
                 {
                     var tr = en.Current;
+                    // FIXME: need concurrency here?
                     tasks[i] = TaskEx.Run(() => persistTree(tr));
                 }
             }
 
             // Wait for all the tasks to complete:
-            await TaskEx.WhenAll(tasks);
+            await TaskEx.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
 
             // Return the root tree node:
             return trees[rootid];
@@ -220,12 +223,12 @@ namespace IVO.Implementation.FileSystem
         
         public async Task<TreeID> DeleteTreeRecursively(TreeID rootid)
         {
-            var trees = await getTreeRecursively(rootid);
+            var trees = await getTreeRecursively(rootid).ConfigureAwait(continueOnCapturedContext: false);
 
             // TODO: test that 'tr' is captured properly in the lambda.
             Task[] tasks = trees.SelectAsArray(tr => TaskEx.Run(() => deleteTree(tr.ID)));
 
-            await TaskEx.WhenAll(tasks);
+            await TaskEx.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
             
             return rootid;
         }
@@ -233,7 +236,7 @@ namespace IVO.Implementation.FileSystem
         public async Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursively(TreeID rootid)
         {
             // Get all trees recursively:
-            var all = await getTreeRecursively(rootid);
+            var all = await getTreeRecursively(rootid).ConfigureAwait(continueOnCapturedContext: false);
 
             // Return them (all[0] is the root):
             return new Tuple<TreeID, ImmutableContainer<TreeID, Tree>>(
@@ -245,11 +248,11 @@ namespace IVO.Implementation.FileSystem
         public async Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursivelyFromPath(TreeTreePath path)
         {
             // Find the TreeID given the path and its root TreeID:
-            TreeIDPathMapping tpm = await getTreeIDByPath(path);
+            TreeIDPathMapping tpm = await getTreeIDByPath(path).ConfigureAwait(continueOnCapturedContext: false);
             if (!tpm.TreeID.HasValue) return null;
 
             // Now use GetTreeRecursively to do the rest:
-            return await GetTreeRecursively(tpm.TreeID.Value);
+            return await GetTreeRecursively(tpm.TreeID.Value).ConfigureAwait(continueOnCapturedContext: false);
         }
     }
 }

@@ -27,10 +27,10 @@ namespace IVO.Implementation.FileSystem
             FileInfo fiTracker = system.getTagPathByTagName(tg.Name);
             if (fiTracker.Exists)
             {
-                TagID? tgID = await getTagIDByName(tg.Name);
+                TagID? tgID = await getTagIDByName(tg.Name).ConfigureAwait(continueOnCapturedContext: false);
                 if (tgID.HasValue)
                 {
-                    var gtg = await getTag(tgID.Value);
+                    var gtg = await getTag(tgID.Value).ConfigureAwait(continueOnCapturedContext: false);
                     if (gtg.Name != tg.Name)
                         throw new InvalidOperationException();
 
@@ -79,7 +79,7 @@ namespace IVO.Implementation.FileSystem
             {
                 // TODO: implement an async buffered Stream:
                 buf = new byte[16384];
-                nr = await fs.ReadAsync(buf, 0, 16384);
+                nr = await fs.ReadAsync(buf, 0, 16384).ConfigureAwait(continueOnCapturedContext: false);
                 if (nr >= 16384)
                 {
                     // My, what a large tag you have!
@@ -109,7 +109,7 @@ namespace IVO.Implementation.FileSystem
             {
                 // TODO: implement an async buffered Stream:
                 buf = new byte[16384];
-                nr = await fs.ReadAsync(buf, 0, 16384);
+                nr = await fs.ReadAsync(buf, 0, 16384).ConfigureAwait(continueOnCapturedContext: false);
                 if (nr >= 16384)
                 {
                     // My, what a large tag you have!
@@ -176,26 +176,26 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Tag> PersistTag(Tag tg)
         {
-            await persistTag(tg);
+            await persistTag(tg).ConfigureAwait(continueOnCapturedContext: false);
             return tg;
         }
 
         public async Task<TagID?> DeleteTag(TagID id)
         {
-            Tag tg = await getTag(id);
+            Tag tg = await getTag(id).ConfigureAwait(continueOnCapturedContext: false);
             if (tg == null) return (TagID?)null;
 
-            await TaskEx.Run(() => deleteTag(tg));
+            deleteTag(tg);
             return tg.ID;
         }
 
         public async Task<TagID?> DeleteTagByName(TagName tagName)
         {
-            TagID? id = await getTagIDByName(tagName);
+            TagID? id = await getTagIDByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
             if (!id.HasValue) return null;
-            
-            Tag tg = await getTag(id.Value);
-            await TaskEx.Run(() => deleteTag(tg));
+
+            Tag tg = await getTag(id.Value).ConfigureAwait(continueOnCapturedContext: false);
+            deleteTag(tg);
             
             return id;
         }
@@ -207,10 +207,10 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Tag> GetTagByName(TagName tagName)
         {
-            TagID? id = await getTagIDByName(tagName);
+            TagID? id = await getTagIDByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
             if (!id.HasValue) return null;
 
-            var tg = await getTag(id.Value);
+            var tg = await getTag(id.Value).ConfigureAwait(continueOnCapturedContext: false);
             if (tg.Name != tagName)
                 throw new InvalidOperationException();
             return tg;

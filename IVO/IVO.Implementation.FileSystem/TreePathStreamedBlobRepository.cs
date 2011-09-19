@@ -35,8 +35,8 @@ namespace IVO.Implementation.FileSystem
             for (int i = 0; i < treePaths.Length; ++i)
             {
                 var tp = treePaths[i];
-                
-                var trm = await trrepo.GetTreeIDByPath(new TreeTreePath(tp.RootTreeID, tp.Path.Tree));
+
+                var trm = await trrepo.GetTreeIDByPath(new TreeTreePath(tp.RootTreeID, tp.Path.Tree)).ConfigureAwait(continueOnCapturedContext: false);
                 if (!trm.TreeID.HasValue)
                 {
                     blobs[i] = null;
@@ -44,7 +44,7 @@ namespace IVO.Implementation.FileSystem
                 }
 
                 // Get the tree:
-                var tr = await trrepo.GetTree(trm.TreeID.Value);
+                var tr = await trrepo.GetTree(trm.TreeID.Value).ConfigureAwait(continueOnCapturedContext: false);
                 
                 // Get the blob out of this tree:
                 // TODO: standardize name comparison semantics:
@@ -66,12 +66,12 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<TreePathStreamedBlob> GetBlobByTreePath(TreeBlobPath treePath)
         {
-            var trm = await trrepo.GetTreeIDByPath(new TreeTreePath(treePath.RootTreeID, treePath.Path.Tree));
+            var trm = await trrepo.GetTreeIDByPath(new TreeTreePath(treePath.RootTreeID, treePath.Path.Tree)).ConfigureAwait(continueOnCapturedContext: false);
             if (!trm.TreeID.HasValue)
                 return null;
 
             // Get the tree:
-            var tr = await trrepo.GetTree(trm.TreeID.Value);
+            var tr = await trrepo.GetTree(trm.TreeID.Value).ConfigureAwait(continueOnCapturedContext: false);
 
             // Get the blob out of this tree:
             // TODO: standardize name comparison semantics:

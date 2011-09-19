@@ -58,7 +58,7 @@ namespace IVO.Implementation.FileSystem
             {
                 // TODO: implement an async buffered Stream:
                 buf = new byte[16384];
-                nr = await fs.ReadAsync(buf, 0, 16384);
+                nr = await fs.ReadAsync(buf, 0, 16384).ConfigureAwait(continueOnCapturedContext: false);
                 if (nr >= 16384)
                 {
                     // My, what a large commit you have!
@@ -132,14 +132,14 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Commit> PersistCommit(Commit cm)
         {
-            await TaskEx.Run(() => persistCommit(cm));
+            await TaskEx.Run(() => persistCommit(cm)).ConfigureAwait(continueOnCapturedContext: false);
 
             return cm;
         }
 
         public async Task<CommitID> DeleteCommit(CommitID id)
         {
-            await TaskEx.Run(() => deleteCommit(id));
+            await TaskEx.Run(() => deleteCommit(id)).ConfigureAwait(continueOnCapturedContext: false);
 
             return id;
         }
@@ -151,35 +151,35 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id)
         {
-            var tg = await tgrepo.GetTag(id);
+            var tg = await tgrepo.GetTag(id).ConfigureAwait(continueOnCapturedContext: false);
             if (tg == null) return new Tuple<Tag, Commit>(tg, (Commit)null);
 
-            var cm = await getCommit(tg.CommitID);
+            var cm = await getCommit(tg.CommitID).ConfigureAwait(continueOnCapturedContext: false);
             return new Tuple<Tag, Commit>(tg, cm);
         }
 
         public async Task<Tuple<Tag, Commit>> GetCommitByTagName(TagName tagName)
         {
-            var tg = await tgrepo.GetTagByName(tagName);
+            var tg = await tgrepo.GetTagByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
             if (tg == null) return new Tuple<Tag, Commit>(tg, (Commit)null);
 
-            var cm = await getCommit(tg.CommitID);
+            var cm = await getCommit(tg.CommitID).ConfigureAwait(continueOnCapturedContext: false);
             return new Tuple<Tag, Commit>(tg, cm);
         }
 
         public async Task<Tuple<Ref, Commit>> GetCommitByRefName(RefName refName)
         {
-            var rf = await rfrepo.GetRefByName(refName);
+            var rf = await rfrepo.GetRefByName(refName).ConfigureAwait(continueOnCapturedContext: false);
             if (rf == null) return new Tuple<Ref, Commit>(rf, (Commit)null);
 
-            var cm = await getCommit(rf.CommitID);
+            var cm = await getCommit(rf.CommitID).ConfigureAwait(continueOnCapturedContext: false);
             return new Tuple<Ref, Commit>(rf, cm);
         }
 
         private async Task<Commit[]> getCommitsRecursively(CommitID id, int depthLevel, int depthMaximum)
         {
             // Get the current commit:
-            var root = await getCommit(id);
+            var root = await getCommit(id).ConfigureAwait(continueOnCapturedContext: false);
             var rootArr = new Commit[1] { root };
 
             // We have no parents:
@@ -198,7 +198,7 @@ namespace IVO.Implementation.FileSystem
             }
 
             // Await all the tree retrievals:
-            var allCommits = await TaskEx.WhenAll(tasks);
+            var allCommits = await TaskEx.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
 
             // Flatten out the tree arrays:
             var flattened =
@@ -212,7 +212,7 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTree(CommitID id, int depth = 10)
         {
-            var all = await getCommitsRecursively(id, 1, depth);
+            var all = await getCommitsRecursively(id, 1, depth).ConfigureAwait(continueOnCapturedContext: false);
 
             // Return them (all[0] is the root):
             return new Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>(

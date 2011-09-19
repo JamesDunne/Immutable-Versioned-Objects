@@ -88,14 +88,14 @@ namespace TestIVO.CommonTest
 
         internal async Task PersistTreeTest()
         {
-            createTrees();
+            await createTrees();
 
             await trrepo.PersistTree(rootId, trees);
         }
 
         internal async Task GetTreesTest()
         {
-            createTrees();
+            await createTrees();
 
             await trrepo.PersistTree(rootId, trees);
 
@@ -108,7 +108,7 @@ namespace TestIVO.CommonTest
 
         internal async Task GetTreeTest()
         {
-            createTrees();
+            await createTrees();
 
             await trrepo.PersistTree(rootId, trees);
 
@@ -123,7 +123,7 @@ namespace TestIVO.CommonTest
 
         internal async Task GetTreeIDByPathTest()
         {
-            createTrees();
+            await createTrees();
 
             await trrepo.PersistTree(rootId, trees);
 
@@ -138,7 +138,7 @@ namespace TestIVO.CommonTest
 
         internal async Task GetTreeIDsByPathsTest()
         {
-            createTrees();
+            await createTrees();
 
             await trrepo.PersistTree(rootId, trees);
 
@@ -164,7 +164,7 @@ namespace TestIVO.CommonTest
 
         internal async Task GetTreeRecursivelyTest()
         {
-            createTrees();
+            await createTrees();
 
             await trrepo.PersistTree(rootId, trees);
 
@@ -177,7 +177,7 @@ namespace TestIVO.CommonTest
 
         internal async Task GetTreeRecursivelyFromPathTest()
         {
-            createTrees();
+            await createTrees();
 
             await trrepo.PersistTree(rootId, trees);
 
@@ -190,7 +190,7 @@ namespace TestIVO.CommonTest
 
         internal async Task DeleteTreeRecursivelyTest()
         {
-            createTrees();
+            await createTrees();
 
             await trrepo.PersistTree(rootId, trees);
 

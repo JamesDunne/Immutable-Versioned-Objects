@@ -65,7 +65,7 @@ namespace IVO.Implementation.FileSystem
                 using (var sha1 = new SHA1StreamWriter(fs))
                 {
                     // Copy the contents asynchronously (expected copy in order):
-                    await sr.CopyToAsync(sha1, bufSize);
+                    await sr.CopyToAsync(sha1, bufSize).ConfigureAwait(continueOnCapturedContext: false);
 
                     // Create the BlobID from the SHA1 hash calculated during copy:
                     blid = new BlobID(sha1.GetHash());
@@ -111,7 +111,7 @@ namespace IVO.Implementation.FileSystem
             }
 
             Debug.WriteLine("Awaiting all persistence tasks...");
-            var streamedBlobs = await TaskEx.WhenAll(persistTasks);
+            var streamedBlobs = await TaskEx.WhenAll(persistTasks).ConfigureAwait(continueOnCapturedContext: false);
 
             Debug.WriteLine("All completed.");
 
@@ -129,26 +129,22 @@ namespace IVO.Implementation.FileSystem
             return;
         }
 
-        public async Task<BlobID[]> DeleteBlobs(params BlobID[] ids)
+        public Task<BlobID[]> DeleteBlobs(params BlobID[] ids)
         {
             if (ids == null) throw new ArgumentNullException("ids");
-            if (ids.Length == 0) return ids;
+            if (ids.Length == 0) return TaskEx.FromResult(ids);
 
-            // Delete each blob asynchronously:
-            Task[] deleteTasks = new Task[ids.Length];
+            // Delete each blob synchronously:
             for (int i = 0; i < ids.Length; ++i)
             {
                 BlobID id = ids[i];
-                deleteTasks[i] = TaskEx.Run(() => deleteBlob(id));
+                deleteBlob(id);
             }
-
-            // Wait for all blobs to be deleted:
-            await TaskEx.WhenAll(deleteTasks);
 
             // TODO: Run through all the 'objects' directories and prune empty ones.
             // Too eager? Could cause conflicts with other threads.
 
-            return ids;
+            return TaskEx.FromResult(ids);
         }
 
         private Task<IStreamedBlob> getBlob(BlobID id)

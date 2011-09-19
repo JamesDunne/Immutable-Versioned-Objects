@@ -31,7 +31,7 @@ namespace IVO.Implementation.FileSystem
 
             // Open the file for reading and send it to the lambda function:
             using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
-                return await read(sr);
+                return await read(sr).ConfigureAwait(continueOnCapturedContext: false);
         }
 
         public async Task ReadStreamAsync(Func<System.IO.Stream, Task> read)
@@ -43,7 +43,7 @@ namespace IVO.Implementation.FileSystem
 
             // Open the file for reading and send it to the lambda function:
             using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
-                await read(sr);
+                await read(sr).ConfigureAwait(continueOnCapturedContext: false);
         }
 
         public TResult ReadStream<TResult>(Func<Stream, TResult> read)

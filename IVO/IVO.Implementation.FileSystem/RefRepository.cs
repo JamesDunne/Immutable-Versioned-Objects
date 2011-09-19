@@ -51,7 +51,7 @@ namespace IVO.Implementation.FileSystem
             {
                 // TODO: implement an async buffered Stream:
                 buf = new byte[16384];
-                nr = await fs.ReadAsync(buf, 0, 16384);
+                nr = await fs.ReadAsync(buf, 0, 16384).ConfigureAwait(continueOnCapturedContext: false);
                 if (nr >= 16384)
                 {
                     // My, what a large tag you have!
@@ -78,10 +78,10 @@ namespace IVO.Implementation.FileSystem
 
         #endregion
 
-        public async Task<Ref> PersistRef(Ref rf)
+        public Task<Ref> PersistRef(Ref rf)
         {
-            await TaskEx.Run(() => persistRef(rf));
-            return rf;
+            persistRef(rf);
+            return TaskEx.FromResult(rf);
         }
 
         public Task<Ref> GetRefByName(RefName name)
@@ -91,8 +91,8 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Ref> DeleteRefByName(RefName name)
         {
-            var rf = await getRefByName(name);
-            await TaskEx.Run(() => deleteRef(name));
+            var rf = await getRefByName(name).ConfigureAwait(continueOnCapturedContext: false);
+            deleteRef(name);
             return rf;
         }
     }
