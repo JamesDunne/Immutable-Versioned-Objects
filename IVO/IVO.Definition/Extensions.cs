@@ -36,6 +36,28 @@ namespace System.Linq
             }
         }
 
+        public static T[] AppendAsArray<T>(this T[] src, T element)
+        {
+            T[] arr = new T[src.Length + 1];
+            Array.Copy(src, arr, src.Length);
+            arr[src.Length] = element;
+            return arr;
+        }
+
+        public static T[] AppendAsArray<T>(this IEnumerable<T> src, T element, int length)
+        {
+            T[] arr = new T[length + 1];
+            using (IEnumerator<T> e = src.GetEnumerator())
+            {
+                for (int i = 0; e.MoveNext(); ++i)
+                {
+                    arr[i] = e.Current;
+                }
+                arr[length] = element;
+                return arr;
+            }
+        }
+
         public static List<T> ToList<T>(this IEnumerable<T> src, int initialCapacity)
         {
             List<T> lst = new List<T>(initialCapacity);

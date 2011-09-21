@@ -33,7 +33,8 @@ namespace IVO.Definition.Models
             // Calculate the remaining properties:
             this.PageCount = totalCount / paging.PageSize + ( (totalCount % paging.PageSize) > 0 ? 1 : 0 );
             this.IsFirstPage = paging.PageNumber == 1;
-            this.IsLastPage = paging.PageNumber == this.PageCount;
+            // If PageCount == 0 we're still on the last page:
+            this.IsLastPage = paging.PageNumber == Math.Max(1, this.PageCount);
         }
 
         public ReadOnlyCollection<Telement> Collection { get; private set; }

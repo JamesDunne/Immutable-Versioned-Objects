@@ -34,7 +34,7 @@ namespace IVO.Implementation.FileSystem
             Debug.WriteLine(String.Format("Starting persistence of blob"));
 
             // Find a temporary filename:
-            string objDir = system.CreateObjectsDirectory().FullName;
+            string objDir = system.getObjectsDirectory().FullName;
             FileInfo tmpPath;
             do
             {

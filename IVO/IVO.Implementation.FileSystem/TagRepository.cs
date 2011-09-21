@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IVO.Definition.Exceptions;
@@ -68,9 +69,15 @@ namespace IVO.Implementation.FileSystem
             }
         }
 
-        private async Task<TagID?> getTagIDByName(TagName tagName)
+        private Task<TagID?> getTagIDByName(TagName tagName)
         {
             FileInfo fiTracker = system.getTagPathByTagName(tagName);
+            return getTagIDByTracker(fiTracker);
+        }
+
+        private async Task<TagID?> getTagIDByTracker(FileInfo fiTracker)
+        {
+            Debug.Assert(fiTracker != null);
             if (!fiTracker.Exists) return (TagID?)null;
 
             byte[] buf;
@@ -94,7 +101,7 @@ namespace IVO.Implementation.FileSystem
                 string line = sr.ReadLine();
                 if (line == null) return (TagID?)null;
 
-                return (TagID?) new TagID(line);
+                return (TagID?)new TagID(line);
             }
         }
 
@@ -132,7 +139,7 @@ namespace IVO.Implementation.FileSystem
                 // Set Name:
                 line = sr.ReadLine();
                 if (line == null || !line.StartsWith("name ")) throw new ObjectParseException("While parsing a tag, expected: 'name'");
-                tb.Name = (TagName) line.Substring("name ".Length);
+                tb.Name = (TagName)line.Substring("name ".Length);
 
                 // Set Tagger:
                 line = sr.ReadLine();
@@ -196,7 +203,7 @@ namespace IVO.Implementation.FileSystem
 
             Tag tg = await getTag(id.Value).ConfigureAwait(continueOnCapturedContext: false);
             deleteTag(tg);
-            
+
             return id;
         }
 
@@ -216,19 +223,120 @@ namespace IVO.Implementation.FileSystem
             return tg;
         }
 
-        public Task<ReadOnlyCollection<Tag>> SearchTags(TagQuery query)
+        private IEnumerable<TagName> getAllTagNames()
         {
-            throw new NotImplementedException();
+            // Create a new stack of an anonymous type:
+            var s = new { di = system.getTagsDirectory(), parts = new string[0] }.StackOf();
+            while (s.Count > 0)
+            {
+                var curr = s.Pop();
+
+                // Yield all files as TagNames in this directory:
+                FileInfo[] files = curr.di.GetFiles();
+                for (int i = 0; i < files.Length; ++i)
+                    yield return (TagName)curr.parts.AppendAsArray(files[i].Name);
+
+                // Push all the subdirectories to the stack:
+                DirectoryInfo[] dirs = curr.di.GetDirectories();
+                for (int i = 0; i < dirs.Length; ++i)
+                    s.Push(new { di = dirs[i], parts = curr.parts.AppendAsArray(dirs[i].Name) });
+            }
         }
 
-        public Task<OrderedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy)
+        private async Task<List<Tag>> searchTags(TagQuery query)
         {
-            throw new NotImplementedException();
+            // First, filter tags by name so that we don't have read them all:
+            IEnumerable<TagName> filteredTagNames = getAllTagNames();
+            if (query.Name != null)
+                filteredTagNames = filteredTagNames.Where(tn => tn.ToString().StartsWith(query.Name));
+
+            DateTimeOffset rightNow = DateTimeOffset.Now;
+            DateTimeOffset fromDate = (query.DateFrom ?? rightNow);
+            DateTimeOffset toDate = (query.DateTo ?? rightNow);
+
+            List<Tag> tags = new List<Tag>();
+            foreach (TagName tagName in filteredTagNames)
+            {
+                TagID? id = await getTagIDByName(tagName);
+                if (!id.HasValue) continue;
+
+                Tag tg = await getTag(id.Value);
+
+                // Filter by tagger name:
+                if ((query.Tagger != null) &&
+                    (!tg.Tagger.StartsWith(query.Tagger)))
+                    continue;
+
+                // Filter by date:
+                if (!((tg.DateTagged >= fromDate) && (tg.DateTagged <= toDate)))
+                    continue;
+
+                tags.Add(tg);
+            }
+
+            return tags;
         }
 
-        public Task<PagedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy, PagingRequest paging)
+        public async Task<ReadOnlyCollection<Tag>> SearchTags(TagQuery query)
         {
-            throw new NotImplementedException();
+            List<Tag> tags = await searchTags(query);
+
+            // Return our read-only collection:
+            return new ReadOnlyCollection<Tag>(tags);
+        }
+
+        private static readonly Dictionary<TagOrderBy, Func<Tag, object>> orderByFuncs = new Dictionary<TagOrderBy, Func<Tag, object>>
+        {
+            { TagOrderBy.DateTagged, tg => tg.DateTagged },
+            { TagOrderBy.Name, tg => tg.Name },
+            { TagOrderBy.Tagger, tg => tg.Tagger }
+        };
+
+        private IEnumerable<Tag> orderResults(List<Tag> tags, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy)
+        {
+            if (orderBy.Count == 0)
+                return tags;
+
+            IOrderedEnumerable<Tag> ordered;
+
+            int i = 0;
+
+            if (orderBy[i].Direction == OrderByDirection.Ascending)
+                ordered = tags.OrderBy(orderByFuncs[orderBy[i].OrderBy]);
+            else
+                ordered = tags.OrderByDescending(orderByFuncs[orderBy[i].OrderBy]);
+
+            for (i = 1; i < orderBy.Count; ++i)
+                if (orderBy[i].Direction == OrderByDirection.Ascending)
+                    ordered = ordered.ThenBy(orderByFuncs[orderBy[i].OrderBy]);
+                else
+                    ordered = ordered.ThenByDescending(orderByFuncs[orderBy[i].OrderBy]);
+
+            return ordered;
+        }
+
+        public async Task<OrderedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy)
+        {
+            // Filter the results:
+            List<Tag> tags = await searchTags(query);
+            // Order the results:
+            IEnumerable<Tag> ordered = orderResults(tags, orderBy);
+            tags = ordered.ToList(tags.Count);
+
+            return new OrderedResponse<Tag, TagOrderBy>(new ReadOnlyCollection<Tag>(tags), orderBy);
+        }
+
+        public async Task<PagedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy, PagingRequest paging)
+        {
+            // Filter the results:
+            List<Tag> tags = await searchTags(query);
+            // Order the results:
+            IEnumerable<Tag> ordered = orderResults(tags, orderBy);
+            tags = ordered.ToList(tags.Count);
+            // Page the results:
+            List<Tag> page = tags.Skip(paging.PageIndex * paging.PageSize).Take(paging.PageSize).ToList(paging.PageSize);
+
+            return new PagedResponse<Tag, TagOrderBy>(new ReadOnlyCollection<Tag>(page), orderBy, paging, tags.Count);
         }
     }
 }

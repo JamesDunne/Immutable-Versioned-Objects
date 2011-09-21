@@ -41,6 +41,15 @@ namespace IVO.Definition.Models
             return new TagName(parts);
         }
 
+        public static explicit operator TagName(string[] parts)
+        {
+            if (parts == null) throw new ArgumentNullException("parts");
+
+            validateCanonicalTreePath(parts);
+
+            return new TagName(parts);
+        }
+
         /// <summary>
         /// Renders the path as a string.
         /// </summary>

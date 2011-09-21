@@ -16,7 +16,7 @@ namespace IVO.Implementation.FileSystem
 
         public DirectoryInfo Root { get; private set; }
 
-        internal DirectoryInfo CreateObjectsDirectory()
+        internal DirectoryInfo getObjectsDirectory()
         {
             // Create the 'objects' subdirectory if it doesn't exist:
             DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(Root.FullName, "objects"));
@@ -25,7 +25,7 @@ namespace IVO.Implementation.FileSystem
             return objDir;
         }
 
-        internal DirectoryInfo CreateRefsDirectory()
+        internal DirectoryInfo getRefsDirectory()
         {
             // Create the 'refs' subdirectory if it doesn't exist:
             DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(Root.FullName, "refs"));
@@ -34,7 +34,7 @@ namespace IVO.Implementation.FileSystem
             return objDir;
         }
 
-        internal DirectoryInfo CreateTagsDirectory()
+        internal DirectoryInfo getTagsDirectory()
         {
             // Create the 'refs/tags' subdirectory if it doesn't exist:
             DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(Root.FullName, "refs", "tags"));
@@ -45,7 +45,7 @@ namespace IVO.Implementation.FileSystem
 
         internal FileInfo getPathByID(BlobID id)
         {
-            DirectoryInfo objDir = CreateObjectsDirectory();
+            DirectoryInfo objDir = getObjectsDirectory();
             string idStr = id.ToString();
 
             string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
@@ -54,7 +54,7 @@ namespace IVO.Implementation.FileSystem
 
         internal FileInfo getPathByID(TreeID id)
         {
-            DirectoryInfo objDir = CreateObjectsDirectory();
+            DirectoryInfo objDir = getObjectsDirectory();
             string idStr = id.ToString();
 
             string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
@@ -63,7 +63,7 @@ namespace IVO.Implementation.FileSystem
         
         internal FileInfo getPathByID(CommitID id)
         {
-            DirectoryInfo objDir = CreateObjectsDirectory();
+            DirectoryInfo objDir = getObjectsDirectory();
             string idStr = id.ToString();
 
             string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
@@ -72,7 +72,7 @@ namespace IVO.Implementation.FileSystem
 
         internal FileInfo getPathByID(TagID id)
         {
-            DirectoryInfo objDir = CreateObjectsDirectory();
+            DirectoryInfo objDir = getObjectsDirectory();
             string idStr = id.ToString();
 
             string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
@@ -83,7 +83,7 @@ namespace IVO.Implementation.FileSystem
         {
             if (tagName == null) throw new ArgumentNullException("tagName");
 
-            DirectoryInfo tagDir = CreateTagsDirectory();
+            DirectoryInfo tagDir = getTagsDirectory();
 
             string[] parts = new string[1] { tagDir.FullName }.Concat(tagName.Parts).ToArray(tagName.Parts.Count + 1);
             string path = System.IO.Path.Combine(parts);
@@ -94,7 +94,7 @@ namespace IVO.Implementation.FileSystem
         {
             if (refName == null) throw new ArgumentNullException("refName");
 
-            DirectoryInfo refDir = CreateRefsDirectory();
+            DirectoryInfo refDir = getRefsDirectory();
 
             string[] parts = new string[1] { refDir.FullName }.Concat(refName.Parts).ToArray(refName.Parts.Count + 1);
             string path = System.IO.Path.Combine(parts);
