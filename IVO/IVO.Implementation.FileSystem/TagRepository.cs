@@ -251,8 +251,6 @@ namespace IVO.Implementation.FileSystem
                 filteredTagNames = filteredTagNames.Where(tn => tn.ToString().StartsWith(query.Name));
 
             DateTimeOffset rightNow = DateTimeOffset.Now;
-            DateTimeOffset fromDate = (query.DateFrom ?? rightNow);
-            DateTimeOffset toDate = (query.DateTo ?? rightNow);
 
             List<Tag> tags = new List<Tag>();
             foreach (TagName tagName in filteredTagNames)
@@ -267,8 +265,9 @@ namespace IVO.Implementation.FileSystem
                     (!tg.Tagger.StartsWith(query.Tagger)))
                     continue;
 
-                // Filter by date:
-                if (!((tg.DateTagged >= fromDate) && (tg.DateTagged <= toDate)))
+                // Filter by date range:
+                if (!( (!query.DateFrom.HasValue || (tg.DateTagged >= query.DateFrom.Value)) &&
+                       (!query.DateTo.HasValue || (tg.DateTagged <= query.DateTo.Value)) ))
                     continue;
 
                 tags.Add(tg);
