@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using IVO.Definition.Exceptions;
 using IVO.Definition.Models;
 using IVO.Definition.Repositories;
-using System.IO;
-using System.Diagnostics;
-using IVO.Definition.Exceptions;
 
 namespace IVO.Implementation.FileSystem
 {
@@ -214,6 +214,21 @@ namespace IVO.Implementation.FileSystem
             if (tg.Name != tagName)
                 throw new InvalidOperationException();
             return tg;
+        }
+
+        public Task<ReadOnlyCollection<Tag>> SearchTags(TagQuery query)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<OrderedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PagedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy, PagingRequest paging)
+        {
+            throw new NotImplementedException();
         }
     }
 }

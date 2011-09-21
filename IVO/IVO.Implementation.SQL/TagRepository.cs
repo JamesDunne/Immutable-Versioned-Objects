@@ -11,6 +11,7 @@ using IVO.Definition;
 using IVO.Definition.Models;
 using IVO.Definition.Containers;
 using IVO.Definition.Repositories;
+using System.Collections.ObjectModel;
 
 namespace IVO.Implementation.SQL
 {
@@ -46,6 +47,21 @@ namespace IVO.Implementation.SQL
         public Task<TagID?> DeleteTagByName(TagName tagName)
         {
             return db.ExecuteNonQueryAsync(new DestroyTagByName(tagName));
+        }
+
+        public Task<ReadOnlyCollection<Tag>> SearchTags(TagQuery query)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<OrderedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PagedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy, PagingRequest paging)
+        {
+            throw new NotImplementedException();
         }
     }
 }
