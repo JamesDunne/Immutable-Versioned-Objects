@@ -55,14 +55,14 @@ namespace IVO.Definition.Models
         public static bool operator ==(RefName a, RefName b)
         {
             if (Object.ReferenceEquals(a, null) != Object.ReferenceEquals(b, null)) return false;
-            if (Object.ReferenceEquals(a, null) || Object.ReferenceEquals(b, null)) return false;
+            if (Object.ReferenceEquals(a, null) && Object.ReferenceEquals(b, null)) return true;
             return a.ToString() == b.ToString();
         }
 
         public static bool operator !=(RefName a, RefName b)
         {
             if (Object.ReferenceEquals(a, null) != Object.ReferenceEquals(b, null)) return true;
-            if (Object.ReferenceEquals(a, null) || Object.ReferenceEquals(b, null)) return true;
+            if (Object.ReferenceEquals(a, null) && Object.ReferenceEquals(b, null)) return false;
             return a.ToString() != b.ToString();
         }
 
