@@ -30,6 +30,7 @@ namespace IVO.Definition.Models
     public struct <#= types[i] #> : IEquatable<<#= types[i] #>>
     {
         public const int ByteArrayLength = 20;
+        public const int HexCharLength = ByteArrayLength * 2;
 
         private readonly byte[] _idValue;
         private int _quickHash;
@@ -44,28 +45,51 @@ namespace IVO.Definition.Models
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = _idValue.ToHexString(0, 20);
         }
-        
-        public <#= types[i] #>(string hexValue)
+
+        public static Maybe<<#= types[i] #>> Parse(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("<#= types[i] #> hex string must be {0} characters in length", ByteArrayLength * 2));
+            if (hexValue.Length != HexCharLength) return Maybe<<#= types[i] #>>.Nothing;
 
-            _idValue = new byte[ByteArrayLength];
+            byte[] tmp = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
             {
-                _idValue[i] = (byte)((deHex(hexValue[i * 2 + 0]) << 4) | deHex(hexValue[i * 2 + 1]));
+                int v1 = deHex(hexValue[i * 2 + 0]);
+                int v2 = deHex(hexValue[i * 2 + 1]);
+                if (v1 == -1) return Maybe<<#= types[i] #>>.Nothing;
+                if (v2 == -1) return Maybe<<#= types[i] #>>.Nothing;
+                tmp[i] = (byte)((v1 << 4) | v2);
             }
 
-            _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = _idValue.ToHexString(0, 20);
+            return new <#= types[i] #>(tmp);
         }
-        
+
+        public static Either<<#= types[i] #>, Exception> TryParse(string hexValue)
+        {
+            // Sanity check first:
+            if (hexValue.Length != HexCharLength) return new Exception(String.Format("<#= types[i] #> must be {0} characters in length", HexCharLength));
+
+            byte[] tmp = new byte[ByteArrayLength];
+            for (int i = 0; i < ByteArrayLength; ++i)
+            {
+                int v1 = deHex(hexValue[i * 2 + 0]);
+                int v2 = deHex(hexValue[i * 2 + 1]);
+
+                if (v1 == -1) return new Exception(String.Format("<#= types[i] #> character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]));
+                if (v2 == -1) return new Exception(String.Format("<#= types[i] #> character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]));
+
+                tmp[i] = (byte)((v1 << 4) | v2);
+            }
+
+            return new <#= types[i] #>(tmp);
+        }
+
         private static int deHex(char c)
         {
             if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
             if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
             if (c >= '0' && c <= '9') return (int)(c - '0');
-            throw new ArgumentOutOfRangeException("c", "Not a hexadecimal character!");
+            return -1;
         }
 
         public static explicit operator byte[](<#= types[i] #> id)
@@ -115,10 +139,10 @@ namespace IVO.Definition.Models
             return _toString;
         }
 
-        public string ToString(int firstLength = ByteArrayLength * 2)
+        public string ToString(int firstLength = HexCharLength)
         {
-            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
-            if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", HexCharLength));
+            if (firstLength > HexCharLength) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", HexCharLength));
             if (_toString == null) return String.Empty;
             return _toString.Substring(0, firstLength);
         }
@@ -151,7 +175,7 @@ namespace IVO.Definition.Models
         {
             string strValue = value as string;
             if (strValue != null)
-				return new <#= types[i] #>(strValue);
+				return <#= types[i] #>.Parse(strValue).Value;
 
             return base.ConvertFrom(context, culture, value);
         }

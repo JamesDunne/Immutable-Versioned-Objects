@@ -23,6 +23,14 @@ namespace System.Linq
 {
     public static class Extensions
     {
+        public static TResult[] SelectAsArray<T, TResult>(this T[] arr, Func<T, TResult> projection)
+        {
+            TResult[] res = new TResult[arr.Length];
+            for (int i = 0; i < arr.Length; ++i)
+                res[i] = projection(arr[i]);
+            return res;
+        }
+
         public static T[] ToArray<T>(this IEnumerable<T> src, int length)
         {
             T[] arr = new T[length];
@@ -91,7 +99,7 @@ namespace System
     public static class ByteArrayExtensions
     {
         private static readonly char[] hexChars = new char[16] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-        
+
         public static string ToHexString(this byte[] value, int offset, int count)
         {
             char[] c = new char[count * 2];
@@ -102,20 +110,6 @@ namespace System
                 c[i * 2 + 1] = hexChars[value[i + offset] & 15];
             }
             return new string(c, 0, i * 2);
-        }
-    }
-
-    namespace Linq
-    {
-        public static class ArrayExtensions
-        {
-            public static TResult[] SelectAsArray<T, TResult>(this T[] arr, Func<T, TResult> projection)
-            {
-                TResult[] res = new TResult[arr.Length];
-                for (int i = 0; i < arr.Length; ++i)
-                    res[i] = projection(arr[i]);
-                return res;
-            }
         }
     }
 }

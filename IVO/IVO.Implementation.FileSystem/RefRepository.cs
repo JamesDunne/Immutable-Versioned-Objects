@@ -66,7 +66,7 @@ namespace IVO.Implementation.FileSystem
                 string line = sr.ReadLine();
                 if (line == null) return (Ref)null;
 
-                return new Ref.Builder(refName, new CommitID(line));
+                return new Ref.Builder(refName, CommitID.Parse(line).Value);
             }
         }
 

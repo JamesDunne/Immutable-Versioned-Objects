@@ -14,14 +14,19 @@ namespace System
         private T _value;
         private bool _hasValue;
 
-        public Maybe(T item)
+        public Maybe(T value)
         {
-            _value = item;
+            _value = value;
             _hasValue = true;
         }
 
         public T Value { get { if (!_hasValue) throw new NullReferenceException(); return _value; } }
         public bool HasValue { get { return _hasValue; } }
+
+        public static implicit operator Maybe<T>(T value)
+        {
+            return new Maybe<T>(value);
+        }
 
         public static readonly Maybe<T> Nothing = new Maybe<T>();
     }
@@ -105,6 +110,12 @@ namespace System
             if (!condition(value))
                 throw getException(value);
             return value;
+        }
+
+        public static Nullable<T> ToNullable<T>(this Maybe<T> maybe) where T : struct
+        {
+            if (maybe.HasValue) return maybe.Value;
+            return null;
         }
     }
 }

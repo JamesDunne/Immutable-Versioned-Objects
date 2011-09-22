@@ -83,12 +83,12 @@ namespace IVO.Implementation.FileSystem
                     if (!line.StartsWith("parent ")) break;
 
                     string parent_commitid = line.Substring("parent ".Length);
-                    cb.Parents.Add(new CommitID(parent_commitid));
+                    cb.Parents.Add(CommitID.Parse(parent_commitid).Value);
                 }
 
                 // Set TreeID:
                 if (line == null || !line.StartsWith("tree ")) throw new ObjectParseException("While parsing a commit, expected: 'tree'");
-                cb.TreeID = new TreeID(line.Substring("tree ".Length));
+                cb.TreeID = TreeID.Parse(line.Substring("tree ".Length)).Value;
 
                 // Set Committer:
                 line = sr.ReadLine();

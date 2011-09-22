@@ -101,7 +101,7 @@ namespace IVO.Implementation.FileSystem
                 string line = sr.ReadLine();
                 if (line == null) return (TagID?)null;
 
-                return (TagID?)new TagID(line);
+                return TagID.Parse(line).ToNullable();
             }
         }
 
@@ -134,7 +134,7 @@ namespace IVO.Implementation.FileSystem
 
                 // Set CommitID:
                 if (line == null || !line.StartsWith("commit ")) throw new ObjectParseException("While parsing a tag, expected: 'commit'");
-                tb.CommitID = new CommitID(line.Substring("commit ".Length));
+                tb.CommitID = CommitID.Parse(line.Substring("commit ".Length)).Value;
 
                 // Set Name:
                 line = sr.ReadLine();

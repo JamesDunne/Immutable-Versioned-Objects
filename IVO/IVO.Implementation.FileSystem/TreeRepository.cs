@@ -57,13 +57,13 @@ namespace IVO.Implementation.FileSystem
                     {
                         string linked_treeid = line.Substring(5, (TreeID.ByteArrayLength * 2));
                         string name = line.Substring(6 + (TreeID.ByteArrayLength * 2));
-                        tb.Trees.Add(new TreeTreeReference.Builder(name, new TreeID(linked_treeid)));
+                        tb.Trees.Add(new TreeTreeReference.Builder(name, TreeID.Parse(linked_treeid).Value));
                     }
                     else if (line.StartsWith("blob "))
                     {
                         string linked_blobid = line.Substring(5, (TreeID.ByteArrayLength * 2));
                         string name = line.Substring(6 + (TreeID.ByteArrayLength * 2));
-                        tb.Blobs.Add(new TreeBlobReference.Builder(name, new BlobID(linked_blobid)));
+                        tb.Blobs.Add(new TreeBlobReference.Builder(name, BlobID.Parse(linked_blobid).Value));
                     }
                 }
             }

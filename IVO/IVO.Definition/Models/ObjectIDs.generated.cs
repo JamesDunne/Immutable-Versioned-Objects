@@ -10,6 +10,7 @@ namespace IVO.Definition.Models
     public struct CommitID : IEquatable<CommitID>
     {
         public const int ByteArrayLength = 20;
+        public const int HexCharLength = ByteArrayLength * 2;
 
         private readonly byte[] _idValue;
         private int _quickHash;
@@ -24,28 +25,51 @@ namespace IVO.Definition.Models
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = _idValue.ToHexString(0, 20);
         }
-        
-        public CommitID(string hexValue)
+
+        public static Maybe<CommitID> Parse(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("CommitID hex string must be {0} characters in length", ByteArrayLength * 2));
+            if (hexValue.Length != HexCharLength) return Maybe<CommitID>.Nothing;
 
-            _idValue = new byte[ByteArrayLength];
+            byte[] tmp = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
             {
-                _idValue[i] = (byte)((deHex(hexValue[i * 2 + 0]) << 4) | deHex(hexValue[i * 2 + 1]));
+                int v1 = deHex(hexValue[i * 2 + 0]);
+                int v2 = deHex(hexValue[i * 2 + 1]);
+                if (v1 == -1) return Maybe<CommitID>.Nothing;
+                if (v2 == -1) return Maybe<CommitID>.Nothing;
+                tmp[i] = (byte)((v1 << 4) | v2);
             }
 
-            _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = _idValue.ToHexString(0, 20);
+            return new CommitID(tmp);
         }
-        
+
+        public static Either<CommitID, Exception> TryParse(string hexValue)
+        {
+            // Sanity check first:
+            if (hexValue.Length != HexCharLength) return new Exception(String.Format("CommitID must be {0} characters in length", HexCharLength));
+
+            byte[] tmp = new byte[ByteArrayLength];
+            for (int i = 0; i < ByteArrayLength; ++i)
+            {
+                int v1 = deHex(hexValue[i * 2 + 0]);
+                int v2 = deHex(hexValue[i * 2 + 1]);
+
+                if (v1 == -1) return new Exception(String.Format("CommitID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]));
+                if (v2 == -1) return new Exception(String.Format("CommitID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]));
+
+                tmp[i] = (byte)((v1 << 4) | v2);
+            }
+
+            return new CommitID(tmp);
+        }
+
         private static int deHex(char c)
         {
             if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
             if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
             if (c >= '0' && c <= '9') return (int)(c - '0');
-            throw new ArgumentOutOfRangeException("c", "Not a hexadecimal character!");
+            return -1;
         }
 
         public static explicit operator byte[](CommitID id)
@@ -95,10 +119,10 @@ namespace IVO.Definition.Models
             return _toString;
         }
 
-        public string ToString(int firstLength = ByteArrayLength * 2)
+        public string ToString(int firstLength = HexCharLength)
         {
-            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
-            if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", HexCharLength));
+            if (firstLength > HexCharLength) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", HexCharLength));
             if (_toString == null) return String.Empty;
             return _toString.Substring(0, firstLength);
         }
@@ -131,7 +155,7 @@ namespace IVO.Definition.Models
         {
             string strValue = value as string;
             if (strValue != null)
-				return new CommitID(strValue);
+				return CommitID.Parse(strValue).Value;
 
             return base.ConvertFrom(context, culture, value);
         }
@@ -157,6 +181,7 @@ namespace IVO.Definition.Models
     public struct TreeID : IEquatable<TreeID>
     {
         public const int ByteArrayLength = 20;
+        public const int HexCharLength = ByteArrayLength * 2;
 
         private readonly byte[] _idValue;
         private int _quickHash;
@@ -171,28 +196,51 @@ namespace IVO.Definition.Models
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = _idValue.ToHexString(0, 20);
         }
-        
-        public TreeID(string hexValue)
+
+        public static Maybe<TreeID> Parse(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("TreeID hex string must be {0} characters in length", ByteArrayLength * 2));
+            if (hexValue.Length != HexCharLength) return Maybe<TreeID>.Nothing;
 
-            _idValue = new byte[ByteArrayLength];
+            byte[] tmp = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
             {
-                _idValue[i] = (byte)((deHex(hexValue[i * 2 + 0]) << 4) | deHex(hexValue[i * 2 + 1]));
+                int v1 = deHex(hexValue[i * 2 + 0]);
+                int v2 = deHex(hexValue[i * 2 + 1]);
+                if (v1 == -1) return Maybe<TreeID>.Nothing;
+                if (v2 == -1) return Maybe<TreeID>.Nothing;
+                tmp[i] = (byte)((v1 << 4) | v2);
             }
 
-            _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = _idValue.ToHexString(0, 20);
+            return new TreeID(tmp);
         }
-        
+
+        public static Either<TreeID, Exception> TryParse(string hexValue)
+        {
+            // Sanity check first:
+            if (hexValue.Length != HexCharLength) return new Exception(String.Format("TreeID must be {0} characters in length", HexCharLength));
+
+            byte[] tmp = new byte[ByteArrayLength];
+            for (int i = 0; i < ByteArrayLength; ++i)
+            {
+                int v1 = deHex(hexValue[i * 2 + 0]);
+                int v2 = deHex(hexValue[i * 2 + 1]);
+
+                if (v1 == -1) return new Exception(String.Format("TreeID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]));
+                if (v2 == -1) return new Exception(String.Format("TreeID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]));
+
+                tmp[i] = (byte)((v1 << 4) | v2);
+            }
+
+            return new TreeID(tmp);
+        }
+
         private static int deHex(char c)
         {
             if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
             if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
             if (c >= '0' && c <= '9') return (int)(c - '0');
-            throw new ArgumentOutOfRangeException("c", "Not a hexadecimal character!");
+            return -1;
         }
 
         public static explicit operator byte[](TreeID id)
@@ -242,10 +290,10 @@ namespace IVO.Definition.Models
             return _toString;
         }
 
-        public string ToString(int firstLength = ByteArrayLength * 2)
+        public string ToString(int firstLength = HexCharLength)
         {
-            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
-            if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", HexCharLength));
+            if (firstLength > HexCharLength) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", HexCharLength));
             if (_toString == null) return String.Empty;
             return _toString.Substring(0, firstLength);
         }
@@ -278,7 +326,7 @@ namespace IVO.Definition.Models
         {
             string strValue = value as string;
             if (strValue != null)
-				return new TreeID(strValue);
+				return TreeID.Parse(strValue).Value;
 
             return base.ConvertFrom(context, culture, value);
         }
@@ -304,6 +352,7 @@ namespace IVO.Definition.Models
     public struct BlobID : IEquatable<BlobID>
     {
         public const int ByteArrayLength = 20;
+        public const int HexCharLength = ByteArrayLength * 2;
 
         private readonly byte[] _idValue;
         private int _quickHash;
@@ -318,28 +367,51 @@ namespace IVO.Definition.Models
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = _idValue.ToHexString(0, 20);
         }
-        
-        public BlobID(string hexValue)
+
+        public static Maybe<BlobID> Parse(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("BlobID hex string must be {0} characters in length", ByteArrayLength * 2));
+            if (hexValue.Length != HexCharLength) return Maybe<BlobID>.Nothing;
 
-            _idValue = new byte[ByteArrayLength];
+            byte[] tmp = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
             {
-                _idValue[i] = (byte)((deHex(hexValue[i * 2 + 0]) << 4) | deHex(hexValue[i * 2 + 1]));
+                int v1 = deHex(hexValue[i * 2 + 0]);
+                int v2 = deHex(hexValue[i * 2 + 1]);
+                if (v1 == -1) return Maybe<BlobID>.Nothing;
+                if (v2 == -1) return Maybe<BlobID>.Nothing;
+                tmp[i] = (byte)((v1 << 4) | v2);
             }
 
-            _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = _idValue.ToHexString(0, 20);
+            return new BlobID(tmp);
         }
-        
+
+        public static Either<BlobID, Exception> TryParse(string hexValue)
+        {
+            // Sanity check first:
+            if (hexValue.Length != HexCharLength) return new Exception(String.Format("BlobID must be {0} characters in length", HexCharLength));
+
+            byte[] tmp = new byte[ByteArrayLength];
+            for (int i = 0; i < ByteArrayLength; ++i)
+            {
+                int v1 = deHex(hexValue[i * 2 + 0]);
+                int v2 = deHex(hexValue[i * 2 + 1]);
+
+                if (v1 == -1) return new Exception(String.Format("BlobID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]));
+                if (v2 == -1) return new Exception(String.Format("BlobID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]));
+
+                tmp[i] = (byte)((v1 << 4) | v2);
+            }
+
+            return new BlobID(tmp);
+        }
+
         private static int deHex(char c)
         {
             if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
             if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
             if (c >= '0' && c <= '9') return (int)(c - '0');
-            throw new ArgumentOutOfRangeException("c", "Not a hexadecimal character!");
+            return -1;
         }
 
         public static explicit operator byte[](BlobID id)
@@ -389,10 +461,10 @@ namespace IVO.Definition.Models
             return _toString;
         }
 
-        public string ToString(int firstLength = ByteArrayLength * 2)
+        public string ToString(int firstLength = HexCharLength)
         {
-            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
-            if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", HexCharLength));
+            if (firstLength > HexCharLength) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", HexCharLength));
             if (_toString == null) return String.Empty;
             return _toString.Substring(0, firstLength);
         }
@@ -425,7 +497,7 @@ namespace IVO.Definition.Models
         {
             string strValue = value as string;
             if (strValue != null)
-				return new BlobID(strValue);
+				return BlobID.Parse(strValue).Value;
 
             return base.ConvertFrom(context, culture, value);
         }
@@ -451,6 +523,7 @@ namespace IVO.Definition.Models
     public struct TagID : IEquatable<TagID>
     {
         public const int ByteArrayLength = 20;
+        public const int HexCharLength = ByteArrayLength * 2;
 
         private readonly byte[] _idValue;
         private int _quickHash;
@@ -465,28 +538,51 @@ namespace IVO.Definition.Models
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = _idValue.ToHexString(0, 20);
         }
-        
-        public TagID(string hexValue)
+
+        public static Maybe<TagID> Parse(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != ByteArrayLength * 2) throw new ArgumentOutOfRangeException("hexValue", String.Format("TagID hex string must be {0} characters in length", ByteArrayLength * 2));
+            if (hexValue.Length != HexCharLength) return Maybe<TagID>.Nothing;
 
-            _idValue = new byte[ByteArrayLength];
+            byte[] tmp = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
             {
-                _idValue[i] = (byte)((deHex(hexValue[i * 2 + 0]) << 4) | deHex(hexValue[i * 2 + 1]));
+                int v1 = deHex(hexValue[i * 2 + 0]);
+                int v2 = deHex(hexValue[i * 2 + 1]);
+                if (v1 == -1) return Maybe<TagID>.Nothing;
+                if (v2 == -1) return Maybe<TagID>.Nothing;
+                tmp[i] = (byte)((v1 << 4) | v2);
             }
 
-            _quickHash = BitConverter.ToInt32(_idValue, 0);
-            _toString = _idValue.ToHexString(0, 20);
+            return new TagID(tmp);
         }
-        
+
+        public static Either<TagID, Exception> TryParse(string hexValue)
+        {
+            // Sanity check first:
+            if (hexValue.Length != HexCharLength) return new Exception(String.Format("TagID must be {0} characters in length", HexCharLength));
+
+            byte[] tmp = new byte[ByteArrayLength];
+            for (int i = 0; i < ByteArrayLength; ++i)
+            {
+                int v1 = deHex(hexValue[i * 2 + 0]);
+                int v2 = deHex(hexValue[i * 2 + 1]);
+
+                if (v1 == -1) return new Exception(String.Format("TagID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]));
+                if (v2 == -1) return new Exception(String.Format("TagID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]));
+
+                tmp[i] = (byte)((v1 << 4) | v2);
+            }
+
+            return new TagID(tmp);
+        }
+
         private static int deHex(char c)
         {
             if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
             if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
             if (c >= '0' && c <= '9') return (int)(c - '0');
-            throw new ArgumentOutOfRangeException("c", "Not a hexadecimal character!");
+            return -1;
         }
 
         public static explicit operator byte[](TagID id)
@@ -536,10 +632,10 @@ namespace IVO.Definition.Models
             return _toString;
         }
 
-        public string ToString(int firstLength = ByteArrayLength * 2)
+        public string ToString(int firstLength = HexCharLength)
         {
-            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
-            if (firstLength > ByteArrayLength * 2) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", ByteArrayLength * 2));
+            if (firstLength <= 0) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", HexCharLength));
+            if (firstLength > HexCharLength) throw new ArgumentOutOfRangeException("firstLength", String.Format("firstLength must be greater than 0 and less than or equal to {0}", HexCharLength));
             if (_toString == null) return String.Empty;
             return _toString.Substring(0, firstLength);
         }
@@ -572,7 +668,7 @@ namespace IVO.Definition.Models
         {
             string strValue = value as string;
             if (strValue != null)
-				return new TagID(strValue);
+				return TagID.Parse(strValue).Value;
 
             return base.ConvertFrom(context, culture, value);
         }
