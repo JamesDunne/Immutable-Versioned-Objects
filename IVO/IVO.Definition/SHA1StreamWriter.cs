@@ -18,6 +18,7 @@ namespace IVO.Definition
             this.output = output;
 
             this.sha1 = SHA1.Create();
+            this.position = 0;
         }
 
         public override bool CanRead { get { return false; } }
@@ -67,6 +68,7 @@ namespace IVO.Definition
         {
             sha1.TransformBlock(buffer, offset, count, null, 0);
             output.Write(buffer, offset, count);
+            position += count;
         }
 
         private readonly static byte[] dum = new byte[0];
