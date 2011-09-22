@@ -47,6 +47,9 @@ namespace System
         private Selected _which;
         public Selected Which { get { return _which; } }
 
+        public bool IsLeft { get { return _which == Selected.Left; } }
+        public bool IsRight { get { return _which == Selected.Right; } }
+
         private TLeft _Left;
         public TLeft Left { get { if (_which == Selected.Right) throw new NullReferenceException(); return _Left; } }
         private TRight _Right;

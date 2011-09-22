@@ -38,7 +38,7 @@ namespace IVO.Definition.Models
             // is close enough because the SHA-1 hash is calculated using the DateTimeOffset.ToString(), so
             // only the ToString() representations of the DateTimeOffsets need to match.
             bw.WriteRaw(String.Format("date {0}\n\n", DateCommitted.ToString()));
-            bw.WriteRaw(Message);
+            bw.WriteRaw(Message ?? String.Empty);
             bw.Flush();
         }
 
@@ -48,9 +48,9 @@ namespace IVO.Definition.Models
             int initialCapacity =
                 Parents == null || Parents.Length == 0 ? 0 : Parents.Sum(t => "parent ".Length + CommitID.ByteArrayLength * 2 + 1)
               + "tree ".Length + TreeID.ByteArrayLength * 2 + 1
-              + "committer ".Length + Committer.Length + 1
+              + "committer ".Length + (Committer ?? String.Empty).Length + 1
               + "date ".Length + 25 + 1
-              + Message.Length;
+              + (Message ?? String.Empty).Length;
 
             using (var ms = new MemoryStream(initialCapacity))
             {
