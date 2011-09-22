@@ -152,7 +152,7 @@ namespace IVO.Implementation.FileSystem
         public async Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id)
         {
             var tg = await tgrepo.GetTag(id).ConfigureAwait(continueOnCapturedContext: false);
-            if (tg == null) return new Tuple<Tag, Commit>(tg, (Commit)null);
+            if (tg == null) return null;
 
             var cm = await getCommit(tg.CommitID).ConfigureAwait(continueOnCapturedContext: false);
             return new Tuple<Tag, Commit>(tg, cm);
@@ -161,7 +161,7 @@ namespace IVO.Implementation.FileSystem
         public async Task<Tuple<Tag, Commit>> GetCommitByTagName(TagName tagName)
         {
             var tg = await tgrepo.GetTagByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
-            if (tg == null) return new Tuple<Tag, Commit>(tg, (Commit)null);
+            if (tg == null) return null;
 
             var cm = await getCommit(tg.CommitID).ConfigureAwait(continueOnCapturedContext: false);
             return new Tuple<Tag, Commit>(tg, cm);
@@ -170,7 +170,7 @@ namespace IVO.Implementation.FileSystem
         public async Task<Tuple<Ref, Commit>> GetCommitByRefName(RefName refName)
         {
             var rf = await rfrepo.GetRefByName(refName).ConfigureAwait(continueOnCapturedContext: false);
-            if (rf == null) return new Tuple<Ref, Commit>(rf, (Commit)null);
+            if (rf == null) return null;
 
             var cm = await getCommit(rf.CommitID).ConfigureAwait(continueOnCapturedContext: false);
             return new Tuple<Ref, Commit>(rf, cm);
@@ -216,6 +216,36 @@ namespace IVO.Implementation.FileSystem
 
             // Return them (all[0] is the root):
             return new Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>(
+                all[0].ID,
+                new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, all)
+            );
+        }
+
+        public async Task<Tuple<Tag, CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTreeByTagName(TagName tagName, int depth = 10)
+        {
+            var tg = await tgrepo.GetTagByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
+            if (tg == null) return null;
+
+            var all = await getCommitsRecursively(tg.CommitID, 1, depth).ConfigureAwait(continueOnCapturedContext: false);
+
+            // Return them (all[0] is the root):
+            return new Tuple<Tag, CommitID, ImmutableContainer<CommitID, ICommit>>(
+                tg,
+                all[0].ID,
+                new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, all)
+            );
+        }
+
+        public async Task<Tuple<Ref, CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTreeByRefName(RefName refName, int depth = 10)
+        {
+            var rf = await rfrepo.GetRefByName(refName).ConfigureAwait(continueOnCapturedContext: false);
+            if (rf == null) return null;
+
+            var all = await getCommitsRecursively(rf.CommitID, 1, depth).ConfigureAwait(continueOnCapturedContext: false);
+
+            // Return them (all[0] is the root):
+            return new Tuple<Ref, CommitID, ImmutableContainer<CommitID, ICommit>>(
+                rf,
                 all[0].ID,
                 new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, all)
             );
