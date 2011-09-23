@@ -31,6 +31,14 @@ namespace System.Linq
             return res;
         }
 
+        public static TResult[] SelectAsArray<T, TResult>(this IList<T> arr, Func<T, TResult> projection)
+        {
+            TResult[] res = new TResult[arr.Count];
+            for (int i = 0; i < arr.Count; ++i)
+                res[i] = projection(arr[i]);
+            return res;
+        }
+
         public static T[] ToArray<T>(this IEnumerable<T> src, int length)
         {
             T[] arr = new T[length];
