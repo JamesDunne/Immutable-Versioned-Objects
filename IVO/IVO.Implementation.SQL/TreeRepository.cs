@@ -26,7 +26,7 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public async Task<Errorable<Tree>> PersistTree(TreeID rootid, ImmutableContainer<TreeID, Tree> trees)
+        public async Task<Errorable<TreeNode>> PersistTree(TreeID rootid, ImmutableContainer<TreeID, TreeNode> trees)
         {
             // Start a query to check what Trees exist already:
             var existTrees = await db.ExecuteListQueryAsync(new QueryTreesExist(trees.Keys), expectedCapacity: trees.Count);
@@ -46,7 +46,7 @@ namespace IVO.Implementation.SQL
                 if (treeIDsToPersistSet.Contains(trID))
                     treeIDsToPersist.Push(trID);
 
-                Tree tr = trees[trID];
+                TreeNode tr = trees[trID];
                 if (tr.Trees == null) continue;
 
                 foreach (TreeTreeReference r in tr.Trees)
@@ -57,7 +57,7 @@ namespace IVO.Implementation.SQL
 
             // Asynchronously persist the trees in dependency order:
             // FIXME: asynchronous fan-out per depth level
-            Task<Tree> runner = null;
+            Task<TreeNode> runner = null;
             while (treeIDsToPersist.Count > 0)
             {
                 TreeID id = treeIDsToPersist.Pop();
@@ -71,9 +71,9 @@ namespace IVO.Implementation.SQL
             return trees[rootid];
         }
 
-        public Task<Errorable<Tree>[]> GetTrees(params TreeID[] ids)
+        public Task<Errorable<TreeNode>[]> GetTrees(params TreeID[] ids)
         {
-            Task<Errorable<Tree>>[] tasks = new Task<Errorable<Tree>>[ids.Length];
+            Task<Errorable<TreeNode>>[] tasks = new Task<Errorable<TreeNode>>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
             {
                 TreeID id = ids[i];
@@ -97,7 +97,7 @@ namespace IVO.Implementation.SQL
             return db.ExecuteSingleQueryAsync(new QueryTreeRecursivelyByPath(path));
         }
 
-        public Task<Errorable<Tree>> GetTree(TreeID id)
+        public Task<Errorable<TreeNode>> GetTree(TreeID id)
         {
             return db.ExecuteSingleQueryAsync(new QueryTree(id));
         }

@@ -64,7 +64,7 @@
     <Compile Include="Models\TreeTreePath.cs" />
     <Compile Include="Models\ICommit.cs" />
     <Compile Include="Models\Tag.cs" />
-    <Compile Include="Models\Tree.cs" />
+    <Compile Include="Models\TreeNode.cs" />
     <Compile Include="Models\TreeBlobPath.cs" />
     <Compile Include="Models\PersistingBlob.cs" />
     <Compile Include="Models\TreePathStreamedBlob.cs" />

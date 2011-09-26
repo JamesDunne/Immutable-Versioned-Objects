@@ -32,8 +32,8 @@ namespace TestIVO.CommonTest
 
         internal async Task PersistTagTest()
         {
-            Tree tr = new Tree.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
-            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, Tree>(trx => trx.ID, tr));
+            TreeNode tr = new TreeNode.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
+            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, TreeNode>(trx => trx.ID, tr));
             Commit cm = new Commit.Builder(new List<CommitID>(0), tr.ID, "James S. Dunne", DateTimeOffset.Now, "Initial commit.");
             await cmrepo.PersistCommit(cm);
             Tag tg = new Tag.Builder((TagName)"v1.0", cm.ID, "James S. Dunne", DateTimeOffset.Now, "Testing tags");
@@ -42,8 +42,8 @@ namespace TestIVO.CommonTest
 
         internal async Task DeleteTagTest()
         {
-            Tree tr = new Tree.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
-            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, Tree>(trx => trx.ID, tr));
+            TreeNode tr = new TreeNode.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
+            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, TreeNode>(trx => trx.ID, tr));
             Commit cm = new Commit.Builder(new List<CommitID>(0), tr.ID, "James S. Dunne", DateTimeOffset.Now, "Initial commit.");
             await cmrepo.PersistCommit(cm);
             Tag tg = new Tag.Builder((TagName)"v1.0", cm.ID, "James S. Dunne", DateTimeOffset.Now, "Testing tags");
@@ -69,8 +69,8 @@ namespace TestIVO.CommonTest
 
         internal async Task DeleteTagByNameTest()
         {
-            Tree tr = new Tree.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
-            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, Tree>(trx => trx.ID, tr));
+            TreeNode tr = new TreeNode.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
+            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, TreeNode>(trx => trx.ID, tr));
             Commit cm = new Commit.Builder(new List<CommitID>(0), tr.ID, "James S. Dunne", DateTimeOffset.Now, "Initial commit.");
             await cmrepo.PersistCommit(cm);
             Tag tg = new Tag.Builder((TagName)"v1.0", cm.ID, "James S. Dunne", DateTimeOffset.Now, "Testing tags");
@@ -96,8 +96,8 @@ namespace TestIVO.CommonTest
 
         internal async Task GetTagTest()
         {
-            Tree tr = new Tree.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
-            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID,Tree>(trx => trx.ID, tr));
+            TreeNode tr = new TreeNode.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
+            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID,TreeNode>(trx => trx.ID, tr));
             Commit cm = new Commit.Builder(new List<CommitID>(0), tr.ID, "James S. Dunne", DateTimeOffset.Now, "Initial commit.");
             await cmrepo.PersistCommit(cm);
             Tag tg = new Tag.Builder((TagName)"v1.0", cm.ID, "James S. Dunne", DateTimeOffset.Now, "Testing tags");
@@ -116,8 +116,8 @@ namespace TestIVO.CommonTest
 
         internal async Task GetTagByNameTest()
         {
-            Tree tr = new Tree.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
-            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, Tree>(trx => trx.ID, tr));
+            TreeNode tr = new TreeNode.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
+            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, TreeNode>(trx => trx.ID, tr));
             Commit cm = new Commit.Builder(new List<CommitID>(0), tr.ID, "James S. Dunne", DateTimeOffset.Now, "Initial commit.");
             await cmrepo.PersistCommit(cm);
             Tag tg = new Tag.Builder((TagName)"v1.0", cm.ID, "James S. Dunne", DateTimeOffset.Now, "Testing tags");

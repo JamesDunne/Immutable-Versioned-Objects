@@ -26,14 +26,14 @@ namespace TestIVO.CommonTest
         }
 
         private TreeID rootId;
-        private ImmutableContainer<TreeID, Tree> trees;
+        private ImmutableContainer<TreeID, TreeNode> trees;
 
-        private Tree trTemplate = null, trRoot = null;
+        private TreeNode trTemplate = null, trRoot = null;
         private IStreamedBlob[] sblobs;
 
-        internal static void RecursivePrint(TreeID treeID, ImmutableContainer<TreeID, Tree> trees, int depth = 1)
+        internal static void RecursivePrint(TreeID treeID, ImmutableContainer<TreeID, TreeNode> trees, int depth = 1)
         {
-            Tree tr;
+            TreeNode tr;
             if (!trees.TryGetValue(treeID, out tr))
                 return;
 
@@ -43,7 +43,7 @@ namespace TestIVO.CommonTest
             }
 
             // Sort refs by name:
-            var namedRefs = Tree.ComputeChildList(tr.Trees, tr.Blobs);
+            var namedRefs = TreeNode.ComputeChildList(tr.Trees, tr.Blobs);
 
             foreach (var kv in namedRefs)
             {
@@ -67,14 +67,14 @@ namespace TestIVO.CommonTest
 
             sblobs = await blrepo.PersistBlobs(pbHeader);
 
-            trTemplate = new Tree.Builder(
+            trTemplate = new TreeNode.Builder(
                 new List<TreeTreeReference>(0),
                 new List<TreeBlobReference> {
                     new TreeBlobReference.Builder("header", sblobs[0].ID)
                 }
             );
 
-            trRoot = new Tree.Builder(
+            trRoot = new TreeNode.Builder(
                 new List<TreeTreeReference> {
                     new TreeTreeReference.Builder("template", trTemplate.ID)
                 },
@@ -82,7 +82,7 @@ namespace TestIVO.CommonTest
             );
 
             rootId = trRoot.ID;
-            trees = new ImmutableContainer<TreeID, Tree>(tr => tr.ID, trTemplate, trRoot);
+            trees = new ImmutableContainer<TreeID, TreeNode>(tr => tr.ID, trTemplate, trRoot);
             RecursivePrint(trRoot.ID, trees);
         }
 

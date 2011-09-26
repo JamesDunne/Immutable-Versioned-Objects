@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryTreeByPath : IComplexDataQuery<Errorable<Tree>>
+    public class QueryTreeByPath : IComplexDataQuery<Errorable<TreeNode>>
     {
         private TreeTreePath _path;
 
@@ -46,19 +46,19 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
             return cmd;
         }
 
-        public Task<Errorable<Tree>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Errorable<TreeNode>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return TaskEx.FromResult(retrieve(cmd, dr, expectedCapacity));
         }
 
-        public Errorable<Tree> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Errorable<TreeNode> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return retrieve(cmd, dr, expectedCapacity);
         }
 
-        public Errorable<Tree> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Errorable<TreeNode> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            Tree.Builder tb = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
+            TreeNode.Builder tb = new TreeNode.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
 
             // Read the TreeTreeReferences:
             while (dr.Read())
@@ -80,7 +80,7 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
                 tb.Blobs.Add(new TreeBlobReference.Builder(name, linked_blobid));
             }
 
-            Tree tr = tb;
+            TreeNode tr = tb;
             TreeID retrievedId = (TreeID)((SqlBinary)cmd.Parameters["@treeid"].SqlValue).Value;
             if (tr.ID != retrievedId) return new ComputedTreeIDMismatchError();
 

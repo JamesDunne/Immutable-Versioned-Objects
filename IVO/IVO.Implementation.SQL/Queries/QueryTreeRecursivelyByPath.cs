@@ -73,7 +73,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
 
         public Errorable<TreeTree> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            Dictionary<TreeID, Tree.Builder> trees = new Dictionary<TreeID, Tree.Builder>(expectedCapacity);
+            Dictionary<TreeID, TreeNode.Builder> trees = new Dictionary<TreeID, TreeNode.Builder>(expectedCapacity);
 
             TreeID? root = null;
 
@@ -94,15 +94,15 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                 // Use the first row as the root:
                 if (!root.HasValue) root = linked_treeid.Value;
 
-                Tree.Builder curr;
+                TreeNode.Builder curr;
                 if (!trees.TryGetValue(pullFor, out curr))
                 {
-                    curr = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
+                    curr = new TreeNode.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
                     trees.Add(pullFor, curr);
                 }
 
                 // The tree to add the blob link to:
-                Tree.Builder blobTree = curr;
+                TreeNode.Builder blobTree = curr;
 
                 // Add a tree link:
                 if (treeid.HasValue && linked_treeid.HasValue)
@@ -110,7 +110,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
                     // Create the Tree.Builder for the linked_treeid if it does not exist:
                     if (!trees.TryGetValue(linked_treeid.Value, out blobTree))
                     {
-                        blobTree = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
+                        blobTree = new TreeNode.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
                         trees.Add(linked_treeid.Value, blobTree);
                     }
 
@@ -140,16 +140,16 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
             // If no root assigned, then no tree retrieved:
             if (!root.HasValue) return null;
 
-            List<Tree> finals = new List<Tree>(trees.Count);
-            foreach (KeyValuePair<TreeID, Tree.Builder> pair in trees)
+            List<TreeNode> finals = new List<TreeNode>(trees.Count);
+            foreach (KeyValuePair<TreeID, TreeNode.Builder> pair in trees)
             {
-                Tree tr = pair.Value;
+                TreeNode tr = pair.Value;
                 if (tr.ID != pair.Key) return new ComputedTreeIDMismatchError();
                 finals.Add(tr);
             }
 
             // Return the final result with immutable objects:
-            return new TreeTree(root.Value, new ImmutableContainer<TreeID, Tree>(tr => tr.ID, finals));
+            return new TreeTree(root.Value, new ImmutableContainer<TreeID, TreeNode>(tr => tr.ID, finals));
         }
 
         public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)

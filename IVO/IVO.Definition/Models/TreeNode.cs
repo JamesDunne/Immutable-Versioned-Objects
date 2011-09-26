@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 
 namespace IVO.Definition.Models
 {
-    public sealed partial class Tree
+    public sealed partial class TreeNode
     {
         public static SortedList<string, Either<TreeTreeReference, TreeBlobReference>> ComputeChildList(IEnumerable<TreeTreeReference> treeRefs, IEnumerable<TreeBlobReference> blobRefs)
         {

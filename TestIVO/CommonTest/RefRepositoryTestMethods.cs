@@ -32,8 +32,8 @@ namespace TestIVO.CommonTest
 
         internal async Task PersistRefTest()
         {
-            Tree tr = new Tree.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
-            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, Tree>(trx => trx.ID, tr));
+            TreeNode tr = new TreeNode.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
+            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, TreeNode>(trx => trx.ID, tr));
             Commit cm = new Commit.Builder(new List<CommitID>(0), tr.ID, "James S. Dunne", DateTimeOffset.Now, "Initial commit.");
             await cmrepo.PersistCommit(cm);
             Ref rf = new Ref.Builder((RefName)"v1.0", cm.ID);
@@ -42,8 +42,8 @@ namespace TestIVO.CommonTest
 
         internal async Task GetRefByNameTest()
         {
-            Tree tr = new Tree.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
-            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, Tree>(trx => trx.ID, tr));
+            TreeNode tr = new TreeNode.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
+            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, TreeNode>(trx => trx.ID, tr));
             Commit cm = new Commit.Builder(new List<CommitID>(0), tr.ID, "James S. Dunne", DateTimeOffset.Now, "Initial commit.");
             await cmrepo.PersistCommit(cm);
             Ref rf = new Ref.Builder((RefName)"v1.0", cm.ID);
@@ -59,8 +59,8 @@ namespace TestIVO.CommonTest
 
         internal async Task DeleteRefByNameTest()
         {
-            Tree tr = new Tree.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
-            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, Tree>(trx => trx.ID, tr));
+            TreeNode tr = new TreeNode.Builder(new List<TreeTreeReference>(0), new List<TreeBlobReference>(0));
+            await trrepo.PersistTree(tr.ID, new IVO.Definition.Containers.ImmutableContainer<TreeID, TreeNode>(trx => trx.ID, tr));
             Commit cm = new Commit.Builder(new List<CommitID>(0), tr.ID, "James S. Dunne", DateTimeOffset.Now, "Initial commit.");
             await cmrepo.PersistCommit(cm);
             Ref rf = new Ref.Builder((RefName)"v1.0", cm.ID);

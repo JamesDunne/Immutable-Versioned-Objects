@@ -17,11 +17,11 @@ namespace IVO.Implementation.SQL.Persists
     /// <item>All BlobIDs referenced are persisted.</item>
     /// </list>
     /// </summary>
-    public sealed class PersistTree : IDataOperation<Tree>
+    public sealed class PersistTree : IDataOperation<TreeNode>
     {
-        private Tree _tr;
+        private TreeNode _tr;
 
-        public PersistTree(Tree tr)
+        public PersistTree(TreeNode tr)
         {
             this._tr = tr;
         }
@@ -97,7 +97,7 @@ WHEN NOT MATCHED THEN INSERT ({3}) VALUES ({4});
             return cmd;
         }
 
-        public Tree Return(SqlCommand cmd, int rowsAffected)
+        public TreeNode Return(SqlCommand cmd, int rowsAffected)
         {
             return this._tr;
         }

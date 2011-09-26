@@ -24,7 +24,7 @@ namespace IVO.Implementation.FileSystem
 
         #region Private details
 
-        private async Task<Errorable<Tree>> getTree(TreeID id)
+        private async Task<Errorable<TreeNode>> getTree(TreeID id)
         {
             FileInfo fi = system.getPathByID(id);
             if (!fi.Exists) return new TreeIDRecordDoesNotExistError();
@@ -43,7 +43,7 @@ namespace IVO.Implementation.FileSystem
                 }
             }
 
-            Tree.Builder tb = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
+            TreeNode.Builder tb = new TreeNode.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
 
             // Parse the Tree:
             using (var ms = new MemoryStream(buf, 0, nr, false))
@@ -69,14 +69,14 @@ namespace IVO.Implementation.FileSystem
             }
 
             // Create the immutable Tree from the Builder:
-            Tree tr = tb;
+            TreeNode tr = tb;
             // Validate the computed TreeID:
             if (tr.ID != id) return new ComputedTreeIDMismatchError();
 
             return tr;
         }
 
-        private void persistTree(Tree tr)
+        private void persistTree(TreeNode tr)
         {
             FileInfo fi = system.getPathByID(tr.ID);
             if (fi.Exists) return;
@@ -104,18 +104,18 @@ namespace IVO.Implementation.FileSystem
             fi.Delete();
         }
 
-        private async Task<Errorable<Tree[]>> getTreeRecursively(TreeID id)
+        private async Task<Errorable<TreeNode[]>> getTreeRecursively(TreeID id)
         {
             var eroot = await getTree(id).ConfigureAwait(continueOnCapturedContext: false);
             if (eroot.HasErrors) return eroot.Errors;
 
             var root = eroot.Value;
-            var rootArr = new Tree[1] { root };
+            var rootArr = new TreeNode[1] { root };
 
             if (root.Trees.Length == 0)
                 return rootArr;
 
-            Task<Errorable<Tree[]>>[] tasks = new Task<Errorable<Tree[]>>[root.Trees.Length];
+            Task<Errorable<TreeNode[]>>[] tasks = new Task<Errorable<TreeNode[]>>[root.Trees.Length];
             for (int i = 0; i < root.Trees.Length; ++i)
             {
                 tasks[i] = getTreeRecursively(root.Trees[i].TreeID);
@@ -150,14 +150,14 @@ namespace IVO.Implementation.FileSystem
             var eroot = await getTree(path.RootTreeID).ConfigureAwait(continueOnCapturedContext: false);
             if (eroot.HasErrors) return eroot.Errors;
             
-            Tree root = eroot.Value;
+            TreeNode root = eroot.Value;
             ReadOnlyCollection<string> parts = path.Path.Parts;
             if (parts.Count == 0) return new TreeIDPathMapping(path, path.RootTreeID);
 
             int j = 0;
 
             // Start descending into child nodes:
-            Tree node = root, nextNode;
+            TreeNode node = root, nextNode;
             while (node != null)
             {
                 nextNode = null;
@@ -190,7 +190,7 @@ namespace IVO.Implementation.FileSystem
 
         #endregion
 
-        public async Task<Errorable<Tree>> PersistTree(TreeID rootid, ImmutableContainer<TreeID, Tree> trees)
+        public async Task<Errorable<TreeNode>> PersistTree(TreeID rootid, ImmutableContainer<TreeID, TreeNode> trees)
         {
             if (trees == null) throw new ArgumentNullException("trees");
 
@@ -213,14 +213,14 @@ namespace IVO.Implementation.FileSystem
             return trees[rootid];
         }
 
-        public Task<Errorable<Tree>> GetTree(TreeID id)
+        public Task<Errorable<TreeNode>> GetTree(TreeID id)
         {
             return getTree(id);
         }
 
-        public Task<Errorable<Tree>[]> GetTrees(params TreeID[] ids)
+        public Task<Errorable<TreeNode>[]> GetTrees(params TreeID[] ids)
         {
-            Task<Errorable<Tree>>[] tasks = new Task<Errorable<Tree>>[ids.Length];
+            Task<Errorable<TreeNode>>[] tasks = new Task<Errorable<TreeNode>>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
             {
                 TreeID id = ids[i];
@@ -260,10 +260,10 @@ namespace IVO.Implementation.FileSystem
             var eall = await getTreeRecursively(rootid).ConfigureAwait(continueOnCapturedContext: false);
             if (eall.HasErrors) return eall.Errors;
 
-            Tree[] all = eall.Value;
+            TreeNode[] all = eall.Value;
 
             // Return them (all[0] is the root):
-            return new TreeTree(all[0].ID, new ImmutableContainer<TreeID, Tree>(tr => tr.ID, all));
+            return new TreeTree(all[0].ID, new ImmutableContainer<TreeID, TreeNode>(tr => tr.ID, all));
         }
 
         public async Task<Errorable<TreeTree>> GetTreeRecursivelyFromPath(TreeTreePath path)

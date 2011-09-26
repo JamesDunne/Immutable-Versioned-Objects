@@ -51,7 +51,7 @@ namespace IVO.Implementation.FileSystem
                 var etr = await trrepo.GetTree(trm.TreeID.Value).ConfigureAwait(continueOnCapturedContext: false);
                 if (etr.HasErrors) blobs[i] = etr.Errors;
 
-                Tree tr = etr.Value;
+                TreeNode tr = etr.Value;
 
                 // Get the blob out of this tree:
                 // TODO: standardize name comparison semantics:
@@ -83,7 +83,7 @@ namespace IVO.Implementation.FileSystem
             var etr = await trrepo.GetTree(trm.TreeID.Value).ConfigureAwait(continueOnCapturedContext: false);
             if (etr.HasErrors) return etr.Errors;
 
-            Tree tr = etr.Value;
+            TreeNode tr = etr.Value;
 
             // Get the blob out of this tree:
             // TODO: standardize name comparison semantics:

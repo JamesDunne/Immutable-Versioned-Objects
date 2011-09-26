@@ -51,7 +51,7 @@ namespace TestIVO.CommonTest
             }
         }
 
-        Tree trRoot;
+        TreeNode trRoot;
         Commit cmRoot;
 
         private async Task createCommits()
@@ -60,7 +60,7 @@ namespace TestIVO.CommonTest
 
             var sblobs = await blrepo.PersistBlobs(pblReadme);
 
-            trRoot = new Tree.Builder(
+            trRoot = new TreeNode.Builder(
                 new List<TreeTreeReference>(0),
                 new List<TreeBlobReference>
                 {
@@ -68,7 +68,7 @@ namespace TestIVO.CommonTest
                 }
             );
 
-            var trees = new ImmutableContainer<TreeID, Tree>(tr => tr.ID, trRoot);
+            var trees = new ImmutableContainer<TreeID, TreeNode>(tr => tr.ID, trRoot);
             await trrepo.PersistTree(trRoot.ID, trees);
 
             TreeRepositoryTestMethods.RecursivePrint(trRoot.ID, trees);

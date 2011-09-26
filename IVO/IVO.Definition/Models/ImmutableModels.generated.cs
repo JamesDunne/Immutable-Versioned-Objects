@@ -221,13 +221,13 @@ namespace IVO.Definition.Models
     /// <summary>
     /// A tree object.
     /// </summary>
-    public sealed partial class Tree
+    public sealed partial class TreeNode
     {
         public TreeID ID { get; private set; }
         public TreeTreeReference[] Trees { get; private set; }
         public TreeBlobReference[] Blobs { get; private set; }
 
-        public Tree(Builder b)
+        public TreeNode(Builder b)
         {
             this.Trees = (b.Trees).ToArray((b.Trees).Count);
             this.Blobs = (b.Blobs).ToArray((b.Blobs).Count);
@@ -241,7 +241,7 @@ namespace IVO.Definition.Models
 
             public Builder() { }
 
-            public Builder(Tree imm)
+            public Builder(TreeNode imm)
             {
                 this.Trees = (imm.Trees).ToList((imm.Trees).Length);
                 this.Blobs = (imm.Blobs).ToList((imm.Blobs).Length);
@@ -259,9 +259,9 @@ namespace IVO.Definition.Models
 
         //public void computeID();
 
-        public static implicit operator Tree(Builder b)
+        public static implicit operator TreeNode(Builder b)
         {
-            return new Tree(b);
+            return new TreeNode(b);
         }
     }
 

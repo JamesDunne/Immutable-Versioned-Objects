@@ -17,21 +17,21 @@ namespace IVO.Definition.Repositories
         /// <param name="rootid">The root TreeID to start persisting from.</param>
         /// <param name="trees">A container to find the Tree objects in.</param>
         /// <returns>The root Tree object.</returns>
-        Task<Errorable<Tree>> PersistTree(TreeID rootid, ImmutableContainer<TreeID, Tree> trees);
+        Task<Errorable<TreeNode>> PersistTree(TreeID rootid, ImmutableContainer<TreeID, TreeNode> trees);
 
         /// <summary>
         /// Gets a set of Tree objects by TreeIDs asynchronously.
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        Task<Errorable<Tree>> GetTree(TreeID id);
+        Task<Errorable<TreeNode>> GetTree(TreeID id);
         
         /// <summary>
         /// Gets a set of Tree objects by TreeIDs asynchronously.
         /// </summary>
         /// <param name="ids"></param>
         /// <returns></returns>
-        Task<Errorable<Tree>[]> GetTrees(params TreeID[] ids);
+        Task<Errorable<TreeNode>[]> GetTrees(params TreeID[] ids);
 
         /// <summary>
         /// Gets a TreeID from its path relative to a root TreeID.
