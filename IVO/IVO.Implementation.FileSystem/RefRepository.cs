@@ -44,7 +44,7 @@ namespace IVO.Implementation.FileSystem
         private async Task<Errorable<Ref>> getRefByName(RefName refName)
         {
             FileInfo fiTracker = system.getRefPathByRefName(refName);
-            if (!fiTracker.Exists) return (Ref)null;
+            if (!fiTracker.Exists) return new RefDoesNotExistError();
 
             byte[] buf;
             int nr = 0;

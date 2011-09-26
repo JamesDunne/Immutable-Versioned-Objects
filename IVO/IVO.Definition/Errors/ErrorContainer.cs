@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace IVO.Definition.Errors
 {
-    public sealed class ErrorContainer
+    public sealed class ErrorContainer : IEnumerable<ErrorBase>
     {
         public ErrorContainer()
         {
@@ -40,6 +40,17 @@ namespace IVO.Definition.Errors
 
         private static readonly ReadOnlyCollection<ErrorBase> EmptyErrors = new ReadOnlyCollection<ErrorBase>(emptyErrorArray);
 
+        public int Count { get { return Errors.Count; } }
         public bool HasAny { get { return Errors.Count > 0; } }
+
+        public IEnumerator<ErrorBase> GetEnumerator()
+        {
+            return Errors.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return ((System.Collections.IEnumerable)Errors).GetEnumerator();
+        }
     }
 }

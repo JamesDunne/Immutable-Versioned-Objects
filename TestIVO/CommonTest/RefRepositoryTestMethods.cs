@@ -75,9 +75,8 @@ namespace TestIVO.CommonTest
             Assert.AreEqual(rf.CommitID, drf.CommitID);
 
             var errf = await rfrepo.GetRefByName((RefName)"v1.0");
-            Assert.IsFalse(errf.HasErrors);
-            Ref rrf = errf.Value;
-            Assert.IsNull(rrf);
+            Assert.IsTrue(errf.HasErrors);
+            Assert.AreEqual(1, errf.Errors.Count);
         }
     }
 }

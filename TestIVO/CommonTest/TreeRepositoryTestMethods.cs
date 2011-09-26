@@ -90,14 +90,16 @@ namespace TestIVO.CommonTest
         {
             await createTrees();
 
-            await trrepo.PersistTree(rootId, trees);
+            var ept = await trrepo.PersistTree(rootId, trees);
+            Assert.IsFalse(ept.HasErrors);
         }
 
         internal async Task GetTreesTest()
         {
             await createTrees();
 
-            await trrepo.PersistTree(rootId, trees);
+            var ept = await trrepo.PersistTree(rootId, trees);
+            Assert.IsFalse(ept.HasErrors);
 
             // Now retrieve those trees:
             var treeIDs = trees.Keys.ToArray();
@@ -111,7 +113,8 @@ namespace TestIVO.CommonTest
         {
             await createTrees();
 
-            await trrepo.PersistTree(rootId, trees);
+            var ept = await trrepo.PersistTree(rootId, trees);
+            Assert.IsFalse(ept.HasErrors);
 
             // Retrieve a single tree node:
             var eroot = await trrepo.GetTree(rootId);
@@ -130,7 +133,8 @@ namespace TestIVO.CommonTest
         {
             await createTrees();
 
-            await trrepo.PersistTree(rootId, trees);
+            var ept = await trrepo.PersistTree(rootId, trees);
+            Assert.IsFalse(ept.HasErrors);
 
             // Retrieve a single TreeID mapping:
             var rootPath = (CanonicalTreePath)"/";
@@ -176,7 +180,8 @@ namespace TestIVO.CommonTest
         {
             await createTrees();
 
-            await trrepo.PersistTree(rootId, trees);
+            var ept = await trrepo.PersistTree(rootId, trees);
+            Assert.IsFalse(ept.HasErrors);
 
             // Retrieve the tree recursively:
             var erec = await trrepo.GetTreeRecursively(rootId);
@@ -191,7 +196,8 @@ namespace TestIVO.CommonTest
         {
             await createTrees();
 
-            await trrepo.PersistTree(rootId, trees);
+            var ept = await trrepo.PersistTree(rootId, trees);
+            Assert.IsFalse(ept.HasErrors);
 
             // Retrieve a subtree recursively by path:
             var erec = await trrepo.GetTreeRecursivelyFromPath(new TreeTreePath(rootId, (CanonicalTreePath)"/template/"));
@@ -209,8 +215,8 @@ namespace TestIVO.CommonTest
             await trrepo.PersistTree(rootId, trees);
 
             // Retrieve a subtree recursively by path:
-            var rec = await trrepo.DeleteTreeRecursively(rootId);
+            var erec = await trrepo.DeleteTreeRecursively(rootId);
+            Assert.IsFalse(erec.HasErrors);
         }
-
     }
 }

@@ -63,10 +63,8 @@ namespace TestIVO.CommonTest
             await tgrepo.DeleteTag(tg.ID);
 
             var retgPost = await tgrepo.GetTag(tg.ID);
-            Assert.IsFalse(retgPost.HasErrors);
-
-            Tag rtgPost = retgPost.Value;
-            Assert.IsNull(rtgPost);
+            Assert.IsTrue(retgPost.HasErrors);
+            Assert.AreEqual(1, retgPost.Errors.Count);
         }
 
         internal async Task DeleteTagByNameTest()
@@ -92,10 +90,8 @@ namespace TestIVO.CommonTest
             await tgrepo.DeleteTagByName((TagName)"v1.0");
 
             var retgPost = await tgrepo.GetTag(tg.ID);
-            Assert.IsFalse(retgPost.HasErrors);
-
-            Tag rtgPost = retgPost.Value;
-            Assert.IsNull(rtgPost);
+            Assert.IsTrue(retgPost.HasErrors);
+            Assert.AreEqual(1, retgPost.Errors.Count);
         }
 
         internal async Task GetTagTest()
