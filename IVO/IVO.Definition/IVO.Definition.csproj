@@ -39,7 +39,12 @@
     <Compile Include="Containers\ImmutableContainer.cs" />
     <Compile Include="Errors\DeleteTagError.cs" />
     <Compile Include="Errors\ErrorBase.cs" />
+    <Compile Include="Errors\ErrorContainer.cs" />
     <Compile Include="Errors\GetTagError.cs" />
+    <Compile Include="Errors\Errorable.cs" />
+    <Compile Include="Errors\InputError.cs" />
+    <Compile Include="Errors\IPersistenceError.cs" />
+    <Compile Include="Errors\ISemanticError.cs" />
     <Compile Include="Exceptions\CommitIDMistmatchException.cs" />
     <Compile Include="Exceptions\BlobIDMistmatchException.cs" />
     <Compile Include="Exceptions\ObjectParseException.cs" />
