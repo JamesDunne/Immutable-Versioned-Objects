@@ -12,7 +12,7 @@ namespace IVO.Definition.Models
     /// A ref name.
     /// </summary>
     [TypeConverter(typeof(RefNameStringConverter))]
-    public sealed class RefName : PathObjectModel
+    public sealed class RefName : PathObjectModel, IComparable<RefName>, IComparable
     {
         internal RefName(IList<string> parts)
         {
@@ -74,6 +74,16 @@ namespace IVO.Definition.Models
         public override int GetHashCode()
         {
             return this.ToString().GetHashCode();
+        }
+
+        public int CompareTo(RefName other)
+        {
+            return this.ToString().CompareTo(other.ToString());
+        }
+
+        public int CompareTo(object obj)
+        {
+            return this.CompareTo((RefName)obj);
         }
     }
 

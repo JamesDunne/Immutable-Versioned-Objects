@@ -12,7 +12,7 @@ namespace IVO.Definition.Models
     /// A tag name.
     /// </summary>
     [TypeConverter(typeof(TagNameStringConverter))]
-    public sealed class TagName : PathObjectModel
+    public sealed class TagName : PathObjectModel, IComparable<TagName>, IComparable
     {
         internal TagName(IList<string> parts)
         {
@@ -83,6 +83,16 @@ namespace IVO.Definition.Models
         public override int GetHashCode()
         {
             return this.ToString().GetHashCode();
+        }
+
+        public int CompareTo(TagName other)
+        {
+            return this.ToString().CompareTo(other.ToString());
+        }
+
+        public int CompareTo(object obj)
+        {
+            return this.CompareTo((TagName)obj);
         }
     }
 
