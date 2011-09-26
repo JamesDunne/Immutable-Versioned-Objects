@@ -37,6 +37,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Containers\ImmutableContainer.cs" />
+    <Compile Include="Errors\DeleteTagError.cs" />
+    <Compile Include="Errors\ErrorBase.cs" />
+    <Compile Include="Errors\GetTagError.cs" />
     <Compile Include="Exceptions\CommitIDMistmatchException.cs" />
     <Compile Include="Exceptions\BlobIDMistmatchException.cs" />
     <Compile Include="Exceptions\ObjectParseException.cs" />
@@ -47,6 +50,7 @@
     <Compile Include="Models\AbsoluteTreePath.cs" />
     <Compile Include="Models\Commit.cs" />
     <Compile Include="Models\CommitPartial.cs" />
+    <Compile Include="Models\FullQueryResponse.cs" />
     <Compile Include="Models\TagName.cs" />
     <Compile Include="Models\RefName.cs" />
     <Compile Include="Models\Ref.cs" />
@@ -78,6 +82,7 @@
     <Compile Include="Models\PagingRequest.cs" />
     <Compile Include="Models\OrderedResponse.cs" />
     <Compile Include="Models\PagedResponse.cs" />
+    <Compile Include="Errors\PersistTagError.cs" />
     <Compile Include="SHA1StreamWriter.cs" />
     <None Include="Models\ImmutableModels.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

@@ -151,8 +151,10 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id)
         {
-            var tg = await tgrepo.GetTag(id).ConfigureAwait(continueOnCapturedContext: false);
-            if (tg == null) return null;
+            var etg = await tgrepo.GetTag(id).ConfigureAwait(continueOnCapturedContext: false);
+            if (etg.IsRight) return null;
+            
+            Tag tg = etg.Left;
 
             var cm = await getCommit(tg.CommitID).ConfigureAwait(continueOnCapturedContext: false);
             return new Tuple<Tag, Commit>(tg, cm);
@@ -160,8 +162,10 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Tuple<Tag, Commit>> GetCommitByTagName(TagName tagName)
         {
-            var tg = await tgrepo.GetTagByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
-            if (tg == null) return null;
+            var etg = await tgrepo.GetTagByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
+            if (etg.IsRight) return null;
+
+            Tag tg = etg.Left;
 
             var cm = await getCommit(tg.CommitID).ConfigureAwait(continueOnCapturedContext: false);
             return new Tuple<Tag, Commit>(tg, cm);
@@ -223,8 +227,10 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Tuple<Tag, CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTreeByTagName(TagName tagName, int depth = 10)
         {
-            var tg = await tgrepo.GetTagByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
-            if (tg == null) return null;
+            var etg = await tgrepo.GetTagByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
+            if (etg.IsRight) return null;
+
+            Tag tg = etg.Left;
 
             var all = await getCommitsRecursively(tg.CommitID, 1, depth).ConfigureAwait(continueOnCapturedContext: false);
 

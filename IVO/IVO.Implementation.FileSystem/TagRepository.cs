@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using IVO.Definition.Exceptions;
 using IVO.Definition.Models;
 using IVO.Definition.Repositories;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.FileSystem
 {
@@ -23,28 +24,18 @@ namespace IVO.Implementation.FileSystem
 
         #region Private details
 
-        private async Task persistTag(Tag tg)
+        // TODO: I wish creating directories was async. Maybe at least do an async file write?
+        private Task<Either<Tag, PersistTagError>> persistTag(Tag tg)
         {
             FileInfo fiTracker = system.getTagPathByTagName(tg.Name);
+            // Does this tag name exist already?
             if (fiTracker.Exists)
-            {
-                TagID? tgID = await getTagIDByName(tg.Name).ConfigureAwait(continueOnCapturedContext: false);
-                if (tgID.HasValue)
-                {
-                    var gtg = await getTag(tgID.Value).ConfigureAwait(continueOnCapturedContext: false);
-                    if (gtg.Name != tg.Name)
-                        throw new InvalidOperationException();
-
-                    // FIXME: assuming rest of the contents are the same.
-                }
-                return;
-            }
+                return TaskEx.FromResult((Either<Tag, PersistTagError>)new PersistTagError(PersistTagError.ErrorType.TagNameAlreadyExists));
 
             FileInfo fi = system.getPathByID(tg.ID);
             if (fi.Exists)
-            {
-                return;
-            }
+                // FIXME: TagID already exists.
+                return TaskEx.FromResult((Either<Tag, PersistTagError>)new PersistTagError(PersistTagError.ErrorType.TagNameAlreadyExists));
 
             // Create directory if it doesn't exist:
             if (!fi.Directory.Exists)
@@ -61,24 +52,35 @@ namespace IVO.Implementation.FileSystem
             }
 
             // Now keep track of the tag by its name:
+
+            // Create directory if it doesn't exist:
+            if (!fiTracker.Directory.Exists)
+            {
+                Debug.WriteLine(String.Format("New DIR '{0}'", fiTracker.Directory.FullName));
+                fiTracker.Directory.Create();
+            }
+
             using (var fs = new FileStream(fiTracker.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
                 Debug.WriteLine(String.Format("New TAG '{0}'", fiTracker.FullName));
+                // TODO: write async?
                 byte[] rawID = Encoding.UTF8.GetBytes(tg.ID.ToString());
                 fs.Write(rawID, 0, rawID.Length);
             }
+
+            return TaskEx.FromResult((Either<Tag, PersistTagError>)tg);
         }
 
-        private Task<TagID?> getTagIDByName(TagName tagName)
+        private Task<Either<TagID, GetTagError>> getTagIDByName(TagName tagName)
         {
             FileInfo fiTracker = system.getTagPathByTagName(tagName);
             return getTagIDByTracker(fiTracker);
         }
 
-        private async Task<TagID?> getTagIDByTracker(FileInfo fiTracker)
+        private async Task<Either<TagID, GetTagError>> getTagIDByTracker(FileInfo fiTracker)
         {
             Debug.Assert(fiTracker != null);
-            if (!fiTracker.Exists) return (TagID?)null;
+            if (!fiTracker.Exists) return new GetTagError(GetTagError.ErrorType.TagNameFileDoesNotExist);
 
             byte[] buf;
             int nr = 0;
@@ -99,16 +101,16 @@ namespace IVO.Implementation.FileSystem
             using (var sr = new StreamReader(ms, Encoding.UTF8))
             {
                 string line = sr.ReadLine();
-                if (line == null) return (TagID?)null;
+                if (line == null) return new GetTagError(GetTagError.ErrorType.TagIDParseError);
 
-                return TagID.Parse(line).ToNullable();
+                return TagID.TryParse(line).CastRight(r => (GetTagError)r);
             }
         }
 
-        private async Task<Tag> getTag(TagID id)
+        private async Task<Either<Tag, GetTagError>> getTag(TagID id)
         {
             FileInfo fi = system.getPathByID(id);
-            if (!fi.Exists) return null;
+            if (!fi.Exists) return new GetTagError(GetTagError.ErrorType.TagIDFileDoesNotExist);
 
             byte[] buf;
             int nr = 0;
@@ -133,31 +135,35 @@ namespace IVO.Implementation.FileSystem
                 string line = sr.ReadLine();
 
                 // Set CommitID:
-                if (line == null || !line.StartsWith("commit ")) throw new ObjectParseException("While parsing a tag, expected: 'commit'");
+                if (line == null || !line.StartsWith("commit ")) return new GetTagError(GetTagError.ErrorType.ParseErrorExpectedCommit);
                 tb.CommitID = CommitID.Parse(line.Substring("commit ".Length)).Value;
 
                 // Set Name:
                 line = sr.ReadLine();
-                if (line == null || !line.StartsWith("name ")) throw new ObjectParseException("While parsing a tag, expected: 'name'");
+                if (line == null || !line.StartsWith("name ")) return new GetTagError(GetTagError.ErrorType.ParseErrorExpectedName);
                 tb.Name = (TagName)line.Substring("name ".Length);
 
                 // Set Tagger:
                 line = sr.ReadLine();
-                if (line == null || !line.StartsWith("tagger ")) throw new ObjectParseException("While parsing a tag, expected: 'tagger'");
+                if (line == null || !line.StartsWith("tagger ")) return new GetTagError(GetTagError.ErrorType.ParseErrorExpectedTagger);
                 tb.Tagger = line.Substring("tagger ".Length);
 
                 // Set DateTagged:
                 line = sr.ReadLine();
-                if (line == null || !line.StartsWith("date ")) throw new ObjectParseException("While parsing a tag, expected: 'date'");
+                if (line == null || !line.StartsWith("date ")) return new GetTagError(GetTagError.ErrorType.ParseErrorExpectedDate);
 
                 // NOTE: date parsing will result in an inexact DateTimeOffset from what was created with, but it
                 // is close enough because the SHA-1 hash is calculated using the DateTimeOffset.ToString(), so
                 // only the ToString() representations of the DateTimeOffsets need to match.
-                tb.DateTagged = DateTimeOffset.Parse(line.Substring("date ".Length));
+                DateTimeOffset tmpDate;
+                if (!DateTimeOffset.TryParse(line.Substring("date ".Length), out tmpDate))
+                    return new GetTagError(GetTagError.ErrorType.ParseErrorBadDateFormat);
+
+                tb.DateTagged = tmpDate;
 
                 // Skip empty line:
                 line = sr.ReadLine();
-                if (line == null || line.Length != 0) throw new ObjectParseException("While parsing a commit, expected blank line");
+                if (line == null || line.Length != 0) return new GetTagError(GetTagError.ErrorType.ParseErrorExpectedBlankLine);
 
                 // Set Message:
                 tb.Message = sr.ReadToEnd();
@@ -166,7 +172,7 @@ namespace IVO.Implementation.FileSystem
             // Create the immutable Tag from the Builder:
             Tag tg = tb;
             // Validate the computed TagID:
-            if (tg.ID != id) throw new TagIDMismatchException(tg.ID, id);
+            if (tg.ID != id) return new GetTagError(GetTagError.ErrorType.ComputedTagIDMismatch);
 
             return tg;
         }
@@ -181,46 +187,53 @@ namespace IVO.Implementation.FileSystem
 
         #endregion
 
-        public async Task<Tag> PersistTag(Tag tg)
+        public async Task<Either<Tag, PersistTagError>> PersistTag(Tag tg)
         {
             await persistTag(tg).ConfigureAwait(continueOnCapturedContext: false);
             return tg;
         }
 
-        public async Task<TagID?> DeleteTag(TagID id)
+        public async Task<Either<TagID, DeleteTagError>> DeleteTag(TagID id)
         {
-            Tag tg = await getTag(id).ConfigureAwait(continueOnCapturedContext: false);
-            if (tg == null) return (TagID?)null;
+            var tg = await getTag(id).ConfigureAwait(continueOnCapturedContext: false);
+            if (tg.IsRight) return (DeleteTagError)tg.Right;
 
-            deleteTag(tg);
-            return tg.ID;
+            deleteTag(tg.Left);
+            return tg.Left.ID;
         }
 
-        public async Task<TagID?> DeleteTagByName(TagName tagName)
+        public async Task<Either<TagID, DeleteTagError>> DeleteTagByName(TagName tagName)
         {
-            TagID? id = await getTagIDByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
-            if (!id.HasValue) return null;
+            var id = await getTagIDByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
+            if (id.IsRight) return (DeleteTagError)id.Right;
 
-            Tag tg = await getTag(id.Value).ConfigureAwait(continueOnCapturedContext: false);
-            deleteTag(tg);
+            var tg = await getTag(id.Left).ConfigureAwait(continueOnCapturedContext: false);
+            if (tg.IsRight) return (DeleteTagError)tg.Right;
 
-            return id;
+            deleteTag(tg.Left);
+
+            return id.Left;
         }
 
-        public Task<Tag> GetTag(TagID id)
+        public Task<Either<Tag, GetTagError>> GetTag(TagID id)
         {
             return getTag(id);
         }
 
-        public async Task<Tag> GetTagByName(TagName tagName)
+        public async Task<Either<Tag, GetTagError>> GetTagByName(TagName tagName)
         {
-            TagID? id = await getTagIDByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
-            if (!id.HasValue) return null;
+            var id = await getTagIDByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
+            if (id.IsRight) return id.Right;
 
-            var tg = await getTag(id.Value).ConfigureAwait(continueOnCapturedContext: false);
-            if (tg.Name != tagName)
-                throw new InvalidOperationException();
-            return tg;
+            var etg = await getTag(id.Left).ConfigureAwait(continueOnCapturedContext: false);
+            if (etg.IsRight) return etg.Right;
+
+            Tag tg = etg.Left;
+
+            // Check that the retrieved TagName matches what we asked for:
+            if (tg.Name != tagName) return new GetTagError(GetTagError.ErrorType.TagNameDoesNotMatchExpected);
+
+            return etg;
         }
 
         private IEnumerable<TagName> getAllTagNames()
@@ -255,10 +268,13 @@ namespace IVO.Implementation.FileSystem
             List<Tag> tags = new List<Tag>();
             foreach (TagName tagName in filteredTagNames)
             {
-                TagID? id = await getTagIDByName(tagName);
-                if (!id.HasValue) continue;
+                var eid = await getTagIDByName(tagName);
+                if (eid.IsRight) continue;
 
-                Tag tg = await getTag(id.Value);
+                var etg = await getTag(eid.Left);
+                if (etg.IsRight) continue;
+
+                Tag tg = etg.Left;
 
                 // Filter by tagger name:
                 if ((query.Tagger != null) &&
@@ -266,8 +282,8 @@ namespace IVO.Implementation.FileSystem
                     continue;
 
                 // Filter by date range:
-                if (!( (!query.DateFrom.HasValue || (tg.DateTagged >= query.DateFrom.Value)) &&
-                       (!query.DateTo.HasValue || (tg.DateTagged <= query.DateTo.Value)) ))
+                if (!((!query.DateFrom.HasValue || (tg.DateTagged >= query.DateFrom.Value)) &&
+                       (!query.DateTo.HasValue || (tg.DateTagged <= query.DateTo.Value))))
                     continue;
 
                 tags.Add(tg);
@@ -276,12 +292,12 @@ namespace IVO.Implementation.FileSystem
             return tags;
         }
 
-        public async Task<ReadOnlyCollection<Tag>> SearchTags(TagQuery query)
+        public async Task<FullQueryResponse<TagQuery, Tag>> SearchTags(TagQuery query)
         {
             List<Tag> tags = await searchTags(query);
 
             // Return our read-only collection:
-            return new ReadOnlyCollection<Tag>(tags);
+            return new FullQueryResponse<TagQuery, Tag>(query, new ReadOnlyCollection<Tag>(tags));
         }
 
         private static readonly Dictionary<TagOrderBy, Func<Tag, object>> orderByFuncs = new Dictionary<TagOrderBy, Func<Tag, object>>
@@ -314,7 +330,7 @@ namespace IVO.Implementation.FileSystem
             return ordered;
         }
 
-        public async Task<OrderedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy)
+        public async Task<OrderedFullQueryResponse<TagQuery, Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy)
         {
             // Filter the results:
             List<Tag> tags = await searchTags(query);
@@ -322,10 +338,10 @@ namespace IVO.Implementation.FileSystem
             IEnumerable<Tag> ordered = orderResults(tags, orderBy);
             tags = ordered.ToList(tags.Count);
 
-            return new OrderedResponse<Tag, TagOrderBy>(new ReadOnlyCollection<Tag>(tags), orderBy);
+            return new OrderedFullQueryResponse<TagQuery, Tag, TagOrderBy>(query, new ReadOnlyCollection<Tag>(tags), orderBy);
         }
 
-        public async Task<PagedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy, PagingRequest paging)
+        public async Task<PagedQueryResponse<TagQuery, Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy, PagingRequest paging)
         {
             // Filter the results:
             List<Tag> tags = await searchTags(query);
@@ -335,7 +351,7 @@ namespace IVO.Implementation.FileSystem
             // Page the results:
             List<Tag> page = tags.Skip(paging.PageIndex * paging.PageSize).Take(paging.PageSize).ToList(paging.PageSize);
 
-            return new PagedResponse<Tag, TagOrderBy>(new ReadOnlyCollection<Tag>(page), orderBy, paging, tags.Count);
+            return new PagedQueryResponse<TagQuery, Tag, TagOrderBy>(query, new ReadOnlyCollection<Tag>(page), orderBy, paging, tags.Count);
         }
     }
 }

@@ -65,8 +65,10 @@ namespace IVO.Implementation.SQL
         public async Task<Tuple<Tag, CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTreeByTagName(TagName tagName, int depth = 10)
         {
             // TODO: implement a single query to handle this
-            var tg = await tgrepo.GetTagByName(tagName);
-            if (tg == null) return null;
+            var etg = await tgrepo.GetTagByName(tagName);
+            if (etg.IsRight) return null;
+            
+            Tag tg = etg.Left;
 
             var cmtr = await db.ExecuteListQueryAsync(new QueryCommitsRecursively(tg.CommitID, depth));
             return new Tuple<Tag, CommitID, ImmutableContainer<CommitID, ICommit>>(tg, cmtr.Item1, cmtr.Item2);

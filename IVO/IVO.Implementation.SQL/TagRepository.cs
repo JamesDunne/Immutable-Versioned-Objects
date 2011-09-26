@@ -12,6 +12,7 @@ using IVO.Definition.Models;
 using IVO.Definition.Containers;
 using IVO.Definition.Repositories;
 using System.Collections.ObjectModel;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL
 {
@@ -24,42 +25,50 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public Task<Tag> PersistTag(Tag tg)
+        public async Task<Either<Tag, PersistTagError>> PersistTag(Tag tg)
         {
-            return db.ExecuteNonQueryAsync(new PersistTag(tg));
+            return await db.ExecuteNonQueryAsync(new PersistTag(tg));
         }
 
-        public Task<Tag> GetTag(TagID id)
+        public async Task<Either<Tag, GetTagError>> GetTag(TagID id)
         {
-            return db.ExecuteSingleQueryAsync(new QueryTag(id));
+            Tag tg = await db.ExecuteSingleQueryAsync(new QueryTag(id));
+            if (tg == null) return new GetTagError(GetTagError.ErrorType.TagIDFileDoesNotExist);
+            return tg;
         }
 
-        public Task<Tag> GetTagByName(TagName tagName)
+        public async Task<Either<Tag, GetTagError>> GetTagByName(TagName tagName)
         {
-            return db.ExecuteSingleQueryAsync(new QueryTag(tagName));
+            Tag tg = await db.ExecuteSingleQueryAsync(new QueryTag(tagName));
+            if (tg == null) return new GetTagError(GetTagError.ErrorType.TagNameFileDoesNotExist);
+            return tg;
         }
 
-        public Task<TagID?> DeleteTag(TagID id)
+        public async Task<Either<TagID, DeleteTagError>> DeleteTag(TagID id)
         {
-            return db.ExecuteNonQueryAsync(new DestroyTag(id));
+            TagID? delid = await db.ExecuteNonQueryAsync(new DestroyTag(id));
+            if (!delid.HasValue) return new DeleteTagError(new GetTagError(GetTagError.ErrorType.TagIDFileDoesNotExist));
+            return delid.Value;
         }
 
-        public Task<TagID?> DeleteTagByName(TagName tagName)
+        public async Task<Either<TagID, DeleteTagError>> DeleteTagByName(TagName tagName)
         {
-            return db.ExecuteNonQueryAsync(new DestroyTagByName(tagName));
+            TagID? delid = await db.ExecuteNonQueryAsync(new DestroyTagByName(tagName));
+            if (!delid.HasValue) return new DeleteTagError(new GetTagError(GetTagError.ErrorType.TagNameFileDoesNotExist));
+            return delid.Value;
         }
 
-        public Task<ReadOnlyCollection<Tag>> SearchTags(TagQuery query)
+        public Task<FullQueryResponse<TagQuery, Tag>> SearchTags(TagQuery query)
         {
             throw new NotImplementedException();
         }
 
-        public Task<OrderedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy)
+        public Task<OrderedFullQueryResponse<TagQuery, Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy)
         {
             throw new NotImplementedException();
         }
 
-        public Task<PagedResponse<Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy, PagingRequest paging)
+        public Task<PagedQueryResponse<TagQuery, Tag, TagOrderBy>> SearchTags(TagQuery query, ReadOnlyCollection<OrderByApplication<TagOrderBy>> orderBy, PagingRequest paging)
         {
             throw new NotImplementedException();
         }

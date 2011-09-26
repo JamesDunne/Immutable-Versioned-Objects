@@ -11,13 +11,15 @@ namespace IVO.Definition.Models
     /// </summary>
     /// <typeparam name="Telement">The type of elements in the collection</typeparam>
     /// <typeparam name="TorderBy">The enum type that defines what columns may be ordered on</typeparam>
-    public sealed class PagedResponse<Telement, TorderBy>
+    public sealed class PagedQueryResponse<Tquery, Telement, TorderBy>
+        where Tquery : class
         where Telement : class
         where TorderBy : struct
     {
-        public PagedResponse(ReadOnlyCollection<Telement> collection, ReadOnlyCollection<OrderByApplication<TorderBy>> orderedBy, PagingRequest paging, int totalCount)
+        public PagedQueryResponse(Tquery query, ReadOnlyCollection<Telement> collection, ReadOnlyCollection<OrderByApplication<TorderBy>> orderedBy, PagingRequest paging, int totalCount)
         {
             // Why would you pass nulls? What the hell is wrong with you?
+            if (query == null) throw new ArgumentNullException("query");
             if (collection == null) throw new ArgumentNullException("collection");
             if (orderedBy == null) throw new ArgumentNullException("orderedBy");
 
@@ -25,6 +27,7 @@ namespace IVO.Definition.Models
             if (collection.Count > paging.PageSize) throw new ArgumentOutOfRangeException("collection", "Page collection is too big for page size");
 
             // Set our known properties:
+            this.Query = query;
             this.Collection = collection;
             this.OrderedBy = orderedBy;
             this.Paging = paging;
@@ -37,6 +40,7 @@ namespace IVO.Definition.Models
             this.IsLastPage = paging.PageNumber == Math.Max(1, this.PageCount);
         }
 
+        public Tquery Query { get; private set; }
         public ReadOnlyCollection<Telement> Collection { get; private set; }
         public ReadOnlyCollection<OrderByApplication<TorderBy>> OrderedBy { get; private set; }
 

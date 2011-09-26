@@ -55,6 +55,9 @@ namespace System
         private TRight _Right;
         public TRight Right { get { if (_which == Selected.Left) throw new NullReferenceException(); return _Right; } }
 
+        public Maybe<TLeft> MaybeLeft { get { if (_which == Selected.Left) return _Left; else return Maybe<TLeft>.Nothing; } }
+        public Maybe<TRight> MaybeRight { get { if (_which == Selected.Right) return _Right; else return Maybe<TRight>.Nothing; } }
+
         public Either(TLeft left)
         {
             _which = Selected.Left;
@@ -83,6 +86,24 @@ namespace System
         {
             if (_which == Selected.Left) return collapseIfLeft(_Left);
             return collapseIfRight(_Right);
+        }
+
+        public Either<TNewLeft, TNewRight> CastBoth<TNewLeft, TNewRight>(Func<TLeft, TNewLeft> tryLeft, Func<TRight, TNewRight> tryRight)
+        {
+            if (IsLeft) return new Either<TNewLeft, TNewRight>(tryLeft(_Left));
+            else return new Either<TNewLeft, TNewRight>(tryRight(_Right));
+        }
+
+        public Either<TLeft, TNewRight> CastRight<TNewRight>(Func<TRight, TNewRight> tryRight)
+        {
+            if (IsLeft) return _Left;
+            else return new Either<TLeft, TNewRight>(tryRight(_Right));
+        }
+
+        public Either<TNewLeft, TRight> CastLeft<TNewLeft>(Func<TLeft, TNewLeft> tryLeft)
+        {
+            if (IsRight) return _Right;
+            else return new Either<TNewLeft, TRight>(tryLeft(_Left));
         }
     }
 

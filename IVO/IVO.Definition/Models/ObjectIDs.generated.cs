@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using IVO.Definition.Errors;
 
 namespace IVO.Definition.Models
 {
@@ -44,10 +45,20 @@ namespace IVO.Definition.Models
             return new CommitID(tmp);
         }
 
-        public static Either<CommitID, Exception> TryParse(string hexValue)
+        public sealed class ParseError : ErrorBase
+        {
+            private string _message;
+
+            internal ParseError(string message) { this._message = message; }
+            internal ParseError(string format, params object[] args) : this(String.Format(format, args)) { }
+
+            public override string Message { get { return this._message; } }
+        }
+
+        public static Either<CommitID, ParseError> TryParse(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != HexCharLength) return new Exception(String.Format("CommitID must be {0} characters in length", HexCharLength));
+            if (hexValue.Length != HexCharLength) return new ParseError("CommitID must be {0} characters in length", HexCharLength);
 
             byte[] tmp = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
@@ -55,8 +66,8 @@ namespace IVO.Definition.Models
                 int v1 = deHex(hexValue[i * 2 + 0]);
                 int v2 = deHex(hexValue[i * 2 + 1]);
 
-                if (v1 == -1) return new Exception(String.Format("CommitID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]));
-                if (v2 == -1) return new Exception(String.Format("CommitID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]));
+                if (v1 == -1) return new ParseError("CommitID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]);
+                if (v2 == -1) return new ParseError("CommitID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]);
 
                 tmp[i] = (byte)((v1 << 4) | v2);
             }
@@ -215,10 +226,20 @@ namespace IVO.Definition.Models
             return new TreeID(tmp);
         }
 
-        public static Either<TreeID, Exception> TryParse(string hexValue)
+        public sealed class ParseError : ErrorBase
+        {
+            private string _message;
+
+            internal ParseError(string message) { this._message = message; }
+            internal ParseError(string format, params object[] args) : this(String.Format(format, args)) { }
+
+            public override string Message { get { return this._message; } }
+        }
+
+        public static Either<TreeID, ParseError> TryParse(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != HexCharLength) return new Exception(String.Format("TreeID must be {0} characters in length", HexCharLength));
+            if (hexValue.Length != HexCharLength) return new ParseError("TreeID must be {0} characters in length", HexCharLength);
 
             byte[] tmp = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
@@ -226,8 +247,8 @@ namespace IVO.Definition.Models
                 int v1 = deHex(hexValue[i * 2 + 0]);
                 int v2 = deHex(hexValue[i * 2 + 1]);
 
-                if (v1 == -1) return new Exception(String.Format("TreeID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]));
-                if (v2 == -1) return new Exception(String.Format("TreeID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]));
+                if (v1 == -1) return new ParseError("TreeID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]);
+                if (v2 == -1) return new ParseError("TreeID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]);
 
                 tmp[i] = (byte)((v1 << 4) | v2);
             }
@@ -386,10 +407,20 @@ namespace IVO.Definition.Models
             return new BlobID(tmp);
         }
 
-        public static Either<BlobID, Exception> TryParse(string hexValue)
+        public sealed class ParseError : ErrorBase
+        {
+            private string _message;
+
+            internal ParseError(string message) { this._message = message; }
+            internal ParseError(string format, params object[] args) : this(String.Format(format, args)) { }
+
+            public override string Message { get { return this._message; } }
+        }
+
+        public static Either<BlobID, ParseError> TryParse(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != HexCharLength) return new Exception(String.Format("BlobID must be {0} characters in length", HexCharLength));
+            if (hexValue.Length != HexCharLength) return new ParseError("BlobID must be {0} characters in length", HexCharLength);
 
             byte[] tmp = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
@@ -397,8 +428,8 @@ namespace IVO.Definition.Models
                 int v1 = deHex(hexValue[i * 2 + 0]);
                 int v2 = deHex(hexValue[i * 2 + 1]);
 
-                if (v1 == -1) return new Exception(String.Format("BlobID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]));
-                if (v2 == -1) return new Exception(String.Format("BlobID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]));
+                if (v1 == -1) return new ParseError("BlobID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]);
+                if (v2 == -1) return new ParseError("BlobID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]);
 
                 tmp[i] = (byte)((v1 << 4) | v2);
             }
@@ -557,10 +588,20 @@ namespace IVO.Definition.Models
             return new TagID(tmp);
         }
 
-        public static Either<TagID, Exception> TryParse(string hexValue)
+        public sealed class ParseError : ErrorBase
+        {
+            private string _message;
+
+            internal ParseError(string message) { this._message = message; }
+            internal ParseError(string format, params object[] args) : this(String.Format(format, args)) { }
+
+            public override string Message { get { return this._message; } }
+        }
+
+        public static Either<TagID, ParseError> TryParse(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != HexCharLength) return new Exception(String.Format("TagID must be {0} characters in length", HexCharLength));
+            if (hexValue.Length != HexCharLength) return new ParseError("TagID must be {0} characters in length", HexCharLength);
 
             byte[] tmp = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
@@ -568,8 +609,8 @@ namespace IVO.Definition.Models
                 int v1 = deHex(hexValue[i * 2 + 0]);
                 int v2 = deHex(hexValue[i * 2 + 1]);
 
-                if (v1 == -1) return new Exception(String.Format("TagID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]));
-                if (v2 == -1) return new Exception(String.Format("TagID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]));
+                if (v1 == -1) return new ParseError("TagID character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]);
+                if (v2 == -1) return new ParseError("TagID character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]);
 
                 tmp[i] = (byte)((v1 << 4) | v2);
             }
