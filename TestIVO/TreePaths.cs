@@ -31,42 +31,42 @@ namespace TestIVO
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidPathException))]
+        [ExpectedException(typeof(InvalidPathError))]
         public void TestAbsoluteFail1()
         {
             var fail = (AbsoluteTreePath)"";
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidPathException))]
+        [ExpectedException(typeof(InvalidPathError))]
         public void TestAbsoluteFail2()
         {
             var fail = (AbsoluteTreePath)" ";
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidPathException))]
+        [ExpectedException(typeof(InvalidPathError))]
         public void TestCanonicalFail1()
         {
             var fail = (CanonicalTreePath)"";
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidPathException))]
+        [ExpectedException(typeof(InvalidPathError))]
         public void TestCanonicalFail2()
         {
             var fail = (CanonicalTreePath)" ";
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidPathException))]
+        [ExpectedException(typeof(InvalidPathError))]
         public void TestCanonicalFail3()
         {
             var fail = ((AbsoluteTreePath)"/" + (RelativeTreePath)"..").Canonicalize();
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidPathException))]
+        [ExpectedException(typeof(InvalidPathError))]
         public void TestCanonicalFail4()
         {
             var fail = ((AbsoluteTreePath)"/test" + (RelativeTreePath)"../..").Canonicalize();

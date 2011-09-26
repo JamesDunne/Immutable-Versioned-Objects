@@ -49,7 +49,9 @@ namespace TestIVO.CommonTest
             Ref rf = new Ref.Builder((RefName)"v1.0", cm.ID);
             await rfrepo.PersistRef(rf);
 
-            Ref rrf = await rfrepo.GetRefByName((RefName)"v1.0");
+            var errf = await rfrepo.GetRefByName((RefName)"v1.0");
+            Assert.IsFalse(errf.HasErrors);
+            Ref rrf = errf.Value;
             Assert.IsNotNull(rrf);
             Assert.AreEqual(rf.Name.ToString(), rrf.Name.ToString());
             Assert.AreEqual(rf.CommitID, rrf.CommitID);
@@ -64,12 +66,17 @@ namespace TestIVO.CommonTest
             Ref rf = new Ref.Builder((RefName)"v1.0", cm.ID);
             await rfrepo.PersistRef(rf);
 
-            Ref drf = await rfrepo.DeleteRefByName((RefName)"v1.0");
+            var edrf = await rfrepo.DeleteRefByName((RefName)"v1.0");
+            Assert.IsFalse(edrf.HasErrors);
+            Ref drf = edrf.Value;
+
             Assert.IsNotNull(drf);
             Assert.AreEqual(rf.Name.ToString(), drf.Name.ToString());
             Assert.AreEqual(rf.CommitID, drf.CommitID);
 
-            Ref rrf = await rfrepo.GetRefByName((RefName)"v1.0");
+            var errf = await rfrepo.GetRefByName((RefName)"v1.0");
+            Assert.IsFalse(errf.HasErrors);
+            Ref rrf = errf.Value;
             Assert.IsNull(rrf);
         }
     }

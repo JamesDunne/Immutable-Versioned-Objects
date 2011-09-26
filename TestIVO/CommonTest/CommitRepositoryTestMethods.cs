@@ -114,7 +114,9 @@ namespace TestIVO.CommonTest
             await createCommits();
 
             // Get the commit back now:
-            var rcm = await cmrepo.GetCommit(cmRoot.ID);
+            var ercm = await cmrepo.GetCommit(cmRoot.ID);
+            Assert.IsFalse(ercm.HasErrors);
+            var rcm = ercm.Value;
 
             Assert.IsNotNull(rcm);
             Assert.AreEqual(cmRoot.ID, rcm.ID);
@@ -129,11 +131,13 @@ namespace TestIVO.CommonTest
             await createCommitTree();
 
             // Get the commit tree:
-            var rcmHeadTree = await cmrepo.GetCommitTree(cmHead.ID, depth: 10);
+            var ercmHeadTree = await cmrepo.GetCommitTree(cmHead.ID, depth: 10);
+            Assert.IsFalse(ercmHeadTree.HasErrors);
+            var rcmHeadTree = ercmHeadTree.Value;
 
-            Assert.AreEqual(cmHead.ID, rcmHeadTree.Item1);
+            Assert.AreEqual(cmHead.ID, rcmHeadTree.RootID);
 
-            RecursivePrint(rcmHeadTree.Item1, rcmHeadTree.Item2);
+            RecursivePrint(rcmHeadTree.RootID, rcmHeadTree.Commits);
         }
 
         internal async Task GetCommitTreeTest2()
@@ -142,11 +146,13 @@ namespace TestIVO.CommonTest
             await createCommitTree();
 
             // Get the commit tree:
-            var rcmHeadTree = await cmrepo.GetCommitTree(cmHead.ID, depth: 20);
+            var ercmHeadTree = await cmrepo.GetCommitTree(cmHead.ID, depth: 20);
+            Assert.IsFalse(ercmHeadTree.HasErrors);
+            var rcmHeadTree = ercmHeadTree.Value;
 
-            Assert.AreEqual(cmHead.ID, rcmHeadTree.Item1);
+            Assert.AreEqual(cmHead.ID, rcmHeadTree.RootID);
 
-            RecursivePrint(rcmHeadTree.Item1, rcmHeadTree.Item2);
+            RecursivePrint(rcmHeadTree.RootID, rcmHeadTree.Commits);
         }
 
         internal async Task GetCommitByTagTest()
@@ -156,7 +162,9 @@ namespace TestIVO.CommonTest
             Tag tg = new Tag.Builder((TagName)"v1.0", cmRoot.ID, "James S. Dunne", DateTimeOffset.Now, "Tagged!");
             await tgrepo.PersistTag(tg);
 
-            var tgcm = await cmrepo.GetCommitByTag(tg.ID);
+            var etgcm = await cmrepo.GetCommitByTag(tg.ID);
+            Assert.IsFalse(etgcm.HasErrors);
+            var tgcm = etgcm.Value;
             Assert.IsNotNull(tgcm);
             Assert.IsNotNull(tgcm.Item1);
             Assert.IsNotNull(tgcm.Item2);
@@ -173,7 +181,9 @@ namespace TestIVO.CommonTest
             Tag tg = new Tag.Builder((TagName)"v1.0", cmRoot.ID, "James S. Dunne", DateTimeOffset.Now, "Tagged!");
             await tgrepo.PersistTag(tg);
 
-            var tgcm = await cmrepo.GetCommitByTagName(tg.Name);
+            var etgcm = await cmrepo.GetCommitByTagName(tg.Name);
+            Assert.IsFalse(etgcm.HasErrors);
+            var tgcm = etgcm.Value;
             Assert.IsNotNull(tgcm);
             Assert.IsNotNull(tgcm.Item1);
             Assert.IsNotNull(tgcm.Item2);
@@ -190,7 +200,9 @@ namespace TestIVO.CommonTest
             Ref rf = new Ref.Builder((RefName)"v1.0", cmRoot.ID);
             await rfrepo.PersistRef(rf);
 
-            var rfcm = await cmrepo.GetCommitByRefName(rf.Name);
+            var erfcm = await cmrepo.GetCommitByRefName(rf.Name);
+            Assert.IsFalse(erfcm.HasErrors);
+            var rfcm = erfcm.Value;
             Assert.IsNotNull(rfcm);
             Assert.IsNotNull(rfcm.Item1);
             Assert.IsNotNull(rfcm.Item2);

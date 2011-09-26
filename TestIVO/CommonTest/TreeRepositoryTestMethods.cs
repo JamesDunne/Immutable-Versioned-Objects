@@ -101,9 +101,10 @@ namespace TestIVO.CommonTest
 
             // Now retrieve those trees:
             var treeIDs = trees.Keys.ToArray();
-            var trGot = await trrepo.GetTrees(treeIDs);
+            var etrGot = await trrepo.GetTrees(treeIDs);
 
-            Assert.AreEqual(treeIDs[0], trGot[0].ID);
+            Assert.IsFalse(etrGot[0].HasErrors);
+            Assert.AreEqual(treeIDs[0], etrGot[0].Value.ID);
         }
 
         internal async Task GetTreeTest()
@@ -113,11 +114,15 @@ namespace TestIVO.CommonTest
             await trrepo.PersistTree(rootId, trees);
 
             // Retrieve a single tree node:
-            var root = await trrepo.GetTree(rootId);
+            var eroot = await trrepo.GetTree(rootId);
+            Assert.IsFalse(eroot.HasErrors);
+            var root = eroot.Value;
             Assert.AreEqual(trRoot.ID, root.ID);
 
             // Retrieve a single tree node:
-            var tmpl = await trrepo.GetTree(trTemplate.ID);
+            var etmpl = await trrepo.GetTree(trTemplate.ID);
+            Assert.IsFalse(etmpl.HasErrors);
+            var tmpl = etmpl.Value;
             Assert.AreEqual(trTemplate.ID, tmpl.ID);
         }
 
@@ -129,7 +134,9 @@ namespace TestIVO.CommonTest
 
             // Retrieve a single TreeID mapping:
             var rootPath = (CanonicalTreePath)"/";
-            var rootMapping = await trrepo.GetTreeIDByPath(new TreeTreePath(rootId, rootPath));
+            var erootMapping = await trrepo.GetTreeIDByPath(new TreeTreePath(rootId, rootPath));
+            Assert.IsFalse(erootMapping.HasErrors);
+            var rootMapping = erootMapping.Value;
 
             Assert.IsTrue(rootMapping != null);
             Assert.AreEqual(trRoot.ID, rootMapping.TreeID);
@@ -140,7 +147,8 @@ namespace TestIVO.CommonTest
         {
             await createTrees();
 
-            await trrepo.PersistTree(rootId, trees);
+            var ept = await trrepo.PersistTree(rootId, trees);
+            Assert.IsFalse(ept.HasErrors);
 
             // Retrieve some TreeID mappings by Paths:
             var rootPath = (CanonicalTreePath)"/";
@@ -153,13 +161,15 @@ namespace TestIVO.CommonTest
             Assert.IsTrue(rootMappings != null);
             Assert.AreEqual(2, rootMappings.Length);
 
-            Assert.IsTrue(rootMappings[0].TreeID.HasValue);
-            Assert.AreEqual(trRoot.ID, rootMappings[0].TreeID.Value);
-            Assert.AreEqual(rootPath.ToString(), rootMappings[0].Path.Path.ToString());
+            Assert.IsFalse(rootMappings[0].HasErrors);
+            Assert.IsTrue(rootMappings[0].Value.TreeID.HasValue);
+            Assert.AreEqual(trRoot.ID, rootMappings[0].Value.TreeID.Value);
+            Assert.AreEqual(rootPath.ToString(), rootMappings[0].Value.Path.Path.ToString());
 
-            Assert.IsTrue(rootMappings[1].TreeID.HasValue);
-            Assert.AreEqual(trTemplate.ID, rootMappings[1].TreeID.Value);
-            Assert.AreEqual(tmplPath.ToString(), rootMappings[1].Path.Path.ToString());
+            Assert.IsFalse(rootMappings[1].HasErrors);
+            Assert.IsTrue(rootMappings[1].Value.TreeID.HasValue);
+            Assert.AreEqual(trTemplate.ID, rootMappings[1].Value.TreeID.Value);
+            Assert.AreEqual(tmplPath.ToString(), rootMappings[1].Value.Path.Path.ToString());
         }
 
         internal async Task GetTreeRecursivelyTest()
@@ -169,10 +179,12 @@ namespace TestIVO.CommonTest
             await trrepo.PersistTree(rootId, trees);
 
             // Retrieve the tree recursively:
-            var rec = await trrepo.GetTreeRecursively(rootId);
+            var erec = await trrepo.GetTreeRecursively(rootId);
+            Assert.IsFalse(erec.HasErrors);
+            var rec = erec.Value;
 
-            Assert.AreEqual(rootId, rec.Item1);
-            Assert.AreEqual(trees.Count, rec.Item2.Count);
+            Assert.AreEqual(rootId, rec.RootID);
+            Assert.AreEqual(trees.Count, rec.Trees.Count);
         }
 
         internal async Task GetTreeRecursivelyFromPathTest()
@@ -182,10 +194,12 @@ namespace TestIVO.CommonTest
             await trrepo.PersistTree(rootId, trees);
 
             // Retrieve a subtree recursively by path:
-            var rec = await trrepo.GetTreeRecursivelyFromPath(new TreeTreePath(rootId, (CanonicalTreePath)"/template/"));
+            var erec = await trrepo.GetTreeRecursivelyFromPath(new TreeTreePath(rootId, (CanonicalTreePath)"/template/"));
+            Assert.IsFalse(erec.HasErrors);
+            var rec = erec.Value;
 
-            Assert.AreEqual(trTemplate.ID, rec.Item1);
-            Assert.AreEqual(trTemplate.Trees.Length + 1, rec.Item2.Count);
+            Assert.AreEqual(trTemplate.ID, rec.RootID);
+            Assert.AreEqual(trTemplate.Trees.Length + 1, rec.Trees.Count);
         }
 
         internal async Task DeleteTreeRecursivelyTest()

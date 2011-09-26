@@ -50,9 +50,9 @@ namespace TestIVO.CommonTest
             await tgrepo.PersistTag(tg);
 
             var retgPre = await tgrepo.GetTag(tg.ID);
-            Assert.IsFalse(retgPre.IsRight);
+            Assert.IsFalse(retgPre.HasErrors);
 
-            Tag rtgPre = retgPre.Left;
+            Tag rtgPre = retgPre.Value;
             Assert.IsNotNull(rtgPre);
             Assert.AreEqual(tg.ID, rtgPre.ID);
             Assert.AreEqual(tg.Name.ToString(), rtgPre.Name.ToString());
@@ -63,9 +63,9 @@ namespace TestIVO.CommonTest
             await tgrepo.DeleteTag(tg.ID);
 
             var retgPost = await tgrepo.GetTag(tg.ID);
-            Assert.IsFalse(retgPost.IsRight);
+            Assert.IsFalse(retgPost.HasErrors);
 
-            Tag rtgPost = retgPost.Left;
+            Tag rtgPost = retgPost.Value;
             Assert.IsNull(rtgPost);
         }
 
@@ -79,9 +79,9 @@ namespace TestIVO.CommonTest
             await tgrepo.PersistTag(tg);
 
             var retgPre = await tgrepo.GetTag(tg.ID);
-            Assert.IsFalse(retgPre.IsRight);
+            Assert.IsFalse(retgPre.HasErrors);
 
-            Tag rtgPre = retgPre.Left;
+            Tag rtgPre = retgPre.Value;
             Assert.IsNotNull(rtgPre);
             Assert.AreEqual(tg.ID, rtgPre.ID);
             Assert.AreEqual(tg.Name.ToString(), rtgPre.Name.ToString());
@@ -92,9 +92,9 @@ namespace TestIVO.CommonTest
             await tgrepo.DeleteTagByName((TagName)"v1.0");
 
             var retgPost = await tgrepo.GetTag(tg.ID);
-            Assert.IsFalse(retgPost.IsRight);
+            Assert.IsFalse(retgPost.HasErrors);
 
-            Tag rtgPost = retgPost.Left;
+            Tag rtgPost = retgPost.Value;
             Assert.IsNull(rtgPost);
         }
 
@@ -108,8 +108,8 @@ namespace TestIVO.CommonTest
             await tgrepo.PersistTag(tg);
 
             var retg = await tgrepo.GetTag(tg.ID);
-            Assert.IsFalse(retg.IsRight);
-            Tag rtg = retg.Left;
+            Assert.IsFalse(retg.HasErrors);
+            Tag rtg = retg.Value;
             Assert.IsNotNull(rtg);
             Assert.AreEqual(tg.ID, rtg.ID);
             Assert.AreEqual(tg.Name.ToString(), rtg.Name.ToString());
@@ -128,8 +128,8 @@ namespace TestIVO.CommonTest
             await tgrepo.PersistTag(tg);
 
             var retg = await tgrepo.GetTagByName((TagName)"v1.0");
-            Assert.IsFalse(retg.IsRight);
-            Tag rtg = retg.Left;
+            Assert.IsFalse(retg.HasErrors);
+            Tag rtg = retg.Value;
             Assert.IsNotNull(rtg);
             Assert.AreEqual(tg.ID, rtg.ID);
             Assert.AreEqual(tg.Name.ToString(), rtg.Name.ToString());
