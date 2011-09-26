@@ -45,17 +45,13 @@ namespace IVO.Definition.Models
             return new CommitID(tmp);
         }
 
-        public sealed class ParseError : ErrorBase
+        public sealed class ParseError : InputError
         {
-            private string _message;
-
-            internal ParseError(string message) { this._message = message; }
-            internal ParseError(string format, params object[] args) : this(String.Format(format, args)) { }
-
-            public override string Message { get { return this._message; } }
+            internal ParseError(string message) : base(message) { }
+            internal ParseError(string format, params object[] args) : base(format, args) { }
         }
 
-        public static Either<CommitID, ParseError> TryParse(string hexValue)
+        public static Errorable<CommitID> TryParse(string hexValue)
         {
             // Sanity check first:
             if (hexValue.Length != HexCharLength) return new ParseError("CommitID must be {0} characters in length", HexCharLength);
@@ -226,17 +222,13 @@ namespace IVO.Definition.Models
             return new TreeID(tmp);
         }
 
-        public sealed class ParseError : ErrorBase
+        public sealed class ParseError : InputError
         {
-            private string _message;
-
-            internal ParseError(string message) { this._message = message; }
-            internal ParseError(string format, params object[] args) : this(String.Format(format, args)) { }
-
-            public override string Message { get { return this._message; } }
+            internal ParseError(string message) : base(message) { }
+            internal ParseError(string format, params object[] args) : base(format, args) { }
         }
 
-        public static Either<TreeID, ParseError> TryParse(string hexValue)
+        public static Errorable<TreeID> TryParse(string hexValue)
         {
             // Sanity check first:
             if (hexValue.Length != HexCharLength) return new ParseError("TreeID must be {0} characters in length", HexCharLength);
@@ -407,17 +399,13 @@ namespace IVO.Definition.Models
             return new BlobID(tmp);
         }
 
-        public sealed class ParseError : ErrorBase
+        public sealed class ParseError : InputError
         {
-            private string _message;
-
-            internal ParseError(string message) { this._message = message; }
-            internal ParseError(string format, params object[] args) : this(String.Format(format, args)) { }
-
-            public override string Message { get { return this._message; } }
+            internal ParseError(string message) : base(message) { }
+            internal ParseError(string format, params object[] args) : base(format, args) { }
         }
 
-        public static Either<BlobID, ParseError> TryParse(string hexValue)
+        public static Errorable<BlobID> TryParse(string hexValue)
         {
             // Sanity check first:
             if (hexValue.Length != HexCharLength) return new ParseError("BlobID must be {0} characters in length", HexCharLength);
@@ -588,17 +576,13 @@ namespace IVO.Definition.Models
             return new TagID(tmp);
         }
 
-        public sealed class ParseError : ErrorBase
+        public sealed class ParseError : InputError
         {
-            private string _message;
-
-            internal ParseError(string message) { this._message = message; }
-            internal ParseError(string format, params object[] args) : this(String.Format(format, args)) { }
-
-            public override string Message { get { return this._message; } }
+            internal ParseError(string message) : base(message) { }
+            internal ParseError(string format, params object[] args) : base(format, args) { }
         }
 
-        public static Either<TagID, ParseError> TryParse(string hexValue)
+        public static Errorable<TagID> TryParse(string hexValue)
         {
             // Sanity check first:
             if (hexValue.Length != HexCharLength) return new ParseError("TagID must be {0} characters in length", HexCharLength);

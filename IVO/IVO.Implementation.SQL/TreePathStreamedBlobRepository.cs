@@ -3,6 +3,7 @@ using Asynq;
 using IVO.Definition.Models;
 using IVO.Definition.Repositories;
 using IVO.Implementation.SQL.Queries;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL
 {
@@ -17,15 +18,15 @@ namespace IVO.Implementation.SQL
             this.blrepo = blrepo;
         }
 
-        public Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(params TreeBlobPath[] treePaths)
+        public async Task<Errorable<TreePathStreamedBlob>[]> GetBlobsByTreePaths(params TreeBlobPath[] treePaths)
         {
-            Task<TreePathStreamedBlob>[] tasks = new Task<TreePathStreamedBlob>[treePaths.Length];
+            var tasks = new Task<Errorable<TreePathStreamedBlob>>[treePaths.Length];
             for (int i = 0; i < treePaths.Length; ++i)
                 tasks[i] = db.ExecuteSingleQueryAsync(new QueryBlobByPath(blrepo, treePaths[i]));
-            return TaskEx.WhenAll(tasks);
+            return await TaskEx.WhenAll(tasks);
         }
 
-        public Task<TreePathStreamedBlob> GetBlobByTreePath(TreeBlobPath treePath)
+        public Task<Errorable<TreePathStreamedBlob>> GetBlobByTreePath(TreeBlobPath treePath)
         {
             return db.ExecuteSingleQueryAsync(new QueryBlobByPath(blrepo, treePath));
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using System.ComponentModel;
 
 namespace IVO.Definition.Models
@@ -32,7 +32,7 @@ namespace IVO.Definition.Models
 
         public static explicit operator TagName(string path)
         {
-            if (String.IsNullOrWhiteSpace(path)) throw new InvalidPathException("Tag name cannot be empty");
+            if (String.IsNullOrWhiteSpace(path)) throw new InvalidPathError("Tag name cannot be empty");
 
             string[] parts = SplitPath(path);
 

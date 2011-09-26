@@ -40,6 +40,7 @@ namespace System
     {
         public enum Selected
         {
+            Neither,
             Left,
             Right
         }

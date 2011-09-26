@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IVO.Definition.Models;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 
 namespace TestIVO
 {
@@ -21,28 +21,28 @@ namespace TestIVO
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidPathException))]
+        [ExpectedException(typeof(InvalidPathError))]
         public void InvalidRefName1()
         {
             Assert.IsNotNull((RefName)"v1.0/");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidPathException))]
+        [ExpectedException(typeof(InvalidPathError))]
         public void InvalidRefName2()
         {
             Assert.IsNotNull((RefName)"a:");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidPathException))]
+        [ExpectedException(typeof(InvalidPathError))]
         public void InvalidRefName3()
         {
             Assert.IsNotNull((RefName)@"hello\world");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidPathException))]
+        [ExpectedException(typeof(InvalidPathError))]
         public void InvalidRefName4()
         {
             Assert.IsNotNull((RefName)"");

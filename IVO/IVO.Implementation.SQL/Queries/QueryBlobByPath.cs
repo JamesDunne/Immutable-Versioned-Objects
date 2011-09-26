@@ -6,13 +6,13 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Containers;
 using IVO.Definition.Models;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using System.Data;
 using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryBlobByPath : IComplexDataQuery<TreePathStreamedBlob>
+    public class QueryBlobByPath : IComplexDataQuery<Errorable<TreePathStreamedBlob>>
     {
         private TreeBlobPath _treePath;
         private StreamedBlobRepository _blrepo;
@@ -48,19 +48,19 @@ WHERE tr.[path] + trbl.name = @path;";
             return cmd;
         }
         
-        public Task<TreePathStreamedBlob> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Errorable<TreePathStreamedBlob>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return TaskEx.FromResult(retrieve(cmd, dr));
         }
 
-        public TreePathStreamedBlob Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Errorable<TreePathStreamedBlob> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return retrieve(cmd, dr);
         }
 
-        public TreePathStreamedBlob retrieve(SqlCommand cmd, SqlDataReader dr)
+        public Errorable<TreePathStreamedBlob> retrieve(SqlCommand cmd, SqlDataReader dr)
         {
-            if (!dr.Read()) return null;
+            if (!dr.Read()) return new BlobNotFoundByPathError();
 
             BlobID id = (BlobID)dr.GetSqlBinary(0).Value;
             long length = dr.GetSqlInt64(1).Value;

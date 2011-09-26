@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IVO.Definition.Models;
+using IVO.Definition.Errors;
 
 namespace IVO.Definition.Repositories
 {
@@ -15,7 +16,7 @@ namespace IVO.Definition.Repositories
         /// <param name="rootid"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        Task<TreePathStreamedBlob> GetBlobByTreePath(TreeBlobPath treePath);
+        Task<Errorable<TreePathStreamedBlob>> GetBlobByTreePath(TreeBlobPath treePath);
 
         /// <summary>
         /// Retrieves multiple Blobs by their canonicalized absolute paths relative to their root TreeIDs asynchronously.
@@ -26,6 +27,6 @@ namespace IVO.Definition.Repositories
         /// <param name="rootid"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        Task<TreePathStreamedBlob[]> GetBlobsByTreePaths(params TreeBlobPath[] treePaths);
+        Task<Errorable<TreePathStreamedBlob>[]> GetBlobsByTreePaths(params TreeBlobPath[] treePaths);
     }
 }

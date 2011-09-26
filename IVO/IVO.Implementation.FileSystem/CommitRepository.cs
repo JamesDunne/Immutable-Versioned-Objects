@@ -8,7 +8,7 @@ using IVO.Definition.Containers;
 using IVO.Definition.Repositories;
 using System.IO;
 using System.Diagnostics;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.FileSystem
 {
@@ -47,7 +47,7 @@ namespace IVO.Implementation.FileSystem
             }
         }
 
-        private async Task<Commit> getCommit(CommitID id)
+        private async Task<Errorable<Commit>> getCommit(CommitID id)
         {
             FileInfo fi = system.getPathByID(id);
             if (!fi.Exists) return null;
@@ -87,26 +87,29 @@ namespace IVO.Implementation.FileSystem
                 }
 
                 // Set TreeID:
-                if (line == null || !line.StartsWith("tree ")) throw new ObjectParseException("While parsing a commit, expected: 'tree'");
+                if (line == null || !line.StartsWith("tree ")) return new CommitParseExpectedTreeError();
                 cb.TreeID = TreeID.Parse(line.Substring("tree ".Length)).Value;
 
                 // Set Committer:
                 line = sr.ReadLine();
-                if (line == null || !line.StartsWith("committer ")) throw new ObjectParseException("While parsing a commit, expected: 'committer'");
+                if (line == null || !line.StartsWith("committer ")) return new CommitParseExpectedCommitterError();
                 cb.Committer = line.Substring("committer ".Length);
 
                 // Set DateCommitted:
                 line = sr.ReadLine();
-                if (line == null || !line.StartsWith("date ")) throw new ObjectParseException("While parsing a commit, expected: 'date'");
+                if (line == null || !line.StartsWith("date ")) return new CommitParseExpectedDateError();
 
                 // NOTE: date parsing will result in an inexact DateTimeOffset from what was created with, but it
                 // is close enough because the SHA-1 hash is calculated using the DateTimeOffset.ToString(), so
                 // only the ToString() representations of the DateTimeOffsets need to match.
-                cb.DateCommitted = DateTimeOffset.Parse(line.Substring("date ".Length));
+                DateTimeOffset tmpDate;
+                if (!DateTimeOffset.TryParse(line.Substring("date ".Length), out tmpDate))
+                    return new CommitParseBadDateFormatError();
+                cb.DateCommitted = tmpDate;
 
                 // Skip empty line:
                 line = sr.ReadLine();
-                if (line == null || line.Length != 0) throw new ObjectParseException("While parsing a commit, expected blank line");
+                if (line == null || line.Length != 0) return new CommitParseExpectedBlankLineError();
 
                 // Set Message:
                 cb.Message = sr.ReadToEnd();
@@ -115,7 +118,7 @@ namespace IVO.Implementation.FileSystem
             // Create the immutable Commit from the Builder:
             Commit cm = cb;
             // Validate the computed CommitID:
-            if (cm.ID != id) throw new CommitIDMismatchException(cm.ID, id);
+            if (cm.ID != id) return new ComputedCommitIDMismatchError();
 
             return cm;
         }
@@ -130,60 +133,74 @@ namespace IVO.Implementation.FileSystem
 
         #endregion
 
-        public async Task<Commit> PersistCommit(Commit cm)
+        public async Task<Errorable<Commit>> PersistCommit(Commit cm)
         {
             await TaskEx.Run(() => persistCommit(cm)).ConfigureAwait(continueOnCapturedContext: false);
 
             return cm;
         }
 
-        public async Task<CommitID> DeleteCommit(CommitID id)
+        public async Task<Errorable<CommitID>> DeleteCommit(CommitID id)
         {
             await TaskEx.Run(() => deleteCommit(id)).ConfigureAwait(continueOnCapturedContext: false);
 
             return id;
         }
 
-        public Task<Commit> GetCommit(CommitID id)
+        public Task<Errorable<Commit>> GetCommit(CommitID id)
         {
             return getCommit(id);
         }
 
-        public async Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id)
+        public async Task<Errorable<Tuple<Tag, Commit>>> GetCommitByTag(TagID id)
         {
             var etg = await tgrepo.GetTag(id).ConfigureAwait(continueOnCapturedContext: false);
-            if (etg.IsRight) return null;
+            if (etg.HasErrors) return etg.Errors;
             
-            Tag tg = etg.Left;
+            Tag tg = etg.Value;
 
-            var cm = await getCommit(tg.CommitID).ConfigureAwait(continueOnCapturedContext: false);
+            var ecm = await getCommit(tg.CommitID).ConfigureAwait(continueOnCapturedContext: false);
+            if (ecm.HasErrors) return ecm.Errors;
+
+            Commit cm = ecm.Value;
             return new Tuple<Tag, Commit>(tg, cm);
         }
 
-        public async Task<Tuple<Tag, Commit>> GetCommitByTagName(TagName tagName)
+        public async Task<Errorable<Tuple<Tag, Commit>>> GetCommitByTagName(TagName tagName)
         {
             var etg = await tgrepo.GetTagByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
-            if (etg.IsRight) return null;
+            if (etg.HasErrors) return null;
 
-            Tag tg = etg.Left;
+            Tag tg = etg.Value;
 
-            var cm = await getCommit(tg.CommitID).ConfigureAwait(continueOnCapturedContext: false);
+            var ecm = await getCommit(tg.CommitID).ConfigureAwait(continueOnCapturedContext: false);
+            if (ecm.HasErrors) return ecm.Errors;
+
+            Commit cm = ecm.Value;
             return new Tuple<Tag, Commit>(tg, cm);
         }
 
-        public async Task<Tuple<Ref, Commit>> GetCommitByRefName(RefName refName)
+        public async Task<Errorable<Tuple<Ref, Commit>>> GetCommitByRefName(RefName refName)
         {
-            var rf = await rfrepo.GetRefByName(refName).ConfigureAwait(continueOnCapturedContext: false);
-            if (rf == null) return null;
+            var erf = await rfrepo.GetRefByName(refName).ConfigureAwait(continueOnCapturedContext: false);
+            if (erf.HasErrors) return erf.Errors;
 
-            var cm = await getCommit(rf.CommitID).ConfigureAwait(continueOnCapturedContext: false);
+            Ref rf = erf.Value;
+
+            var ecm = await getCommit(rf.CommitID).ConfigureAwait(continueOnCapturedContext: false);
+            if (ecm.HasErrors) return ecm.Errors;
+
+            Commit cm = ecm.Value;
             return new Tuple<Ref, Commit>(rf, cm);
         }
 
-        private async Task<Commit[]> getCommitsRecursively(CommitID id, int depthLevel, int depthMaximum)
+        private async Task<Errorable<Commit[]>> getCommitsRecursively(CommitID id, int depthLevel, int depthMaximum)
         {
             // Get the current commit:
-            var root = await getCommit(id).ConfigureAwait(continueOnCapturedContext: false);
+            var eroot = await getCommit(id).ConfigureAwait(continueOnCapturedContext: false);
+            if (eroot.HasErrors) return eroot.Errors;
+            
+            var root = eroot.Value;
             var rootArr = new Commit[1] { root };
 
             // We have no parents:
@@ -195,7 +212,7 @@ namespace IVO.Implementation.FileSystem
                 return rootArr;
 
             // Recurse up the commit parents:
-            Task<Commit[]>[] tasks = new Task<Commit[]>[root.Parents.Length];
+            Task<Errorable<Commit[]>>[] tasks = new Task<Errorable<Commit[]>>[root.Parents.Length];
             for (int i = 0; i < root.Parents.Length; ++i)
             {
                 tasks[i] = getCommitsRecursively(root.Parents[i], depthLevel + 1, depthMaximum);
@@ -204,56 +221,70 @@ namespace IVO.Implementation.FileSystem
             // Await all the tree retrievals:
             var allCommits = await TaskEx.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
 
+            // Roll up all the errors:
+            ErrorContainer errors =
+                (
+                    from ecms in allCommits
+                    where ecms.HasErrors
+                    select ecms.Errors
+                ).Aggregate(new ErrorContainer(), (acc, err) => acc + err);
+
+            if (errors.HasAny) return errors;
+
             // Flatten out the tree arrays:
             var flattened =
-                from cmArr in allCommits
-                from cm in cmArr
+                from ecms in allCommits
+                from cm in ecms.Value
                 select cm;
 
             // Return the final array:
-            return rootArr.Concat(flattened).ToArray(allCommits.Sum(ca => ca.Length) + 1);
+            return rootArr.Concat(flattened).ToArray(allCommits.Sum(ca => ca.Value.Length) + 1);
         }
 
-        public async Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTree(CommitID id, int depth = 10)
+        public async Task<Errorable<CommitTree>> GetCommitTree(CommitID id, int depth = 10)
         {
-            var all = await getCommitsRecursively(id, 1, depth).ConfigureAwait(continueOnCapturedContext: false);
+            var eall = await getCommitsRecursively(id, 1, depth).ConfigureAwait(continueOnCapturedContext: false);
+            if (eall.HasErrors) return eall.Errors;
+
+            var all = eall.Value;
 
             // Return them (all[0] is the root):
-            return new Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>(
-                all[0].ID,
-                new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, all)
-            );
+            return new CommitTree(all[0].ID, new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, all));
         }
 
-        public async Task<Tuple<Tag, CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTreeByTagName(TagName tagName, int depth = 10)
+        public async Task<Errorable<Tuple<Tag, CommitTree>>> GetCommitTreeByTagName(TagName tagName, int depth = 10)
         {
             var etg = await tgrepo.GetTagByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
-            if (etg.IsRight) return null;
+            if (etg.HasErrors) return null;
 
-            Tag tg = etg.Left;
+            Tag tg = etg.Value;
+            var eall = await getCommitsRecursively(tg.CommitID, 1, depth).ConfigureAwait(continueOnCapturedContext: false);
+            if (eall.HasErrors) return eall.Errors;
 
-            var all = await getCommitsRecursively(tg.CommitID, 1, depth).ConfigureAwait(continueOnCapturedContext: false);
+            var all = eall.Value;
 
             // Return them (all[0] is the root):
-            return new Tuple<Tag, CommitID, ImmutableContainer<CommitID, ICommit>>(
+            return new Tuple<Tag, CommitTree>(
                 tg,
-                all[0].ID,
-                new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, all)
+                new CommitTree(all[0].ID, new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, all))
             );
         }
 
-        public async Task<Tuple<Ref, CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTreeByRefName(RefName refName, int depth = 10)
+        public async Task<Errorable<Tuple<Ref, CommitTree>>> GetCommitTreeByRefName(RefName refName, int depth = 10)
         {
-            var rf = await rfrepo.GetRefByName(refName).ConfigureAwait(continueOnCapturedContext: false);
-            if (rf == null) return null;
+            var erf = await rfrepo.GetRefByName(refName).ConfigureAwait(continueOnCapturedContext: false);
+            if (erf.HasErrors) return erf.Errors;
 
-            var all = await getCommitsRecursively(rf.CommitID, 1, depth).ConfigureAwait(continueOnCapturedContext: false);
+            Ref rf = erf.Value;
+            var eall = await getCommitsRecursively(rf.CommitID, 1, depth).ConfigureAwait(continueOnCapturedContext: false);
+            if (eall.HasErrors) return eall.Errors;
+
+            var all = eall.Value;
 
             // Return them (all[0] is the root):
-            return new Tuple<Ref, CommitID, ImmutableContainer<CommitID, ICommit>>(
+            return new Tuple<Ref, CommitTree>(
                 rf,
-                all[0].ID,
-                new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, all)
+                new CommitTree(all[0].ID, new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, all))
             );
         }
     }

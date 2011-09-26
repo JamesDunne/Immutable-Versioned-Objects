@@ -2,13 +2,14 @@
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Linq;
-using Asynq;
-using IVO.Definition.Models;
 using System.Text;
+using Asynq;
+using IVO.Definition.Errors;
+using IVO.Definition.Models;
 
 namespace IVO.Implementation.SQL.Persists
 {
-    public sealed class PersistCommit : IDataOperation<Commit>
+    public sealed class PersistCommit : IDataOperation<Errorable<Commit>>
     {
         private Commit _cm;
 
@@ -45,7 +46,7 @@ namespace IVO.Implementation.SQL.Persists
             return cmd;
         }
 
-        public Commit Return(SqlCommand cmd, int rowsAffected)
+        public Errorable<Commit> Return(SqlCommand cmd, int rowsAffected)
         {
             return this._cm;
         }

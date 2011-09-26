@@ -7,7 +7,7 @@ using IVO.Definition.Models;
 
 namespace IVO.Definition.Errors
 {
-    public sealed class GetTagError : ErrorBase
+    public sealed class GetTagError
     {
         private string _message;
 
@@ -19,17 +19,17 @@ namespace IVO.Definition.Errors
 
         public enum ErrorType
         {
-            TagIDFileDoesNotExist,
-            TagNameFileDoesNotExist,
-            ParseErrorExpectedCommit,
-            ParseErrorExpectedName,
-            ParseErrorExpectedTagger,
-            ParseErrorExpectedDate,
-            ParseErrorBadDateFormat,
-            ParseErrorExpectedBlankLine,
-            TagIDParseError,
-            ComputedTagIDMismatch,
-            TagNameDoesNotMatchExpected
+            //TagIDFileDoesNotExist,
+            //TagNameFileDoesNotExist,
+            //ParseErrorExpectedCommit,
+            //ParseErrorExpectedName,
+            //ParseErrorExpectedTagger,
+            //ParseErrorExpectedDate,
+            //ParseErrorBadDateFormat,
+            //ParseErrorExpectedBlankLine,
+            //TagIDParseError,
+            //ComputedTagIDMismatch,
+            //TagNameDoesNotMatchExpected
         }
 
         public ErrorType Type { get; private set; }

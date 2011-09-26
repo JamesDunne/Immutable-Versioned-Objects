@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 
 namespace IVO.Definition.Models
 {
@@ -33,7 +33,7 @@ namespace IVO.Definition.Models
 
         public static explicit operator RelativeBlobPath(string path)
         {
-            if (path.Length == 0) throw new InvalidPathException("relative path cannot be empty");
+            if (path.Length == 0) throw new InvalidPathError("relative path cannot be empty");
 
             string[] parts = SplitPath(path);
             int treePartCount = parts.Length - 1;

@@ -5,27 +5,28 @@ using System.Text;
 using System.Threading.Tasks;
 using IVO.Definition.Models;
 using IVO.Definition.Containers;
+using IVO.Definition.Errors;
 
 namespace IVO.Definition.Repositories
 {
     public interface ICommitRepository
     {
-        Task<Commit> PersistCommit(Commit cm);
+        Task<Errorable<Commit>> PersistCommit(Commit cm);
 
-        Task<CommitID> DeleteCommit(CommitID id);
+        Task<Errorable<CommitID>> DeleteCommit(CommitID id);
 
-        Task<Commit> GetCommit(CommitID id);
+        Task<Errorable<Commit>> GetCommit(CommitID id);
 
-        Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id);
+        Task<Errorable<Tuple<Tag, Commit>>> GetCommitByTag(TagID id);
 
-        Task<Tuple<Tag, Commit>> GetCommitByTagName(TagName tagName);
+        Task<Errorable<Tuple<Tag, Commit>>> GetCommitByTagName(TagName tagName);
 
-        Task<Tuple<Ref, Commit>> GetCommitByRefName(RefName refName);
+        Task<Errorable<Tuple<Ref, Commit>>> GetCommitByRefName(RefName refName);
 
-        Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTree(CommitID id, int depth = 10);
+        Task<Errorable<CommitTree>> GetCommitTree(CommitID id, int depth = 10);
 
-        Task<Tuple<Tag, CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTreeByTagName(TagName tagName, int depth = 10);
+        Task<Errorable<Tuple<Tag, CommitTree>>> GetCommitTreeByTagName(TagName tagName, int depth = 10);
 
-        Task<Tuple<Ref, CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTreeByRefName(RefName refName, int depth = 10);
+        Task<Errorable<Tuple<Ref, CommitTree>>> GetCommitTreeByRefName(RefName refName, int depth = 10);
     }
 }

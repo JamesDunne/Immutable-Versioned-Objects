@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IVO.Definition.Models;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 
 namespace TestIVO
 {

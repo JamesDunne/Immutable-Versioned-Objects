@@ -4,13 +4,13 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using System.Data;
 using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public sealed class QueryCommitByTagID : IComplexDataQuery<Tuple<Tag, Commit>>
+    public sealed class QueryCommitByTagID : IComplexDataQuery<Errorable<Tuple<Tag, Commit>>>
     {
         private TagID _id;
 
@@ -42,20 +42,20 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return cmd;
         }
 
-        public Task<Tuple<Tag, Commit>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Errorable<Tuple<Tag, Commit>>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return TaskEx.FromResult(retrieve(cmd, dr));
         }
 
-        public Tuple<Tag, Commit> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Errorable<Tuple<Tag, Commit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return retrieve(cmd, dr);
         }
 
-        internal static Tuple<Tag, Commit> retrieve(SqlCommand cmd, SqlDataReader dr)
+        internal static Errorable<Tuple<Tag, Commit>> retrieve(SqlCommand cmd, SqlDataReader dr)
         {
             // If no result, return null:
-            if (!dr.Read()) return null;
+            if (!dr.Read()) return new TagIDRecordDoesNotExistError();
 
             TagID tgid = (TagID)dr.GetSqlBinary(0).Value;
             Tag.Builder tgb = new Tag.Builder(
@@ -67,7 +67,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             );
 
             Tag tg = tgb;
-            if (tg.ID != tgid) throw new InvalidOperationException();
+            if (tg.ID != tgid) return new ComputedTagIDMismatchError();
 
             const int offs = 6;
             CommitID id = (CommitID)dr.GetSqlBinary(0 + offs).Value;
@@ -91,7 +91,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             }
 
             Commit cm = cmb;
-            if (cm.ID != id) throw new CommitIDMismatchException(cm.ID, id);
+            if (cm.ID != id) return new ComputedCommitIDMismatchError();
 
             return new Tuple<Tag, Commit>(tg, cm);
         }

@@ -1,0 +1,117 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".generated.cs" #><#
+    var semanticErrors = new ErrorDescriptor[]
+    {
+        new ErrorDescriptor("TagNameAlreadyExistsError", "A tag with that tag name already exists"),
+        new ErrorDescriptor("TagNameDoesNotExistError", "A tag with that tag name does not exist"),
+        new ErrorDescriptor("TagIDRecordDoesNotExistError", "A tag with that TagID does not exist"),
+        new ErrorDescriptor("TreeIDRecordDoesNotExistError", "A tree with that TreeID does not exist"),
+        new ErrorDescriptor("TagNameDoesNotMatchExpectedError", "Retrieved tag name does not match expected tag name"),
+        new ErrorDescriptor("RefDoesNotExistError", "A ref with that ref name does not exist"),
+        new ErrorDescriptor("CommitIDRecordNotFoundError", "A commit with that CommitID does not exist"),
+        new ErrorDescriptor("BlobNotFoundByPathError", "A blob was not found given that path"),
+        new ErrorDescriptor("ComputedTagIDMismatchError", "Computed TagID does not match expected TagID"),
+        new ErrorDescriptor("ComputedCommitIDMismatchError", "Computed CommitID does not match expected CommitID"),
+        new ErrorDescriptor("ComputedTreeIDMismatchError", "Computed TreeID does not match expected TreeID"),
+        new ErrorDescriptor("ComputedBlobIDMismatchError", "Computed BlobID does not match expected BlobID"),
+    };
+
+    var inputErrors = new ErrorDescriptor[]
+    {
+        new ErrorDescriptor("TagParseExpectedCommitError", "Parse error while parsing tag: expected 'commit'"),
+        new ErrorDescriptor("TagParseExpectedNameError", "Parse error while parsing tag: expected 'name'"),
+        new ErrorDescriptor("TagParseExpectedTaggerError", "Parse error while parsing tag: expected 'tagger'"),
+        new ErrorDescriptor("TagParseExpectedDateError", "Parse error while parsing tag: expected 'date'"),
+        new ErrorDescriptor("TagParseBadDateFormatError", "Parse error while parsing tag: bad date format"),
+        new ErrorDescriptor("TagParseExpectedBlankLineError", "Parse error while parsing tag: expected blank line"),
+        new ErrorDescriptor("CommitParseExpectedTreeError", "Parse error while parsing commit: expected 'tree'"),
+        new ErrorDescriptor("CommitParseExpectedCommitterError", "Parse error while parsing commit: expected 'committer'"),
+        new ErrorDescriptor("CommitParseExpectedDateError", "Parse error while parsing commit: expected 'date'"),
+        new ErrorDescriptor("CommitParseBadDateFormatError", "Parse error while parsing tag: bad date format"),
+        new ErrorDescriptor("CommitParseExpectedBlankLineError", "Parse error while parsing commit: expected blank line"),
+    };
+#>
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+
+namespace IVO.Definition.Errors
+{
+<#
+    bool writtenFirst = false;
+    for (int i = 0; i < inputErrors.Length; ++i)
+    {
+        var ty = inputErrors[i];
+        if (!writtenFirst)
+        {
+            writtenFirst = true;
+        }
+        else
+        {
+#>
+
+<#
+        }
+#>
+    public sealed partial class <#= ty.Name #> : InputError
+    {
+<#
+        if (ty.DefaultMessage != null)
+        {
+#>
+        public <#= ty.Name #>() : base("<#= ty.DefaultMessage #>") { }
+<#
+        } // if (ty.DefaultMessage != null)
+#>
+        public <#= ty.Name #>(string message) : base(message) { }
+        public <#= ty.Name #>(string format, params object[] args) : base(format, args) { }
+    }
+<#
+    } // for (int i = 0; i < semanticErrors.Length; ++i)
+#>
+<#
+    for (int i = 0; i < semanticErrors.Length; ++i)
+    {
+        var ty = semanticErrors[i];
+        if (!writtenFirst)
+        {
+            writtenFirst = true;
+        }
+        else
+        {
+#>
+
+<#
+        }
+#>
+    public sealed partial class <#= ty.Name #> : SemanticError
+    {
+<#
+        if (ty.DefaultMessage != null)
+        {
+#>
+        public <#= ty.Name #>() : base("<#= ty.DefaultMessage #>") { }
+<#
+        } // if (ty.DefaultMessage != null)
+#>
+        public <#= ty.Name #>(string message) : base(message) { }
+        public <#= ty.Name #>(string format, params object[] args) : base(format, args) { }
+    }
+<#
+    } // for (int i = 0; i < semanticErrors.Length; ++i)
+#>
+}<#+
+    private sealed class ErrorDescriptor
+    {
+        public ErrorDescriptor(string name, string defaultMessage = null)
+        {
+            this.Name = name;
+            this.DefaultMessage = defaultMessage;
+        }
+
+        public string Name { get; private set; }
+        public string DefaultMessage { get; private set; }
+    }
+#>

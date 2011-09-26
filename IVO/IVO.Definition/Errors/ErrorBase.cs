@@ -6,8 +6,15 @@ using System.Collections.ObjectModel;
 
 namespace IVO.Definition.Errors
 {
-    public abstract class ErrorBase
+    public abstract class ErrorBase : Exception
     {
-        public abstract string Message { get; }
+        protected ErrorBase(string message) : base(message)
+        {
+        }
+
+        protected ErrorBase(string format, params object[] args)
+            : base(String.Format(format, args))
+        {
+        }
     }
 }

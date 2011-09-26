@@ -6,13 +6,13 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Containers;
 using IVO.Definition.Models;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using System.Data;
 using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryTreeRecursivelyByPath : IComplexDataQuery<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>>
+    public class QueryTreeRecursivelyByPath : IComplexDataQuery<Errorable<TreeTree>>
     {
         private TreeTreePath _path;
 
@@ -60,18 +60,18 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
             cmd.AddOutParameter("@treeid", System.Data.SqlDbType.Binary, 20);
             return cmd;
         }
-        
-        public Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+
+        public Task<Errorable<TreeTree>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return TaskEx.FromResult(retrieve(cmd, dr, expectedCapacity));
         }
 
-        public Tuple<TreeID, ImmutableContainer<TreeID, Tree>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Errorable<TreeTree> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return retrieve(cmd, dr, expectedCapacity);
         }
 
-        public Tuple<TreeID, ImmutableContainer<TreeID, Tree>> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Errorable<TreeTree> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             Dictionary<TreeID, Tree.Builder> trees = new Dictionary<TreeID, Tree.Builder>(expectedCapacity);
 
@@ -140,17 +140,16 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
             // If no root assigned, then no tree retrieved:
             if (!root.HasValue) return null;
 
+            List<Tree> finals = new List<Tree>(trees.Count);
+            foreach (KeyValuePair<TreeID, Tree.Builder> pair in trees)
+            {
+                Tree tr = pair.Value;
+                if (tr.ID != pair.Key) return new ComputedTreeIDMismatchError();
+                finals.Add(tr);
+            }
+
             // Return the final result with immutable objects:
-            return new Tuple<TreeID, ImmutableContainer<TreeID, Tree>>(
-                root.Value,
-                new ImmutableContainer<TreeID, Tree>(
-                    tr => tr.ID,
-                    trees.Select(kv =>
-                        // Verify that the retrieved ID is equivalent to the constructed ID:
-                        ((Tree)kv.Value).Assert(tr => kv.Key == tr.ID, tr => new TreeIDMismatchException(tr.ID, kv.Key))
-                    )
-                )
-            );
+            return new TreeTree(root.Value, new ImmutableContainer<TreeID, Tree>(tr => tr.ID, finals));
         }
 
         public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)

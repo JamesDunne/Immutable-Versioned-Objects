@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 
 namespace IVO.Definition.Models
 {
@@ -41,7 +41,7 @@ namespace IVO.Definition.Models
         
         public static explicit operator AbsoluteTreePath(string path)
         {
-            if (String.IsNullOrWhiteSpace(path)) throw new InvalidPathException("Path cannot be empty");
+            if (String.IsNullOrWhiteSpace(path)) throw new InvalidPathError("Path cannot be empty");
 
             // Remove trailing path separator char for parsing:
             if (path[path.Length - 1] == PathSeparatorChar) path = path.Substring(0, path.Length - 1);

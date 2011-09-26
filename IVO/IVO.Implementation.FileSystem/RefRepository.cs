@@ -7,6 +7,7 @@ using IVO.Definition.Models;
 using IVO.Definition.Repositories;
 using System.IO;
 using System.Diagnostics;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.FileSystem
 {
@@ -40,7 +41,7 @@ namespace IVO.Implementation.FileSystem
             }
         }
 
-        private async Task<Ref> getRefByName(RefName refName)
+        private async Task<Errorable<Ref>> getRefByName(RefName refName)
         {
             FileInfo fiTracker = system.getRefPathByRefName(refName);
             if (!fiTracker.Exists) return (Ref)null;
@@ -66,7 +67,10 @@ namespace IVO.Implementation.FileSystem
                 string line = sr.ReadLine();
                 if (line == null) return (Ref)null;
 
-                return new Ref.Builder(refName, CommitID.Parse(line).Value);
+                var ecid = CommitID.TryParse(line);
+                if (ecid.HasErrors) return ecid.Errors;
+
+                return (Ref) new Ref.Builder(refName, ecid.Value);
             }
         }
 
@@ -78,22 +82,25 @@ namespace IVO.Implementation.FileSystem
 
         #endregion
 
-        public Task<Ref> PersistRef(Ref rf)
+        public Task<Errorable<Ref>> PersistRef(Ref rf)
         {
             persistRef(rf);
-            return TaskEx.FromResult(rf);
+            return TaskEx.FromResult((Errorable<Ref>)rf);
         }
 
-        public Task<Ref> GetRefByName(RefName name)
+        public Task<Errorable<Ref>> GetRefByName(RefName name)
         {
             return getRefByName(name);
         }
 
-        public async Task<Ref> DeleteRefByName(RefName name)
+        public async Task<Errorable<Ref>> DeleteRefByName(RefName name)
         {
-            var rf = await getRefByName(name).ConfigureAwait(continueOnCapturedContext: false);
+            var erf = await getRefByName(name).ConfigureAwait(continueOnCapturedContext: false);
+            if (erf.HasErrors) return erf.Errors;
+
             deleteRef(name);
-            return rf;
+            
+            return erf.Value;
         }
     }
 }

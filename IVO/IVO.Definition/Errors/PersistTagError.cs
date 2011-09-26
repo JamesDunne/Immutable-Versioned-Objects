@@ -5,7 +5,7 @@ using System.Text;
 
 namespace IVO.Definition.Errors
 {
-    public sealed class PersistTagError : ErrorBase
+    public sealed class PersistTagError
     {
         public PersistTagError(ErrorType type)
             : base()

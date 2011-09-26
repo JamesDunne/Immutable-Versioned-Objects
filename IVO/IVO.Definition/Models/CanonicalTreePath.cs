@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 
 namespace IVO.Definition.Models
 {
@@ -43,7 +43,7 @@ namespace IVO.Definition.Models
 
         public static explicit operator CanonicalTreePath(string path)
         {
-            if (String.IsNullOrWhiteSpace(path)) throw new InvalidPathException("Path cannot be empty");
+            if (String.IsNullOrWhiteSpace(path)) throw new InvalidPathError("Path cannot be empty");
 
             // Remove trailing path separator char for parsing:
             if (path[path.Length - 1] == PathSeparatorChar) path = path.Substring(0, path.Length - 1);
@@ -89,7 +89,7 @@ namespace IVO.Definition.Models
                 // Take a '..' and remove the last part of the path:
                 if (part == "..")
                 {
-                    if (parts.Count == 0) throw new InvalidPathException("traversed beyond the tree root with too many '..' path elements");
+                    if (parts.Count == 0) throw new InvalidPathError("traversed beyond the tree root with too many '..' path elements");
 
                     // Remove the last part of the absolute path built so far:
                     parts.RemoveAt(parts.Count - 1);

@@ -6,14 +6,14 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Containers;
 using IVO.Definition.Models;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using System.Data;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryTreeIDsByPaths : IComplexDataQuery<ReadOnlyCollection<TreeIDPathMapping>>
+    public class QueryTreeIDsByPaths : IComplexDataQuery<ReadOnlyCollection<Errorable<TreeIDPathMapping>>>
     {
         private CanonicalTreePath[] _paths;
         private TreeID _rootid;
@@ -52,19 +52,19 @@ SELECT  [tr].linked_treeid AS [treeid], tr.[path] FROM rec tr WHERE tr.[path] IN
             return cmd;
         }
         
-        public Task<ReadOnlyCollection<TreeIDPathMapping>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<ReadOnlyCollection<Errorable<TreeIDPathMapping>>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return TaskEx.FromResult(retrieve(cmd, dr, expectedCapacity));
         }
 
-        public ReadOnlyCollection<TreeIDPathMapping> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public ReadOnlyCollection<Errorable<TreeIDPathMapping>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return retrieve(cmd, dr, expectedCapacity);
         }
 
-        public ReadOnlyCollection<TreeIDPathMapping> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public ReadOnlyCollection<Errorable<TreeIDPathMapping>> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            List<TreeIDPathMapping> mappings = new List<TreeIDPathMapping>();
+            List<Errorable<TreeIDPathMapping>> mappings = new List<Errorable<TreeIDPathMapping>>();
 
             // Read the TreeTreeReferences:
             while (dr.Read())
@@ -74,10 +74,11 @@ SELECT  [tr].linked_treeid AS [treeid], tr.[path] FROM rec tr WHERE tr.[path] IN
                 TreeID? id = bid.IsNull ? (TreeID?)null : (TreeID?)bid.Value;
                 string path = dr.GetSqlString(1).Value;
 
+                // TODO: use a function to parse the path and return an error accordingly.
                 mappings.Add(new TreeIDPathMapping(new TreeTreePath(_rootid, (CanonicalTreePath)path), id));
             }
 
-            return new ReadOnlyCollection<TreeIDPathMapping>(mappings);
+            return new ReadOnlyCollection<Errorable<TreeIDPathMapping>>(mappings);
         }
 
         public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)

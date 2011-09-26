@@ -4,13 +4,13 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using System.Data;
 using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public sealed class QueryCommitByRefName : IComplexDataQuery<Tuple<Ref, Commit>>
+    public sealed class QueryCommitByRefName : IComplexDataQuery<Errorable<Tuple<Ref, Commit>>>
     {
         private RefName _refName;
 
@@ -42,20 +42,20 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return cmd;
         }
 
-        public Task<Tuple<Ref, Commit>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Errorable<Tuple<Ref, Commit>>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return TaskEx.FromResult(retrieve(cmd, dr));
         }
 
-        public Tuple<Ref, Commit> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Errorable<Tuple<Ref, Commit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return retrieve(cmd, dr);
         }
 
-        public Tuple<Ref, Commit> retrieve(SqlCommand cmd, SqlDataReader dr)
+        public Errorable<Tuple<Ref, Commit>> retrieve(SqlCommand cmd, SqlDataReader dr)
         {
             // If no result, return null:
-            if (!dr.Read()) return null;
+            if (!dr.Read()) return new RefDoesNotExistError();
 
             Ref.Builder rfb = new Ref.Builder(
                 pName:      (RefName) dr.GetSqlString(0).Value,
@@ -87,7 +87,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             }
 
             Commit cm = cmb;
-            if (cm.ID != id) throw new CommitIDMismatchException(cm.ID, id);
+            if (cm.ID != id) return new ComputedCommitIDMismatchError();
 
             return new Tuple<Ref, Commit>(rf, cm);
         }

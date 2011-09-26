@@ -4,10 +4,11 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL.Persists
 {
-    public sealed class DestroyCommit : IDataOperation<CommitID>
+    public sealed class DestroyCommit : IDataOperation<Errorable<CommitID>>
     {
         private CommitID _id;
 
@@ -30,7 +31,7 @@ namespace IVO.Implementation.SQL.Persists
             return cmd;
         }
 
-        public CommitID Return(SqlCommand cmd, int rowsAffected)
+        public Errorable<CommitID> Return(SqlCommand cmd, int rowsAffected)
         {
             return this._id;
         }

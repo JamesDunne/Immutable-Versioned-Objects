@@ -25,37 +25,29 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public async Task<Either<Tag, PersistTagError>> PersistTag(Tag tg)
+        public async Task<Errorable<Tag>> PersistTag(Tag tg)
         {
             return await db.ExecuteNonQueryAsync(new PersistTag(tg));
         }
 
-        public async Task<Either<Tag, GetTagError>> GetTag(TagID id)
+        public Task<Errorable<Tag>> GetTag(TagID id)
         {
-            Tag tg = await db.ExecuteSingleQueryAsync(new QueryTag(id));
-            if (tg == null) return new GetTagError(GetTagError.ErrorType.TagIDFileDoesNotExist);
-            return tg;
+            return db.ExecuteSingleQueryAsync(new QueryTag(id));
         }
 
-        public async Task<Either<Tag, GetTagError>> GetTagByName(TagName tagName)
+        public Task<Errorable<Tag>> GetTagByName(TagName tagName)
         {
-            Tag tg = await db.ExecuteSingleQueryAsync(new QueryTag(tagName));
-            if (tg == null) return new GetTagError(GetTagError.ErrorType.TagNameFileDoesNotExist);
-            return tg;
+            return db.ExecuteSingleQueryAsync(new QueryTag(tagName));
         }
 
-        public async Task<Either<TagID, DeleteTagError>> DeleteTag(TagID id)
+        public Task<Errorable<TagID>> DeleteTag(TagID id)
         {
-            TagID? delid = await db.ExecuteNonQueryAsync(new DestroyTag(id));
-            if (!delid.HasValue) return new DeleteTagError(new GetTagError(GetTagError.ErrorType.TagIDFileDoesNotExist));
-            return delid.Value;
+            return db.ExecuteNonQueryAsync(new DestroyTag(id));
         }
 
-        public async Task<Either<TagID, DeleteTagError>> DeleteTagByName(TagName tagName)
+        public Task<Errorable<TagID>> DeleteTagByName(TagName tagName)
         {
-            TagID? delid = await db.ExecuteNonQueryAsync(new DestroyTagByName(tagName));
-            if (!delid.HasValue) return new DeleteTagError(new GetTagError(GetTagError.ErrorType.TagNameFileDoesNotExist));
-            return delid.Value;
+            return db.ExecuteNonQueryAsync(new DestroyTagByName(tagName));
         }
 
         public Task<FullQueryResponse<TagQuery, Tag>> SearchTags(TagQuery query)

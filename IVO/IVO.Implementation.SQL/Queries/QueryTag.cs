@@ -4,13 +4,13 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using IVO.Definition;
 using System.Data;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public sealed class QueryTag : ISimpleDataQuery<Tag>
+    public sealed class QueryTag : ISimpleDataQuery<Errorable<Tag>>
     {
         private Either<TagID, TagName> _idOrName;
 
@@ -59,7 +59,7 @@ namespace IVO.Implementation.SQL.Queries
             return cmd;
         }
 
-        public Tag Project(SqlCommand cmd, SqlDataReader dr)
+        public Errorable<Tag> Project(SqlCommand cmd, SqlDataReader dr)
         {
             TagID id = (TagID) dr.GetSqlBinary(0).Value;
 
@@ -72,7 +72,7 @@ namespace IVO.Implementation.SQL.Queries
             );
 
             Tag tg = tb;
-            if (tg.ID != id) throw new TagIDMismatchException(tg.ID, id);
+            if (tg.ID != id) return new ComputedTagIDMismatchError();
 
             return tg;
         }

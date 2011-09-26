@@ -11,6 +11,7 @@ using IVO.Definition;
 using IVO.Definition.Models;
 using IVO.Definition.Containers;
 using IVO.Definition.Repositories;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL
 {
@@ -23,17 +24,17 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public Task<Ref> PersistRef(Ref rf)
+        public Task<Errorable<Ref>> PersistRef(Ref rf)
         {
             return db.ExecuteNonQueryAsync(new PersistRef(rf));
         }
 
-        public Task<Ref> GetRefByName(RefName name)
+        public Task<Errorable<Ref>> GetRefByName(RefName name)
         {
             return db.ExecuteSingleQueryAsync(new QueryRef(name));
         }
 
-        public async Task<Ref> DeleteRefByName(RefName name)
+        public async Task<Errorable<Ref>> DeleteRefByName(RefName name)
         {
             // Grab the ref before we destroy it, just in case:
             var rf = await db.ExecuteSingleQueryAsync(new QueryRef(name));

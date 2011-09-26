@@ -4,7 +4,7 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using System.Data;
 using System.Threading.Tasks;
 
@@ -55,7 +55,7 @@ namespace IVO.Implementation.SQL.Queries
 
             // Read the BlobID:
             BlobID id = (BlobID) dr.GetSqlBinary(0).Value;
-            if (id != this._id) throw new BlobIDMismatchException(this._id, id);
+            if (id != this._id) throw new ComputedBlobIDMismatchError();
 
             // Read the length of the contents:
             long datalength = dr.GetSqlInt64(1).Value;
@@ -71,7 +71,7 @@ namespace IVO.Implementation.SQL.Queries
 
             // Read the BlobID:
             BlobID id = (BlobID)dr.GetSqlBinary(0).Value;
-            if (id != this._id) throw new BlobIDMismatchException(this._id, id);
+            if (id != this._id) throw new ComputedBlobIDMismatchError();
 
             // Read the length of the contents:
             long datalength = dr.GetSqlInt64(1).Value;

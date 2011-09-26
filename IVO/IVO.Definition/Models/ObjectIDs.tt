@@ -65,17 +65,13 @@ namespace IVO.Definition.Models
             return new <#= types[i] #>(tmp);
         }
 
-        public sealed class ParseError : ErrorBase
+        public sealed class ParseError : InputError
         {
-            private string _message;
-
-            internal ParseError(string message) { this._message = message; }
-            internal ParseError(string format, params object[] args) : this(String.Format(format, args)) { }
-
-            public override string Message { get { return this._message; } }
+            internal ParseError(string message) : base(message) { }
+            internal ParseError(string format, params object[] args) : base(format, args) { }
         }
 
-        public static Either<<#= types[i] #>, ParseError> TryParse(string hexValue)
+        public static Errorable<<#= types[i] #>> TryParse(string hexValue)
         {
             // Sanity check first:
             if (hexValue.Length != HexCharLength) return new ParseError("<#= types[i] #> must be {0} characters in length", HexCharLength);

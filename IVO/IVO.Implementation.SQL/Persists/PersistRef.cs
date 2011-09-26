@@ -4,10 +4,11 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL.Persists
 {
-    public sealed class PersistRef : IDataOperation<Ref>
+    public sealed class PersistRef : IDataOperation<Errorable<Ref>>
     {
         private Ref _rf;
 
@@ -37,7 +38,7 @@ END",
             return cmd;
         }
 
-        public Ref Return(SqlCommand cmd, int rowsAffected)
+        public Errorable<Ref> Return(SqlCommand cmd, int rowsAffected)
         {
             return this._rf;
         }

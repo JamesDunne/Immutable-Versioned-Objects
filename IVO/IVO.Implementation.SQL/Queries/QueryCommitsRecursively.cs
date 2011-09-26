@@ -7,13 +7,13 @@ using IVO.Definition.Models;
 using System.Collections.Generic;
 using IVO.Definition.Containers;
 using System.Diagnostics;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using System.Data;
 using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryCommitsRecursively : IComplexDataQuery<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>>
+    public class QueryCommitsRecursively : IComplexDataQuery<Errorable<CommitTree>>
     {
         private CommitID _id;
         private int _depth;
@@ -47,17 +47,17 @@ WHERE   cm.depth <= @depth";
             return cmd;
         }
 
-        public Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public Task<Errorable<CommitTree>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             return TaskEx.FromResult(retrieve(cmd, dr, expectedCount));
         }
 
-        public Tuple<CommitID, ImmutableContainer<CommitID, ICommit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public Errorable<CommitTree> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             return retrieve(cmd, dr, expectedCount);
         }
 
-        public Tuple<CommitID, ImmutableContainer<CommitID, ICommit>> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
+        public Errorable<CommitTree> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
             Dictionary<CommitID, Commit.Builder> commits = new Dictionary<CommitID, Commit.Builder>(expectedCount);
             CommitPartial.Builder cmPartial = null;
@@ -104,22 +104,19 @@ WHERE   cm.depth <= @depth";
                     commits[cmid.Value].Parents.Add(parent_cmid.Value);
             }
 
+            // Finalize each commit builder:
+            List<ICommit> finals = new List<ICommit>(commits.Count);
+            foreach (KeyValuePair<CommitID, Commit.Builder> pair in commits)
+            {
+                Commit cm = pair.Value;
+                // TODO: Would it be useful to know which CommitIDs?
+                if (cm.ID != pair.Key) return new ComputedCommitIDMismatchError();
+                finals.Add(cm);
+            }
+            if (cmPartial != null) finals.Add((CommitPartial)cmPartial);
+
             // Return the final result with immutable objects:
-            return new Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>(
-                this._id,
-                new ImmutableContainer<CommitID, ICommit>(
-                    cm => cm.ID,
-                    commits.Select(kv =>
-                        // Verify that the retrieved ID is equivalent to the constructed ID:
-                        (ICommit) ((Commit)kv.Value).Assert(cm => kv.Key == cm.ID, cm => new CommitIDMismatchException(cm.ID, kv.Key))
-                    ).Concat(
-                        // Add the partial commit if there is one:
-                        (cmPartial == null)
-                          ? new ICommit[0]
-                          : new ICommit[1] { (CommitPartial)cmPartial }
-                    )
-                )
-            );
+            return new CommitTree(this._id, new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, finals));
         }
 
         public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)

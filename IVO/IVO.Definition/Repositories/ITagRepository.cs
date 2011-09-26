@@ -11,15 +11,15 @@ namespace IVO.Definition.Repositories
 {
     public interface ITagRepository
     {
-        Task<Either<Tag, PersistTagError>> PersistTag(Tag tg);
+        Task<Errorable<Tag>> PersistTag(Tag tg);
 
-        Task<Either<TagID, DeleteTagError>> DeleteTag(TagID id);
+        Task<Errorable<TagID>> DeleteTag(TagID id);
 
-        Task<Either<TagID, DeleteTagError>> DeleteTagByName(TagName tagName);
+        Task<Errorable<TagID>> DeleteTagByName(TagName tagName);
 
-        Task<Either<Tag, GetTagError>> GetTag(TagID id);
+        Task<Errorable<Tag>> GetTag(TagID id);
 
-        Task<Either<Tag, GetTagError>> GetTagByName(TagName tagName);
+        Task<Errorable<Tag>> GetTagByName(TagName tagName);
 
         Task<FullQueryResponse<TagQuery, Tag>> SearchTags(TagQuery query);
 

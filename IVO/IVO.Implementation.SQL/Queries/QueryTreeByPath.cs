@@ -6,13 +6,13 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Containers;
 using IVO.Definition.Models;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using System.Data;
 using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public class QueryTreeByPath : IComplexDataQuery<Tree>
+    public class QueryTreeByPath : IComplexDataQuery<Errorable<Tree>>
     {
         private TreeTreePath _path;
 
@@ -46,17 +46,17 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
             return cmd;
         }
 
-        public Task<Tree> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Errorable<Tree>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return TaskEx.FromResult(retrieve(cmd, dr, expectedCapacity));
         }
 
-        public Tree Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Errorable<Tree> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return retrieve(cmd, dr, expectedCapacity);
         }
 
-        public Tree retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Errorable<Tree> retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             Tree.Builder tb = new Tree.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>());
 
@@ -82,7 +82,7 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
 
             Tree tr = tb;
             TreeID retrievedId = (TreeID)((SqlBinary)cmd.Parameters["@treeid"].SqlValue).Value;
-            if (tr.ID != retrievedId) throw new TreeIDMismatchException(tr.ID, retrievedId);
+            if (tr.ID != retrievedId) return new ComputedTreeIDMismatchError();
 
             return tr;
         }

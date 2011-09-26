@@ -4,13 +4,13 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using System.Data;
 using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public sealed class QueryCommit : IComplexDataQuery<Commit>
+    public sealed class QueryCommit : IComplexDataQuery<Errorable<Commit>>
     {
         private CommitID _id;
 
@@ -35,20 +35,20 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return cmd;
         }
 
-        public Task<Commit> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Errorable<Commit>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return TaskEx.FromResult(retrieve(cmd, dr));
         }
 
-        public Commit Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Errorable<Commit> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return retrieve(cmd, dr);
         }
 
-        private Commit retrieve(SqlCommand cmd, SqlDataReader dr)
+        private Errorable<Commit> retrieve(SqlCommand cmd, SqlDataReader dr)
         {
             // If no result, return null:
-            if (!dr.Read()) return null;
+            if (!dr.Read()) return new CommitIDRecordNotFoundError();
 
             CommitID id = (CommitID)dr.GetSqlBinary(0).Value;
 
@@ -71,7 +71,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             }
 
             Commit cm = b;
-            if (cm.ID != id) throw new CommitIDMismatchException(cm.ID, id);
+            if (cm.ID != id) throw new ComputedCommitIDMismatchError();
 
             return cm;
         }

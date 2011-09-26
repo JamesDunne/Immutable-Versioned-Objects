@@ -31,17 +31,7 @@ namespace IVO.Definition.Errors
             return new Errorable<Tsuccess>(errors);
         }
 
-        public static implicit operator Errorable<Tsuccess>(InputError err)
-        {
-            return new Errorable<Tsuccess>((ErrorContainer)err);
-        }
-
-        public static implicit operator Errorable<Tsuccess>(SemanticError err)
-        {
-            return new Errorable<Tsuccess>((ErrorContainer)err);
-        }
-
-        public static implicit operator Errorable<Tsuccess>(PersistenceError err)
+        public static implicit operator Errorable<Tsuccess>(ErrorBase err)
         {
             return new Errorable<Tsuccess>((ErrorContainer)err);
         }

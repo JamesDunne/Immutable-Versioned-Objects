@@ -8,26 +8,19 @@ namespace IVO.Definition.Errors
 {
     public sealed class ErrorContainer
     {
-        private ErrorContainer(ReadOnlyCollection<InputError> inpErrors, ReadOnlyCollection<SemanticError> semErrors, ReadOnlyCollection<PersistenceError> perErrors)
+        public ErrorContainer()
         {
-            this.InputErrors = inpErrors;
-            this.SemanticErrors = semErrors;
-            this.PersistenceErrors = perErrors;
+            this.Errors = EmptyErrors;
         }
 
-        public static implicit operator ErrorContainer(InputError err)
+        private ErrorContainer(ReadOnlyCollection<ErrorBase> errors)
         {
-            return new ErrorContainer(new ReadOnlyCollection<InputError>(new[] { err }), EmptySemanticErrors, EmptyPersistenceErrors);
+            this.Errors = errors;
         }
 
-        public static implicit operator ErrorContainer(SemanticError err)
+        public static implicit operator ErrorContainer(ErrorBase err)
         {
-            return new ErrorContainer(EmptyInputErrors, new ReadOnlyCollection<SemanticError>(new[] { err }), EmptyPersistenceErrors);
-        }
-
-        public static implicit operator ErrorContainer(PersistenceError err)
-        {
-            return new ErrorContainer(EmptyInputErrors, EmptySemanticErrors, new ReadOnlyCollection<PersistenceError>(new[] { err }));
+            return new ErrorContainer(new ReadOnlyCollection<ErrorBase>(new[] { err }));
         }
 
         public static ErrorContainer operator +(ErrorContainer a, ErrorContainer b)
@@ -37,22 +30,16 @@ namespace IVO.Definition.Errors
             if (b == null) return a;
 
             return new ErrorContainer(
-                new ReadOnlyCollection<InputError>(a.InputErrors.Concat(b.InputErrors).ToArray(a.InputErrors.Count + b.InputErrors.Count)),
-                new ReadOnlyCollection<SemanticError>(a.SemanticErrors.Concat(b.SemanticErrors).ToArray(a.SemanticErrors.Count + b.SemanticErrors.Count)),
-                new ReadOnlyCollection<PersistenceError>(a.PersistenceErrors.Concat(b.PersistenceErrors).ToArray(a.PersistenceErrors.Count + b.PersistenceErrors.Count))
+                new ReadOnlyCollection<ErrorBase>(a.Errors.Concat(b.Errors).ToArray(a.Errors.Count + b.Errors.Count))
             );
         }
 
-        public ReadOnlyCollection<InputError> InputErrors { get; private set; }
-        public ReadOnlyCollection<SemanticError> SemanticErrors { get; private set; }
-        public ReadOnlyCollection<PersistenceError> PersistenceErrors { get; private set; }
+        public ReadOnlyCollection<ErrorBase> Errors { get; private set; }
 
-        private static readonly InputError[] emptyInputErrorArray = new InputError[0];
-        private static readonly SemanticError[] emptySemanticErrorArray = new SemanticError[0];
-        private static readonly PersistenceError[] emptyPersistenceErrorArray = new PersistenceError[0];
+        private static readonly ErrorBase[] emptyErrorArray = new InputError[0];
 
-        private static readonly ReadOnlyCollection<InputError> EmptyInputErrors = new ReadOnlyCollection<InputError>(emptyInputErrorArray);
-        private static readonly ReadOnlyCollection<SemanticError> EmptySemanticErrors = new ReadOnlyCollection<SemanticError>(emptySemanticErrorArray);
-        private static readonly ReadOnlyCollection<PersistenceError> EmptyPersistenceErrors = new ReadOnlyCollection<PersistenceError>(emptyPersistenceErrorArray);
+        private static readonly ReadOnlyCollection<ErrorBase> EmptyErrors = new ReadOnlyCollection<ErrorBase>(emptyErrorArray);
+
+        public bool HasAny { get { return Errors.Count > 0; } }
     }
 }

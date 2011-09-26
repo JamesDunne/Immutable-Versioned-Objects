@@ -11,6 +11,7 @@ using IVO.Definition;
 using IVO.Definition.Models;
 using IVO.Definition.Containers;
 using IVO.Definition.Repositories;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL
 {
@@ -27,61 +28,69 @@ namespace IVO.Implementation.SQL
             this.rfrepo = new RefRepository(db);
         }
 
-        public Task<Commit> PersistCommit(Commit cm)
+        public Task<Errorable<Commit>> PersistCommit(Commit cm)
         {
             return db.ExecuteNonQueryAsync(new PersistCommit(cm));
         }
 
-        public Task<CommitID> DeleteCommit(CommitID id)
+        public Task<Errorable<CommitID>> DeleteCommit(CommitID id)
         {
             return db.ExecuteNonQueryAsync(new DestroyCommit(id));
         }
 
-        public Task<Commit> GetCommit(CommitID id)
+        public Task<Errorable<Commit>> GetCommit(CommitID id)
         {
             return db.ExecuteSingleQueryAsync(new QueryCommit(id));
         }
 
-        public Task<Tuple<Tag, Commit>> GetCommitByTag(TagID id)
+        public Task<Errorable<Tuple<Tag, Commit>>> GetCommitByTag(TagID id)
         {
             return db.ExecuteSingleQueryAsync(new QueryCommitByTagID(id));
         }
 
-        public Task<Tuple<Tag, Commit>> GetCommitByTagName(TagName tagName)
+        public Task<Errorable<Tuple<Tag, Commit>>> GetCommitByTagName(TagName tagName)
         {
             return db.ExecuteSingleQueryAsync(new QueryCommitByTagName(tagName));
         }
 
-        public Task<Tuple<Ref, Commit>> GetCommitByRefName(RefName refName)
+        public Task<Errorable<Tuple<Ref, Commit>>> GetCommitByRefName(RefName refName)
         {
             return db.ExecuteSingleQueryAsync(new QueryCommitByRefName(refName));
         }
 
-        public Task<Tuple<CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTree(CommitID id, int depth = 10)
+        public Task<Errorable<CommitTree>> GetCommitTree(CommitID id, int depth = 10)
         {
             return db.ExecuteListQueryAsync(new QueryCommitsRecursively(id, depth));
         }
 
-        public async Task<Tuple<Tag, CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTreeByTagName(TagName tagName, int depth = 10)
+        public async Task<Errorable<Tuple<Tag, CommitTree>>> GetCommitTreeByTagName(TagName tagName, int depth = 10)
         {
             // TODO: implement a single query to handle this
             var etg = await tgrepo.GetTagByName(tagName);
-            if (etg.IsRight) return null;
+            if (etg.HasErrors) return etg.Errors;
             
-            Tag tg = etg.Left;
+            Tag tg = etg.Value;
 
-            var cmtr = await db.ExecuteListQueryAsync(new QueryCommitsRecursively(tg.CommitID, depth));
-            return new Tuple<Tag, CommitID, ImmutableContainer<CommitID, ICommit>>(tg, cmtr.Item1, cmtr.Item2);
+            var ecmtr = await db.ExecuteListQueryAsync(new QueryCommitsRecursively(tg.CommitID, depth));
+            if (ecmtr.HasErrors) return ecmtr.Errors;
+
+            CommitTree cmtr = ecmtr.Value;
+            return new Tuple<Tag, CommitTree>(tg, cmtr);
         }
 
-        public async Task<Tuple<Ref, CommitID, ImmutableContainer<CommitID, ICommit>>> GetCommitTreeByRefName(RefName refName, int depth = 10)
+        public async Task<Errorable<Tuple<Ref, CommitTree>>> GetCommitTreeByRefName(RefName refName, int depth = 10)
         {
             // TODO: implement a single query to handle this
-            var rf = await rfrepo.GetRefByName(refName);
-            if (rf == null) return null;
+            var erf = await rfrepo.GetRefByName(refName);
+            if (erf.HasErrors) return erf.Errors;
 
-            var cmtr = await db.ExecuteListQueryAsync(new QueryCommitsRecursively(rf.CommitID, depth));
-            return new Tuple<Ref, CommitID, ImmutableContainer<CommitID, ICommit>>(rf, cmtr.Item1, cmtr.Item2);
+            Ref rf = erf.Value;
+
+            var ecmtr = await db.ExecuteListQueryAsync(new QueryCommitsRecursively(rf.CommitID, depth));
+            if (ecmtr.HasErrors) return ecmtr.Errors;
+
+            CommitTree cmtr = ecmtr.Value;
+            return new Tuple<Ref, CommitTree>(rf, cmtr);
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 
 namespace IVO.Definition.Models
 {
@@ -32,7 +32,7 @@ namespace IVO.Definition.Models
 
         public static explicit operator RefName(string path)
         {
-            if (String.IsNullOrWhiteSpace(path)) throw new InvalidPathException("Ref name cannot be empty");
+            if (String.IsNullOrWhiteSpace(path)) throw new InvalidPathError("Ref name cannot be empty");
 
             string[] parts = SplitPath(path);
 

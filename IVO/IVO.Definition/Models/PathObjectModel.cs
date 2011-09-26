@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 
 namespace IVO.Definition.Models
 {
@@ -21,12 +21,12 @@ namespace IVO.Definition.Models
             foreach (string part in parts)
             {
                 if (String.IsNullOrWhiteSpace(part))
-                    throw new InvalidPathException("One of the path components is empty or whitespace");
+                    throw new InvalidPathError("One of the path components is empty or whitespace");
 
                 // Make sure the part is a valid name:
                 foreach (char ch in part)
                     if (invalidCharSet.Contains(ch))
-                        throw new InvalidPathException("One of the path components, '{0}', contains an invalid character '{1}'", part, ch);
+                        throw new InvalidPathError("One of the path components, '{0}', contains an invalid character '{1}'", part, ch);
             }
         }
 
@@ -36,16 +36,16 @@ namespace IVO.Definition.Models
             foreach (string part in parts)
             {
                 if (String.IsNullOrWhiteSpace(part))
-                    throw new InvalidPathException("One of the path components is empty or whitespace");
+                    throw new InvalidPathError("One of the path components is empty or whitespace");
 
                 // Make sure the part is a valid name:
                 foreach (char ch in part)
                     if (invalidCharSet.Contains(ch))
-                        throw new InvalidPathException("One of the path components, '{0}', contains an invalid character '{1}'", part, ch);
+                        throw new InvalidPathError("One of the path components, '{0}', contains an invalid character '{1}'", part, ch);
 
                 // Make sure there are no directory traversals:
                 if (part == "." || part == "..")
-                    throw new InvalidPathException("Canonical path cannot contain directory traversals '.' or '..'"); 
+                    throw new InvalidPathError("Canonical path cannot contain directory traversals '.' or '..'"); 
             }
         }
 

@@ -13,6 +13,7 @@ using IVO.Definition.Containers;
 using IVO.Definition.Repositories;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL
 {
@@ -25,7 +26,7 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
-        public async Task<Tree> PersistTree(TreeID rootid, ImmutableContainer<TreeID, Tree> trees)
+        public async Task<Errorable<Tree>> PersistTree(TreeID rootid, ImmutableContainer<TreeID, Tree> trees)
         {
             // Start a query to check what Trees exist already:
             var existTrees = await db.ExecuteListQueryAsync(new QueryTreesExist(trees.Keys), expectedCapacity: trees.Count);
@@ -70,9 +71,9 @@ namespace IVO.Implementation.SQL
             return trees[rootid];
         }
 
-        public Task<Tree[]> GetTrees(params TreeID[] ids)
+        public Task<Errorable<Tree>[]> GetTrees(params TreeID[] ids)
         {
-            Task<Tree>[] tasks = new Task<Tree>[ids.Length];
+            Task<Errorable<Tree>>[] tasks = new Task<Errorable<Tree>>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
             {
                 TreeID id = ids[i];
@@ -81,41 +82,41 @@ namespace IVO.Implementation.SQL
             return TaskEx.WhenAll(tasks);
         }
 
-        public Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursively(TreeID rootid)
+        public Task<Errorable<TreeTree>> GetTreeRecursively(TreeID rootid)
         {
             return db.ExecuteListQueryAsync(new QueryTreeRecursively(rootid));
         }
 
-        public Task<TreeID> DeleteTreeRecursively(TreeID rootid)
+        public Task<Errorable<TreeID>> DeleteTreeRecursively(TreeID rootid)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Tuple<TreeID, ImmutableContainer<TreeID, Tree>>> GetTreeRecursivelyFromPath(TreeTreePath path)
+        public Task<Errorable<TreeTree>> GetTreeRecursivelyFromPath(TreeTreePath path)
         {
             return db.ExecuteSingleQueryAsync(new QueryTreeRecursivelyByPath(path));
         }
 
-        public Task<Tree> GetTree(TreeID id)
+        public Task<Errorable<Tree>> GetTree(TreeID id)
         {
             return db.ExecuteSingleQueryAsync(new QueryTree(id));
         }
 
-        public async Task<TreeIDPathMapping> GetTreeIDByPath(TreeTreePath path)
+        public async Task<Errorable<TreeIDPathMapping>> GetTreeIDByPath(TreeTreePath path)
         {
             var treeIDs = await db.ExecuteSingleQueryAsync(new QueryTreeIDsByPaths(path.RootTreeID, path.Path));
             if (treeIDs.Count == 0) return new TreeIDPathMapping(path, (TreeID?)null);
             return treeIDs[0];
         }
 
-        public async Task<TreeIDPathMapping[]> GetTreeIDsByPaths(params TreeTreePath[] paths)
+        public async Task<Errorable<TreeIDPathMapping>[]> GetTreeIDsByPaths(params TreeTreePath[] paths)
         {
             // Since we cannot query the database with multiple root TreeIDs at once, group all the
             // paths that share the same root TreeID together and submit those in one query.
 
             var rootTreeIDGroups = from path in paths group path by path.RootTreeID;
 
-            var tasks = new List<Task<ReadOnlyCollection<TreeIDPathMapping>>>(capacity: paths.Length);
+            var tasks = new List<Task<ReadOnlyCollection<Errorable<TreeIDPathMapping>>>>(capacity: paths.Length);
             using (var en = rootTreeIDGroups.GetEnumerator())
             {
                 for (int i = 0; en.MoveNext(); ++i)

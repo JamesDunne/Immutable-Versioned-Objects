@@ -4,10 +4,11 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL.Persists
 {
-    public sealed class DestroyTagByName : IDataOperation<TagID?>
+    public sealed class DestroyTagByName : IDataOperation<Errorable<TagID>>
     {
         private TagName _tagName;
 
@@ -35,11 +36,11 @@ END",
             return cmd;
         }
 
-        public TagID? Return(SqlCommand cmd, int rowsAffected)
+        public Errorable<TagID> Return(SqlCommand cmd, int rowsAffected)
         {
             SqlBinary tagId = (SqlBinary)cmd.Parameters["@tagid"].SqlValue;
 
-            if (tagId.IsNull) return (TagID?)null;
+            if (tagId.IsNull) return new TagNameDoesNotExistError();
 
             return (TagID) tagId.Value;
         }

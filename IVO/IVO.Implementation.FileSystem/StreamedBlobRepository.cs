@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using IVO.Definition.Containers;
-using IVO.Definition.Exceptions;
+using IVO.Definition.Errors;
 using IVO.Definition.Models;
 using IVO.Definition.Repositories;
 using System.Diagnostics;

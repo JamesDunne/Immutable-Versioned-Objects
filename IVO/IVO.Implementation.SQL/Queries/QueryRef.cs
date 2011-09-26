@@ -5,10 +5,11 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
 using System.Data;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public sealed class QueryRef : ISimpleDataQuery<Ref>
+    public sealed class QueryRef : ISimpleDataQuery<Errorable<Ref>>
     {
         private RefName _name;
 
@@ -32,7 +33,7 @@ namespace IVO.Implementation.SQL.Queries
             return cmd;
         }
 
-        public Ref Project(SqlCommand cmd, SqlDataReader dr)
+        public Errorable<Ref> Project(SqlCommand cmd, SqlDataReader dr)
         {
             Ref.Builder b = new Ref.Builder(
                 pName:      (RefName) dr.GetSqlString(0).Value,

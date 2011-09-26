@@ -6,10 +6,11 @@ using Asynq;
 using IVO.Definition.Models;
 using System.Data;
 using System.Threading.Tasks;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public sealed class QueryCommitByTagName : IComplexDataQuery<Tuple<Tag, Commit>>
+    public sealed class QueryCommitByTagName : IComplexDataQuery<Errorable<Tuple<Tag, Commit>>>
     {
         private TagName _tagName;
 
@@ -41,12 +42,12 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return cmd;
         }
 
-        public Task<Tuple<Tag, Commit>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Task<Errorable<Tuple<Tag, Commit>>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return TaskEx.FromResult(QueryCommitByTagID.retrieve(cmd, dr));
         }
 
-        public Tuple<Tag, Commit> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        public Errorable<Tuple<Tag, Commit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
             return QueryCommitByTagID.retrieve(cmd, dr);
         }

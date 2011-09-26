@@ -37,24 +37,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Containers\ImmutableContainer.cs" />
-    <Compile Include="Errors\DeleteTagError.cs" />
     <Compile Include="Errors\ErrorBase.cs" />
     <Compile Include="Errors\ErrorContainer.cs" />
-    <Compile Include="Errors\GetTagError.cs" />
     <Compile Include="Errors\Errorable.cs" />
     <Compile Include="Errors\InputError.cs" />
-    <Compile Include="Errors\IPersistenceError.cs" />
-    <Compile Include="Errors\ISemanticError.cs" />
-    <Compile Include="Exceptions\CommitIDMistmatchException.cs" />
-    <Compile Include="Exceptions\BlobIDMistmatchException.cs" />
-    <Compile Include="Exceptions\ObjectParseException.cs" />
-    <Compile Include="Exceptions\TreeIDMistmatchException.cs" />
-    <Compile Include="Exceptions\InvalidPathException.cs" />
+    <Compile Include="Errors\InvalidPathError.cs" />
+    <Compile Include="Errors\Errors.generated.cs">
+      <DependentUpon>Errors.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Errors\PersistenceError.cs" />
+    <Compile Include="Errors\SemanticError.cs" />
     <Compile Include="Functional.cs" />
     <Compile Include="Models\AbsoluteBlobPath.cs" />
     <Compile Include="Models\AbsoluteTreePath.cs" />
     <Compile Include="Models\Commit.cs" />
     <Compile Include="Models\CommitPartial.cs" />
+    <Compile Include="Models\CommitTree.cs" />
+    <Compile Include="Models\TreeTree.cs" />
     <Compile Include="Models\FullQueryResponse.cs" />
     <Compile Include="Models\TagName.cs" />
     <Compile Include="Models\RefName.cs" />
@@ -79,7 +80,6 @@
     <Compile Include="Repositories\ITagRepository.cs" />
     <Compile Include="Repositories\ITreePathStreamedBlobRepository.cs" />
     <Compile Include="Repositories\ITreeRepository.cs" />
-    <Compile Include="Exceptions\TagIDMismatchException.cs" />
     <Compile Include="Models\TagQuery.cs" />
     <Compile Include="Models\OrderByApplication.cs" />
     <Compile Include="Models\OrderByDirection.cs" />
@@ -87,8 +87,11 @@
     <Compile Include="Models\PagingRequest.cs" />
     <Compile Include="Models\OrderedResponse.cs" />
     <Compile Include="Models\PagedResponse.cs" />
-    <Compile Include="Errors\PersistTagError.cs" />
     <Compile Include="SHA1StreamWriter.cs" />
+    <None Include="Errors\Errors.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Errors.generated.cs</LastGenOutput>
+    </None>
     <None Include="Models\ImmutableModels.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ImmutableModels.generated.cs</LastGenOutput>
