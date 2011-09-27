@@ -84,8 +84,9 @@ namespace IVO.Implementation.FileSystem
             // Don't recreate an existing blob:
             if (path.Exists)
             {
-                Debug.WriteLine(String.Format("Blob already exists at path '{0}', deleting...", path.FullName));
-                path.Delete();
+                Debug.WriteLine(String.Format("Blob already exists at path '{0}', deleting temporary...", path.FullName));
+                tmpPath.Delete();
+                return (IStreamedBlob)new StreamedBlob(this, blid, length);
             }
 
             // Move the temp file to the final blob filename:
@@ -107,7 +108,7 @@ namespace IVO.Implementation.FileSystem
             {
                 var blob = blobs[i];
                 // Start a new task to contain each asynchronous task so that they can start up in parallel with one another:
-                persistTasks[i] = TaskEx.RunEx(() => persistBlob(blob));
+                persistTasks[i] = persistBlob(blob);
             }
 
             Debug.WriteLine("Awaiting all persistence tasks...");
