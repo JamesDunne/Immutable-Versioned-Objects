@@ -97,25 +97,18 @@ namespace IVO.Definition.Errors
         public TagNameDoesNotExistError(string format, params object[] args) : base(format, args) { }
     }
 
-    public sealed partial class TagIDRecordDoesNotExistError : SemanticError
-    {
-        public TagIDRecordDoesNotExistError() : base("A tag with that TagID does not exist") { }
-        public TagIDRecordDoesNotExistError(string message) : base(message) { }
-        public TagIDRecordDoesNotExistError(string format, params object[] args) : base(format, args) { }
-    }
-
-    public sealed partial class TreeIDRecordDoesNotExistError : SemanticError
-    {
-        public TreeIDRecordDoesNotExistError() : base("A tree with that TreeID does not exist") { }
-        public TreeIDRecordDoesNotExistError(string message) : base(message) { }
-        public TreeIDRecordDoesNotExistError(string format, params object[] args) : base(format, args) { }
-    }
-
     public sealed partial class TagNameDoesNotMatchExpectedError : SemanticError
     {
         public TagNameDoesNotMatchExpectedError() : base("Retrieved tag name does not match expected tag name") { }
         public TagNameDoesNotMatchExpectedError(string message) : base(message) { }
         public TagNameDoesNotMatchExpectedError(string format, params object[] args) : base(format, args) { }
+    }
+
+    public sealed partial class BlobNotFoundByPathError : SemanticError
+    {
+        public BlobNotFoundByPathError() : base("A blob was not found given that path") { }
+        public BlobNotFoundByPathError(string message) : base(message) { }
+        public BlobNotFoundByPathError(string format, params object[] args) : base(format, args) { }
     }
 
     public sealed partial class RefDoesNotExistError : SemanticError
@@ -132,11 +125,25 @@ namespace IVO.Definition.Errors
         public CommitIDRecordNotFoundError(string format, params object[] args) : base(format, args) { }
     }
 
-    public sealed partial class BlobNotFoundByPathError : SemanticError
+    public sealed partial class TagIDRecordDoesNotExistError : SemanticError
     {
-        public BlobNotFoundByPathError() : base("A blob was not found given that path") { }
-        public BlobNotFoundByPathError(string message) : base(message) { }
-        public BlobNotFoundByPathError(string format, params object[] args) : base(format, args) { }
+        public TagIDRecordDoesNotExistError() : base("A tag with that TagID does not exist") { }
+        public TagIDRecordDoesNotExistError(string message) : base(message) { }
+        public TagIDRecordDoesNotExistError(string format, params object[] args) : base(format, args) { }
+    }
+
+    public sealed partial class TreeIDRecordDoesNotExistError : SemanticError
+    {
+        public TreeIDRecordDoesNotExistError() : base("A tree with that TreeID does not exist") { }
+        public TreeIDRecordDoesNotExistError(string message) : base(message) { }
+        public TreeIDRecordDoesNotExistError(string format, params object[] args) : base(format, args) { }
+    }
+
+    public sealed partial class BlobIDRecordDoesNotExistError : SemanticError
+    {
+        public BlobIDRecordDoesNotExistError() : base("A blob with that BlobID does not exist") { }
+        public BlobIDRecordDoesNotExistError(string message) : base(message) { }
+        public BlobIDRecordDoesNotExistError(string format, params object[] args) : base(format, args) { }
     }
 
     public sealed partial class ComputedTagIDMismatchError : SemanticError

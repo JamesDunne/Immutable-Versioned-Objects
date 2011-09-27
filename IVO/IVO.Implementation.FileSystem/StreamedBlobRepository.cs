@@ -29,7 +29,7 @@ namespace IVO.Implementation.FileSystem
             this.system = system;
         }
 
-        private async Task<IStreamedBlob> persistBlob(PersistingBlob blob)
+        private async Task<Errorable<IStreamedBlob>> persistBlob(PersistingBlob blob)
         {
             Debug.WriteLine(String.Format("Starting persistence of blob"));
 
@@ -86,24 +86,24 @@ namespace IVO.Implementation.FileSystem
             {
                 Debug.WriteLine(String.Format("Blob already exists at path '{0}', deleting temporary...", path.FullName));
                 tmpPath.Delete();
-                return (IStreamedBlob)new StreamedBlob(this, blid, length);
+                return new Errorable<IStreamedBlob>( (IStreamedBlob)new StreamedBlob(this, blid, length) );
             }
 
             // Move the temp file to the final blob filename:
             File.Move(tmpPath.FullName, path.FullName);
 
-            return (IStreamedBlob)new StreamedBlob(this, blid, length);
+            return new Errorable<IStreamedBlob>( (IStreamedBlob)new StreamedBlob(this, blid, length) );
         }
 
-        public async Task<IStreamedBlob[]> PersistBlobs(params PersistingBlob[] blobs)
+        public async Task<Errorable<IStreamedBlob>[]> PersistBlobs(params PersistingBlob[] blobs)
         {
             if (blobs == null) throw new ArgumentNullException("blobs");
-            if (blobs.Length == 0) return new IStreamedBlob[0];
+            if (blobs.Length == 0) return new Errorable<IStreamedBlob>[0];
 
             // TODO: implement a filesystem lock?
 
             // Persist each blob to the 'objects' folder asynchronously:
-            Task<IStreamedBlob>[] persistTasks = new Task<IStreamedBlob>[blobs.Length];
+            Task<Errorable<IStreamedBlob>>[] persistTasks = new Task<Errorable<IStreamedBlob>>[blobs.Length];
             for (int i = 0; i < blobs.Length; ++i)
             {
                 var blob = blobs[i];
@@ -120,48 +120,65 @@ namespace IVO.Implementation.FileSystem
             return streamedBlobs;
         }
 
-        private void deleteBlob(BlobID id)
+        private Errorable<BlobID> deleteBlob(BlobID id)
         {
             FileInfo path = system.getPathByID(id);
 
-            if (path.Exists)
-                path.Delete();
+            if (!path.Exists) return new BlobIDRecordDoesNotExistError();
 
-            return;
+            path.Delete();
+
+            return id;
         }
 
-        public Task<BlobID[]> DeleteBlobs(params BlobID[] ids)
+        public Task<Errorable<BlobID>[]> DeleteBlobs(params BlobID[] ids)
         {
             if (ids == null) throw new ArgumentNullException("ids");
-            if (ids.Length == 0) return TaskEx.FromResult(ids);
+            if (ids.Length == 0) return TaskEx.FromResult(new Errorable<BlobID>[0]);
 
             // Delete each blob synchronously:
+            Errorable<BlobID>[] results = new Errorable<BlobID>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
             {
                 BlobID id = ids[i];
-                deleteBlob(id);
+                results[i] = deleteBlob(id);
             }
 
             // TODO: Run through all the 'objects' directories and prune empty ones.
             // Too eager? Could cause conflicts with other threads.
 
-            return TaskEx.FromResult(ids);
+            return TaskEx.FromResult(results);
         }
 
-        private Task<IStreamedBlob> getBlob(BlobID id)
+        private Task<Errorable<IStreamedBlob>> getBlob(BlobID id)
         {
             var fi = system.getPathByID(id);
-            if (!fi.Exists) return TaskEx.FromResult( (IStreamedBlob)null );
+            if (!fi.Exists) return TaskEx.FromResult( (Errorable<IStreamedBlob>) new BlobIDRecordDoesNotExistError() );
 
-            return TaskEx.FromResult( (IStreamedBlob)new StreamedBlob(this, id, fi.Length) );
+            return TaskEx.FromResult( new Errorable<IStreamedBlob>((IStreamedBlob)new StreamedBlob(this, id, fi.Length)) );
         }
 
-        public Task<IStreamedBlob[]> GetBlobs(params BlobID[] ids)
+        public Task<Errorable<IStreamedBlob>[]> GetBlobs(params BlobID[] ids)
         {
-            Task<IStreamedBlob>[] tasks = new Task<IStreamedBlob>[ids.Length];
+            Task<Errorable<IStreamedBlob>>[] tasks = new Task<Errorable<IStreamedBlob>>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
                 tasks[i] = getBlob(ids[i]);
             return TaskEx.WhenAll(tasks);
+        }
+
+        public Task<Errorable<IStreamedBlob>> PersistBlob(PersistingBlob blob)
+        {
+            return persistBlob(blob);
+        }
+
+        public Task<Errorable<BlobID>> DeleteBlob(BlobID id)
+        {
+            return TaskEx.FromResult( deleteBlob(id) );
+        }
+
+        public Task<Errorable<IStreamedBlob>> GetBlob(BlobID id)
+        {
+            return getBlob(id);
         }
     }
 }

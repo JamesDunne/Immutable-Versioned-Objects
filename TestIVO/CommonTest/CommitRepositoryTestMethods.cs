@@ -64,7 +64,7 @@ namespace TestIVO.CommonTest
                 new List<TreeTreeReference>(0),
                 new List<TreeBlobReference>
                 {
-                    new TreeBlobReference.Builder("README", sblobs[0].ID)
+                    new TreeBlobReference.Builder("README", sblobs[0].Value.ID)
                 }
             );
 

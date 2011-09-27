@@ -4,10 +4,11 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL.Persists
 {
-    public sealed class DestroyBlob : IDataOperation<BlobID>
+    public sealed class DestroyBlob : IDataOperation<Errorable<BlobID>>
     {
         private BlobID _id;
 
@@ -30,7 +31,7 @@ namespace IVO.Implementation.SQL.Persists
             return cmd;
         }
 
-        public BlobID Return(SqlCommand cmd, int rowsAffected)
+        public Errorable<BlobID> Return(SqlCommand cmd, int rowsAffected)
         {
             return this._id;
         }

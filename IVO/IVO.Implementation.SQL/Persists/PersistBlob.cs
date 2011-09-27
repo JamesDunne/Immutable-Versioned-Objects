@@ -4,10 +4,11 @@ using System.Data.SqlTypes;
 using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL.Persists
 {
-    public sealed class PersistBlob : IDataOperation<IStreamedBlob>
+    public sealed class PersistBlob : IDataOperation<Errorable<IStreamedBlob>>
     {
         private PersistingBlob _bl;
         private StreamedBlobRepository _blrepo;
@@ -31,7 +32,7 @@ namespace IVO.Implementation.SQL.Persists
             return null;
         }
 
-        public IStreamedBlob Return(SqlCommand cmd, int rowsAffected)
+        public Errorable<IStreamedBlob> Return(SqlCommand cmd, int rowsAffected)
         {
             return new StreamedBlob(_blrepo, new BlobID(), _length);
         }

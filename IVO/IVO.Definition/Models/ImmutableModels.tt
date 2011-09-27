@@ -53,7 +53,7 @@
         },
 
         new {
-            name = "Tree",
+            name = "TreeNode",
             comment = "A tree object.",
             idType = "TreeID",
             members = new[] {

@@ -8,7 +8,7 @@ namespace IVO.Definition.Errors
 {
     public sealed class Errorable<Tsuccess>
     {
-        private Errorable(Tsuccess value)
+        public Errorable(Tsuccess value)
         {
             this._value = value;
             this.HasErrors = false;

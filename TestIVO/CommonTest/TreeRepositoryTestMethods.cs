@@ -11,6 +11,7 @@ using IVO.Definition.Models;
 using IVO.Definition.Repositories;
 using IVO.Definition.Containers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using IVO.Definition.Errors;
 
 namespace TestIVO.CommonTest
 {
@@ -29,7 +30,7 @@ namespace TestIVO.CommonTest
         private ImmutableContainer<TreeID, TreeNode> trees;
 
         private TreeNode trTemplate = null, trRoot = null;
-        private IStreamedBlob[] sblobs;
+        private Errorable<IStreamedBlob>[] sblobs;
 
         internal static void RecursivePrint(TreeID treeID, ImmutableContainer<TreeID, TreeNode> trees, int depth = 1)
         {
@@ -70,7 +71,7 @@ namespace TestIVO.CommonTest
             trTemplate = new TreeNode.Builder(
                 new List<TreeTreeReference>(0),
                 new List<TreeBlobReference> {
-                    new TreeBlobReference.Builder("header", sblobs[0].ID)
+                    new TreeBlobReference.Builder("header", sblobs[0].Value.ID)
                 }
             );
 

@@ -49,7 +49,7 @@ namespace TestIVO.CommonTest
             Stopwatch sw = Stopwatch.StartNew();
             var streamedBlobs = await blrepo.PersistBlobs(blobs);
 
-            Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, streamedBlobs.Sum(b => b.Length) * 1000d / sw.ElapsedMilliseconds);
+            Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, streamedBlobs.Sum(b => b.Value.Length) * 1000d / sw.ElapsedMilliseconds);
         }
 
         internal async Task DeleteBlobsTest()
@@ -61,7 +61,7 @@ namespace TestIVO.CommonTest
             var streamedBlobs = await blrepo.PersistBlobs(blobs);
 
             // Delete the newly persisted blobs:
-            await blrepo.DeleteBlobs(streamedBlobs.Select(bl => bl.ID).ToArray(numBlobs));
+            await blrepo.DeleteBlobs(streamedBlobs.Select(bl => bl.Value.ID).ToArray(numBlobs));
         }
 
         internal async Task GetBlobsTest()
@@ -77,13 +77,13 @@ namespace TestIVO.CommonTest
             Stopwatch sw = Stopwatch.StartNew();
             var streamedBlobs = await blrepo.PersistBlobs(blobs);
 
-            Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, streamedBlobs.Sum(b => b.Length) * 1000d / sw.ElapsedMilliseconds);
+            Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, streamedBlobs.Sum(b => b.Value.Length) * 1000d / sw.ElapsedMilliseconds);
 
             // Get the blobs:
-            var getBlobs = await blrepo.GetBlobs(streamedBlobs.Select(bl => bl.ID).ToArray(streamedBlobs.Length));
+            var getBlobs = await blrepo.GetBlobs(streamedBlobs.Select(bl => bl.Value.ID).ToArray(streamedBlobs.Length));
             for (int i = 0; i < getBlobs.Length; ++i)
             {
-                Console.WriteLine("{0}", getBlobs[i].ID);
+                Console.WriteLine("{0}", getBlobs[i].Value.ID);
             }
         }
 
@@ -99,7 +99,7 @@ namespace TestIVO.CommonTest
             Console.WriteLine("Awaiting fetch of streamed blob.");
 
             Console.WriteLine("Awaiting ReadStream to complete...");
-            await streamedBlobs[0].ReadStreamAsync(async blsr =>
+            await streamedBlobs[0].Value.ReadStreamAsync(async blsr =>
             {
                 Console.WriteLine("blob is {0} length", blsr.Length);
 
