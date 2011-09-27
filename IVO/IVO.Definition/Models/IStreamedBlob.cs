@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IVO.Definition.Errors;
 
 namespace IVO.Definition.Models
 {
@@ -29,7 +30,7 @@ namespace IVO.Definition.Models
         /// <typeparam name="TResult"></typeparam>
         /// <param name="read">Reads content from the underlying Stream until complete.</param>
         /// <returns></returns>
-        Task<TResult> ReadStreamAsync<TResult>(Func<System.IO.Stream, Task<TResult>> read);
+        Task<Errorable<TResult>> ReadStreamAsync<TResult>(Func<System.IO.Stream, Task<Errorable<TResult>>> read) where TResult : class;
 
         /// <summary>
         /// Starts a Task to open the data stream from the persistence store, passes it to the <paramref name="read"/>
@@ -38,7 +39,7 @@ namespace IVO.Definition.Models
         /// </summary>
         /// <param name="read">Reads content from the underlying Stream until complete.</param>
         /// <returns></returns>
-        Task ReadStreamAsync(Func<System.IO.Stream, Task> read);
+        Task<Errorable> ReadStreamAsync(Func<System.IO.Stream, Task<Errorable>> read);
 
         /// <summary>
         /// Opens the data stream from the persistence store, passes it to the <paramref name="read"/>
@@ -48,7 +49,7 @@ namespace IVO.Definition.Models
         /// <typeparam name="TResult"></typeparam>
         /// <param name="read">Reads content from the underlying Stream until complete.</param>
         /// <returns></returns>
-        TResult ReadStream<TResult>(Func<System.IO.Stream, TResult> read);
+        Errorable<TResult> ReadStream<TResult>(Func<System.IO.Stream, Errorable<TResult>> read) where TResult : class;
 
         /// <summary>
         /// Opens the data stream from the persistence store, passes it to the <paramref name="read"/>
@@ -57,6 +58,6 @@ namespace IVO.Definition.Models
         /// </summary>
         /// <param name="read">Reads content from the underlying Stream until complete.</param>
         /// <returns></returns>
-        void ReadStream(Action<System.IO.Stream> read);
+        Errorable ReadStream(Func<System.IO.Stream, Errorable> read);
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using IVO.Definition.Models;
 using System.Threading.Tasks;
 using IVO.Implementation.SQL.Queries;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL
 {
@@ -22,24 +23,24 @@ namespace IVO.Implementation.SQL
         public BlobID ID { get; private set; }
         public long? Length { get; private set; }
 
-        public Task<TResult> ReadStreamAsync<TResult>(Func<System.IO.Stream, Task<TResult>> read)
+        public Task<Errorable<TResult>> ReadStreamAsync<TResult>(Func<System.IO.Stream, Task<Errorable<TResult>>> read) where TResult : class
         {
-            return blrepo.DB.ExecuteSingleQueryAsync(new QueryStreamedBlob<TResult>(this.ID, read));
+            return blrepo.DB.ExecuteSingleQueryAsync(new QueryStreamedBlob<Errorable<TResult>>(this.ID, read));
         }
 
-        public Task ReadStreamAsync(Func<System.IO.Stream, Task> read)
+        public Task<Errorable> ReadStreamAsync(Func<System.IO.Stream, Task<Errorable>> read)
         {
-            return blrepo.DB.ExecuteSingleQueryAsync(new QueryStreamedBlob<int>(this.ID, async sr => { await read(sr); return 0; }));
+            return blrepo.DB.ExecuteSingleQueryAsync(new QueryStreamedBlob<Errorable>(this.ID, async sr => { await read(sr); return Errorable.NoErrors; }));
         }
 
-        public TResult ReadStream<TResult>(Func<System.IO.Stream, TResult> read)
+        public Errorable<TResult> ReadStream<TResult>(Func<System.IO.Stream, Errorable<TResult>> read) where TResult : class
         {
-            return blrepo.DB.ExecuteSingleQuery(new QueryStreamedBlob<TResult>(this.ID, read));
+            return blrepo.DB.ExecuteSingleQuery(new QueryStreamedBlob<Errorable<TResult>>(this.ID, read));
         }
 
-        public void ReadStream(Action<System.IO.Stream> read)
+        public Errorable ReadStream(Func<System.IO.Stream, Errorable> read)
         {
-            blrepo.DB.ExecuteSingleQuery(new QueryStreamedBlob<int>(this.ID, sr => { read(sr); return 0; }));
+            return blrepo.DB.ExecuteSingleQuery(new QueryStreamedBlob<Errorable>(this.ID, sr => { read(sr); return Errorable.NoErrors; }));
         }
     }
 }

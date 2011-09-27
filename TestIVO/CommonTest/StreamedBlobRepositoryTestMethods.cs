@@ -8,6 +8,7 @@ using IVO.Definition;
 using IVO.Definition.Models;
 using IVO.Definition.Repositories;
 using IVO.TestSupport;
+using IVO.Definition.Errors;
 
 namespace TestIVO.CommonTest
 {
@@ -130,6 +131,8 @@ namespace TestIVO.CommonTest
                 {
                     Console.WriteLine(ex.ToString());
                 }
+
+                return Errorable.NoErrors;
             });
         }
     }

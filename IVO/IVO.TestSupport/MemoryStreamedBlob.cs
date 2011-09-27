@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using IVO.Definition.Models;
 using System.Threading.Tasks;
+using IVO.Definition.Errors;
 
 namespace IVO.TestSupport
 {
@@ -23,28 +24,28 @@ namespace IVO.TestSupport
 
         public long? Length { get { return buf.LongLength; } }
 
-        public async Task<TResult> ReadStreamAsync<TResult>(Func<System.IO.Stream, Task<TResult>> read)
+        public async Task<Errorable<TResult>> ReadStreamAsync<TResult>(Func<System.IO.Stream, Task<Errorable<TResult>>> read) where TResult : class
         {
             using (var ms = new System.IO.MemoryStream(buf))
                 return await read(ms);
         }
 
-        public async Task ReadStreamAsync(Func<System.IO.Stream, Task> read)
+        public async Task<Errorable> ReadStreamAsync(Func<System.IO.Stream, Task<Errorable>> read)
         {
             using (var ms = new System.IO.MemoryStream(buf))
-                await read(ms);
+                return await read(ms);
         }
 
-        public TResult ReadStream<TResult>(Func<System.IO.Stream, TResult> read)
+        public Errorable<TResult> ReadStream<TResult>(Func<System.IO.Stream, Errorable<TResult>> read) where TResult : class
         {
             using (var ms = new System.IO.MemoryStream(buf))
                 return read(ms);
         }
 
-        public void ReadStream(Action<System.IO.Stream> read)
+        public Errorable ReadStream(Func<System.IO.Stream, Errorable> read)
         {
             using (var ms = new System.IO.MemoryStream(buf))
-                read(ms);
+                return read(ms);
         }
     }
 }

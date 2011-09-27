@@ -42,4 +42,34 @@ namespace IVO.Definition.Errors
         public bool HasErrors { get; private set; }
         public ErrorContainer Errors { get; private set; }
     }
+    
+    public sealed class Errorable
+    {
+        private Errorable()
+        {
+            this.HasErrors = false;
+            this.Errors = new ErrorContainer();
+        }
+
+        private Errorable(ErrorContainer errors)
+        {
+            this.HasErrors = true;
+            this.Errors = errors;
+        }
+
+        public static implicit operator Errorable(ErrorContainer errors)
+        {
+            return new Errorable(errors);
+        }
+
+        public static implicit operator Errorable(ErrorBase err)
+        {
+            return new Errorable((ErrorContainer)err);
+        }
+
+        public static readonly Errorable NoErrors = new Errorable();
+
+        public bool HasErrors { get; private set; }
+        public ErrorContainer Errors { get; private set; }
+    }
 }

@@ -77,7 +77,7 @@ namespace IVO.Implementation.FileSystem
             if (etrm.HasErrors) return etrm.Errors;
             
             TreeIDPathMapping trm = etrm.Value;
-            if (!trm.TreeID.HasValue) return (TreePathStreamedBlob)null;
+            if (!trm.TreeID.HasValue) return new BlobNotFoundByPathError();
 
             // Get the tree:
             var etr = await trrepo.GetTree(trm.TreeID.Value).ConfigureAwait(continueOnCapturedContext: false);
@@ -88,7 +88,10 @@ namespace IVO.Implementation.FileSystem
             // Get the blob out of this tree:
             // TODO: standardize name comparison semantics:
             var trbl = tr.Blobs.SingleOrDefault(x => x.Name == treePath.Path.Name);
-            if (trbl == null) return (TreePathStreamedBlob)null;
+            if (trbl == null) return new BlobNotFoundByPathError();
+
+            // System inconsistency!
+            if (!system.getPathByID(trbl.BlobID).Exists) return new BlobNotFoundByPathError();
 
             return new TreePathStreamedBlob(treePath, new StreamedBlob(blrepo, trbl.BlobID));
         }
