@@ -29,8 +29,23 @@ namespace TestIVO.CommonTest
         private TreeID rootId;
         private ImmutableContainer<TreeID, TreeNode> trees;
 
-        private TreeNode trTemplate = null, trRoot = null;
+        private TreeNode trTemplate = null, trContent = null, trPages = null, trRoot = null;
+        private TreeNode trImages = null, trCSS = null, trJS = null;
+        private TreeNode trSection1 = null, trSection2 = null, trSection3 = null;
         private Errorable<IStreamedBlob>[] sblobs;
+
+        private T assertNoErrors<T>(Errorable<T> err)
+        {
+            if (err.HasErrors)
+            {
+                foreach (var e in err.Errors)
+                {
+                    Console.Error.WriteLine("ERROR: {0}", e.Message);
+                }
+                Assert.IsFalse(err.HasErrors);
+            }
+            return err.Value;
+        }
 
         internal static void RecursivePrint(TreeID treeID, ImmutableContainer<TreeID, TreeNode> trees, int depth = 1)
         {
@@ -68,6 +83,31 @@ namespace TestIVO.CommonTest
 
             sblobs = await blrepo.PersistBlobs(pbHeader);
 
+            trSection1 = new TreeNode.Builder();
+            trSection2 = new TreeNode.Builder();
+            trSection3 = new TreeNode.Builder();
+            trImages = new TreeNode.Builder();
+            trCSS = new TreeNode.Builder();
+            trJS = new TreeNode.Builder();
+
+            trPages = new TreeNode.Builder(
+                new List<TreeTreeReference> {
+                    new TreeTreeReference.Builder("section1", trSection1.ID),
+                    new TreeTreeReference.Builder("section2", trSection2.ID),
+                    new TreeTreeReference.Builder("section3", trSection3.ID)
+                },
+                new List<TreeBlobReference>(0)
+            );
+
+            trContent = new TreeNode.Builder(
+                new List<TreeTreeReference> {
+                    new TreeTreeReference.Builder("images", trImages.ID),
+                    new TreeTreeReference.Builder("css", trCSS.ID),
+                    new TreeTreeReference.Builder("js", trJS.ID)
+                },
+                new List<TreeBlobReference>(0)
+            );
+
             trTemplate = new TreeNode.Builder(
                 new List<TreeTreeReference>(0),
                 new List<TreeBlobReference> {
@@ -77,13 +117,15 @@ namespace TestIVO.CommonTest
 
             trRoot = new TreeNode.Builder(
                 new List<TreeTreeReference> {
-                    new TreeTreeReference.Builder("template", trTemplate.ID)
+                    new TreeTreeReference.Builder("template", trTemplate.ID),
+                    new TreeTreeReference.Builder("content", trContent.ID),
+                    new TreeTreeReference.Builder("pages", trPages.ID)
                 },
                 new List<TreeBlobReference>(0)
             );
 
             rootId = trRoot.ID;
-            trees = new ImmutableContainer<TreeID, TreeNode>(tr => tr.ID, trTemplate, trRoot);
+            trees = new ImmutableContainer<TreeID, TreeNode>(tr => tr.ID, trSection1, trSection2, trSection3, trPages, trImages, trCSS, trJS, trContent, trTemplate, trRoot);
             RecursivePrint(trRoot.ID, trees);
         }
 
@@ -92,7 +134,7 @@ namespace TestIVO.CommonTest
             await createTrees();
 
             var ept = await trrepo.PersistTree(rootId, trees);
-            Assert.IsFalse(ept.HasErrors);
+            assertNoErrors(ept);
         }
 
         internal async Task GetTreesTest()
@@ -100,13 +142,13 @@ namespace TestIVO.CommonTest
             await createTrees();
 
             var ept = await trrepo.PersistTree(rootId, trees);
-            Assert.IsFalse(ept.HasErrors);
+            assertNoErrors(ept);
 
             // Now retrieve those trees:
             var treeIDs = trees.Keys.ToArray();
             var etrGot = await trrepo.GetTrees(treeIDs);
 
-            Assert.IsFalse(etrGot[0].HasErrors);
+            assertNoErrors(etrGot[0]);
             Assert.AreEqual(treeIDs[0], etrGot[0].Value.ID);
         }
 
@@ -115,18 +157,16 @@ namespace TestIVO.CommonTest
             await createTrees();
 
             var ept = await trrepo.PersistTree(rootId, trees);
-            Assert.IsFalse(ept.HasErrors);
+            assertNoErrors(ept);
 
             // Retrieve a single tree node:
             var eroot = await trrepo.GetTree(rootId);
-            Assert.IsFalse(eroot.HasErrors);
-            var root = eroot.Value;
+            var root = assertNoErrors(eroot);
             Assert.AreEqual(trRoot.ID, root.ID);
 
             // Retrieve a single tree node:
             var etmpl = await trrepo.GetTree(trTemplate.ID);
-            Assert.IsFalse(etmpl.HasErrors);
-            var tmpl = etmpl.Value;
+            var tmpl = assertNoErrors(etmpl);
             Assert.AreEqual(trTemplate.ID, tmpl.ID);
         }
 
@@ -135,13 +175,12 @@ namespace TestIVO.CommonTest
             await createTrees();
 
             var ept = await trrepo.PersistTree(rootId, trees);
-            Assert.IsFalse(ept.HasErrors);
+            assertNoErrors(ept);
 
             // Retrieve a single TreeID mapping:
             var rootPath = (CanonicalTreePath)"/";
             var erootMapping = await trrepo.GetTreeIDByPath(new TreeTreePath(rootId, rootPath));
-            Assert.IsFalse(erootMapping.HasErrors);
-            var rootMapping = erootMapping.Value;
+            var rootMapping = assertNoErrors(erootMapping);
 
             Assert.IsTrue(rootMapping != null);
             Assert.AreEqual(trRoot.ID, rootMapping.TreeID);
@@ -153,7 +192,7 @@ namespace TestIVO.CommonTest
             await createTrees();
 
             var ept = await trrepo.PersistTree(rootId, trees);
-            Assert.IsFalse(ept.HasErrors);
+            assertNoErrors(ept);
 
             // Retrieve some TreeID mappings by Paths:
             var rootPath = (CanonicalTreePath)"/";
@@ -166,12 +205,12 @@ namespace TestIVO.CommonTest
             Assert.IsTrue(rootMappings != null);
             Assert.AreEqual(2, rootMappings.Length);
 
-            Assert.IsFalse(rootMappings[0].HasErrors);
+            assertNoErrors(rootMappings[0]);
             Assert.IsTrue(rootMappings[0].Value.TreeID.HasValue);
             Assert.AreEqual(trRoot.ID, rootMappings[0].Value.TreeID.Value);
             Assert.AreEqual(rootPath.ToString(), rootMappings[0].Value.Path.Path.ToString());
 
-            Assert.IsFalse(rootMappings[1].HasErrors);
+            assertNoErrors(rootMappings[1]);
             Assert.IsTrue(rootMappings[1].Value.TreeID.HasValue);
             Assert.AreEqual(trTemplate.ID, rootMappings[1].Value.TreeID.Value);
             Assert.AreEqual(tmplPath.ToString(), rootMappings[1].Value.Path.Path.ToString());
@@ -182,12 +221,11 @@ namespace TestIVO.CommonTest
             await createTrees();
 
             var ept = await trrepo.PersistTree(rootId, trees);
-            Assert.IsFalse(ept.HasErrors);
+            assertNoErrors(ept);
 
             // Retrieve the tree recursively:
             var erec = await trrepo.GetTreeRecursively(rootId);
-            Assert.IsFalse(erec.HasErrors);
-            var rec = erec.Value;
+            var rec = assertNoErrors(erec);
 
             Assert.AreEqual(rootId, rec.RootID);
             Assert.AreEqual(trees.Count, rec.Trees.Count);
@@ -198,12 +236,11 @@ namespace TestIVO.CommonTest
             await createTrees();
 
             var ept = await trrepo.PersistTree(rootId, trees);
-            Assert.IsFalse(ept.HasErrors);
+            assertNoErrors(ept);
 
             // Retrieve a subtree recursively by path:
             var erec = await trrepo.GetTreeRecursivelyFromPath(new TreeTreePath(rootId, (CanonicalTreePath)"/template/"));
-            Assert.IsFalse(erec.HasErrors);
-            var rec = erec.Value;
+            var rec = assertNoErrors(erec);
 
             Assert.AreEqual(trTemplate.ID, rec.RootID);
             Assert.AreEqual(trTemplate.Trees.Length + 1, rec.Trees.Count);
@@ -217,7 +254,7 @@ namespace TestIVO.CommonTest
 
             // Retrieve a subtree recursively by path:
             var erec = await trrepo.DeleteTreeRecursively(rootId);
-            Assert.IsFalse(erec.HasErrors);
+            assertNoErrors(erec);
         }
     }
 }

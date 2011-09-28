@@ -229,8 +229,8 @@ namespace IVO.Definition.Models
 
         public TreeNode(Builder b)
         {
-            this.Trees = (b.Trees).ToArray((b.Trees).Count);
-            this.Blobs = (b.Blobs).ToArray((b.Blobs).Count);
+            this.Trees = b.Trees == null ? new TreeTreeReference[0] : (b.Trees).ToArray((b.Trees).Count);
+            this.Blobs = b.Blobs == null ? new TreeBlobReference[0] : (b.Blobs).ToArray((b.Blobs).Count);
             computeID();
         }
 

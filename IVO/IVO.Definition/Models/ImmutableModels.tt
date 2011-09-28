@@ -57,8 +57,8 @@
             comment = "A tree object.",
             idType = "TreeID",
             members = new[] {
-                new { name = "Trees", type = "TreeTreeReference[]", bType = "List<TreeTreeReference>", convert = "({0}).ToArray(({0}).Count)", revert = "({0}).ToList(({0}).Length)" },
-                new { name = "Blobs", type = "TreeBlobReference[]", bType = "List<TreeBlobReference>", convert = "({0}).ToArray(({0}).Count)", revert = "({0}).ToList(({0}).Length)" },
+                new { name = "Trees", type = "TreeTreeReference[]", bType = "List<TreeTreeReference>", convert = "{0} == null ? new TreeTreeReference[0] : ({0}).ToArray(({0}).Count)", revert = "({0}).ToList(({0}).Length)" },
+                new { name = "Blobs", type = "TreeBlobReference[]", bType = "List<TreeBlobReference>", convert = "{0} == null ? new TreeBlobReference[0] : ({0}).ToArray(({0}).Count)", revert = "({0}).ToList(({0}).Length)" },
             }
         },
 

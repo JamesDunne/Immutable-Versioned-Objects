@@ -99,6 +99,20 @@ namespace System.Collections.Generic
             stk.Push(value);
             return stk;
         }
+
+        public static Queue<T> QueueOf<T>(this T value, int capacity = 10)
+        {
+            Queue<T> qu = new Queue<T>(capacity);
+            qu.Enqueue(value);
+            return qu;
+        }
+
+        public static List<T> ListOf<T>(this T value, int capacity = 10)
+        {
+            List<T> lst = new List<T>(capacity);
+            lst.Add(value);
+            return lst;
+        }
     }
 }
 

@@ -57,13 +57,23 @@ namespace IVO.Implementation.FileSystem
                     {
                         string linked_treeid = line.Substring(5, (TreeID.ByteArrayLength * 2));
                         string name = line.Substring(6 + (TreeID.ByteArrayLength * 2));
-                        tb.Trees.Add(new TreeTreeReference.Builder(name, TreeID.Parse(linked_treeid).Value));
+
+                        // Attempt to parse the TreeID and verify its existence:
+                        Errorable<TreeID> trid = TreeID.TryParse(linked_treeid);
+                        if (trid.HasErrors) return trid.Errors;
+                        if (!system.getPathByID(trid.Value).Exists) return new TreeIDRecordDoesNotExistError();
+                        tb.Trees.Add(new TreeTreeReference.Builder(name, trid.Value));
                     }
                     else if (line.StartsWith("blob "))
                     {
                         string linked_blobid = line.Substring(5, (TreeID.ByteArrayLength * 2));
                         string name = line.Substring(6 + (TreeID.ByteArrayLength * 2));
-                        tb.Blobs.Add(new TreeBlobReference.Builder(name, BlobID.Parse(linked_blobid).Value));
+
+                        // Attempt to parse the BlobID and verify its existence:
+                        Errorable<BlobID> blid = BlobID.TryParse(linked_blobid);
+                        if (blid.HasErrors) return blid.Errors;
+                        if (!system.getPathByID(blid.Value).Exists) return new BlobIDRecordDoesNotExistError();
+                        tb.Blobs.Add(new TreeBlobReference.Builder(name, blid.Value));
                     }
                 }
             }
@@ -76,10 +86,29 @@ namespace IVO.Implementation.FileSystem
             return tr;
         }
 
-        private void persistTree(TreeNode tr)
+        private Errorable<TreeNode> persistTree(TreeNode tr)
         {
+            Debug.Assert(tr != null);
+
+            // Check that all referenced blobs are already persisted:
+            foreach (var trbl in tr.Blobs)
+            {
+                if (!system.getPathByID(trbl.BlobID).Exists)
+                    // TODO: supply BlobID that is missing here.
+                    return new BlobIDRecordDoesNotExistError();
+            }
+
+            // Check that all referenced blobs are already persisted:
+            foreach (var trtr in tr.Trees)
+            {
+                if (!system.getPathByID(trtr.TreeID).Exists)
+                    // TODO: supply TreeID that is missing here.
+                    return new TreeIDRecordDoesNotExistError();
+            }
+
             FileInfo fi = system.getPathByID(tr.ID);
-            if (fi.Exists) return;
+            // TODO: maybe a TreeIDRecordAlreadyExistsError?
+            if (fi.Exists) return tr;
 
             // Create directory if it doesn't exist:
             if (!fi.Directory.Exists)
@@ -94,6 +123,8 @@ namespace IVO.Implementation.FileSystem
                 Debug.WriteLine(String.Format("New TREE '{0}'", fi.FullName));
                 tr.WriteTo(fs);
             }
+
+            return tr;
         }
 
         private void deleteTree(TreeID id)
@@ -149,7 +180,7 @@ namespace IVO.Implementation.FileSystem
             // Get the root Tree:
             var eroot = await getTree(path.RootTreeID).ConfigureAwait(continueOnCapturedContext: false);
             if (eroot.HasErrors) return eroot.Errors;
-            
+
             TreeNode root = eroot.Value;
             ReadOnlyCollection<string> parts = path.Path.Parts;
             if (parts.Count == 0) return new TreeIDPathMapping(path, path.RootTreeID);
@@ -193,24 +224,90 @@ namespace IVO.Implementation.FileSystem
         public async Task<Errorable<TreeNode>> PersistTree(TreeID rootid, ImmutableContainer<TreeID, TreeNode> trees)
         {
             if (trees == null) throw new ArgumentNullException("trees");
+            // TODO: better return value than `null`
+            if (trees.Count == 0) return (TreeNode)null;
 
-            // NOTE: We don't have to persist tree nodes in any particular order here if we implement a filesystem lock.
-            Task[] tasks = new Task[trees.Count];
-            using (var en = trees.Values.GetEnumerator())
+            // This code scans the tree breadth-first and builds a reversed depth-ordered stack:
+
+            var reverseDepthOrder = new { id = rootid, depth = 0 }.StackOf(trees.Count);
+            reverseDepthOrder.Pop();
+
+            var breadthFirstQueue = new { id = rootid, depth = 0 }.QueueOf(trees.Count);
+            while (breadthFirstQueue.Count > 0)
             {
-                for (int i = 0; en.MoveNext(); ++i)
+                var curr = breadthFirstQueue.Dequeue();
+                // Add it to the reverse stack:
+                reverseDepthOrder.Push(curr);
+
+                TreeNode node;
+                if (!trees.TryGetValue(curr.id, out node))
                 {
-                    var tr = en.Current;
-                    // FIXME: need concurrency here?
-                    tasks[i] = TaskEx.Run(() => persistTree(tr));
+                    // TODO: didn't find the TreeID in the given collection, assume already persisted?
+                    continue;
                 }
+
+                // Queue up the child TreeIDs:
+                foreach (var trtr in node.Trees)
+                    breadthFirstQueue.Enqueue(new { id = trtr.TreeID, depth = curr.depth + 1 });
             }
 
-            // Wait for all the tasks to complete:
-            await TaskEx.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
+            // This code takes the reverse depth-ordered stack and persists the tree nodes in groups per depth level.
+            // This ensures that all child nodes across the breadth of the tree at each depth level are persisted
+            // before moving up to their parents.
 
-            // Return the root tree node:
-            return trees[rootid];
+            List<Task<Errorable<TreeNode>>> persistTasks = new List<Task<Errorable<TreeNode>>>();
+            HashSet<TreeID> isPersisting = new HashSet<TreeID>();
+
+            int lastDepth = reverseDepthOrder.Peek().depth;
+            foreach (var curr in reverseDepthOrder)
+            {
+                Debug.WriteLine(String.Format("{0}: {1}", curr.depth, curr.id.ToString(firstLength: 7)));
+                // An invariant of the algorithm, enforced via assert:
+                Debug.Assert(curr.depth <= lastDepth);
+
+                // Did we move to the next depth group:
+                if (curr.depth != lastDepth)
+                {
+                    Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
+                    // Wait for the last depth group to finish persisting:
+                    await TaskEx.WhenAll(persistTasks);
+
+                    // Start a new depth group:
+                    persistTasks = new List<Task<Errorable<TreeNode>>>();
+                }
+
+                // Don't re-persist the same TreeID (this is a legit case - the same TreeID may be seen in different nodes of the tree):
+                if (isPersisting.Contains(curr.id))
+                {
+                    Debug.WriteLine(String.Format("Already persisting {0}", curr.id.ToString(firstLength: 7)));
+                    continue;
+                }
+
+                // Get the TreeNode and persist it:
+                TreeNode node = trees[curr.id];
+                isPersisting.Add(curr.id);
+                
+                // Fire up a task to persist this tree node:
+                var tsk = TaskEx.Run(() => persistTree(node));
+                
+                // Add the task to the depth group to await:
+                Debug.WriteLine(String.Format("Adding to depth group {0}...", curr.depth));
+                persistTasks.Add(tsk);
+
+                // Keep track of the last depth level:
+                lastDepth = curr.depth;
+            }
+
+            // The final depth group should be depth 0 with only 1 element: the root node.
+            Debug.Assert(lastDepth == 0);
+            Debug.Assert(persistTasks.Count == 1);
+
+            // Await the last group (the root node):
+            Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
+            await TaskEx.WhenAll(persistTasks);
+
+            // Return the root TreeNode:
+            return persistTasks[0].Result;
         }
 
         public Task<Errorable<TreeNode>> GetTree(TreeID id)
@@ -238,7 +335,7 @@ namespace IVO.Implementation.FileSystem
         {
             return TaskEx.WhenAll(paths.SelectAsArray(path => getTreeIDByPath(path)));
         }
-        
+
         public async Task<Errorable<TreeID>> DeleteTreeRecursively(TreeID rootid)
         {
             var etrees = await getTreeRecursively(rootid).ConfigureAwait(continueOnCapturedContext: false);
@@ -250,7 +347,7 @@ namespace IVO.Implementation.FileSystem
             Task[] tasks = trees.SelectAsArray(tr => TaskEx.Run(() => deleteTree(tr.ID)));
 
             await TaskEx.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
-            
+
             return rootid;
         }
 

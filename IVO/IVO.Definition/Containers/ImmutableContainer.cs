@@ -18,22 +18,22 @@ namespace IVO.Definition.Containers
 
         public ImmutableContainer(Func<V, K> keySelector, IEqualityComparer<K> comparer, params V[] items)
         {
-            _container = items.ToDictionary(e => keySelector(e), comparer);
+            construct(keySelector, comparer, items);
         }
 
         public ImmutableContainer(Func<V, K> keySelector, params V[] items)
         {
-            _container = items.ToDictionary(e => keySelector(e));
+            construct(keySelector, EqualityComparer<K>.Default, items);
         }
 
         public ImmutableContainer(Func<V, K> keySelector, IEqualityComparer<K> comparer, IEnumerable<V> items)
         {
-            _container = items.ToDictionary(e => keySelector(e), comparer);
+            construct(keySelector, comparer, items.ToList());
         }
 
         public ImmutableContainer(Func<V, K> keySelector, IEnumerable<V> items)
         {
-            _container = items.ToDictionary(e => keySelector(e));
+            construct(keySelector, EqualityComparer<K>.Default, items.ToList());
         }
 
         public ImmutableContainer(IDictionary<K, V> items, IEqualityComparer<K> comparer)
@@ -44,6 +44,18 @@ namespace IVO.Definition.Containers
         public ImmutableContainer(IDictionary<K, V> items)
         {
             _container = new Dictionary<K, V>(items);
+        }
+
+        private void construct(Func<V, K> keySelector, IEqualityComparer<K> comparer, IList<V> items)
+        {
+            _container = new Dictionary<K,V>(items.Count, comparer);
+            foreach (V value in items)
+            {
+                K key = keySelector(value);
+                if (_container.ContainsKey(key)) continue;
+
+                _container.Add(key, value);
+            }
         }
 
         public V this[K id]
