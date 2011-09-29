@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Containers\ImmutableContainer.cs" />
+    <Compile Include="SHA1StreamReader.cs" />
     <Compile Include="Errors\ErrorBase.cs" />
     <Compile Include="Errors\ErrorContainer.cs" />
     <Compile Include="Errors\Errorable.cs" />

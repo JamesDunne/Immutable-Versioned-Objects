@@ -5,6 +5,7 @@ using System.Linq;
 using Asynq;
 using IVO.Definition.Models;
 using System.Text;
+using IVO.Definition.Errors;
 
 namespace IVO.Implementation.SQL.Persists
 {
@@ -17,7 +18,7 @@ namespace IVO.Implementation.SQL.Persists
     /// <item>All BlobIDs referenced are persisted.</item>
     /// </list>
     /// </summary>
-    public sealed class PersistTree : IDataOperation<TreeNode>
+    public sealed class PersistTree : IDataOperation<Errorable<TreeNode>>
     {
         private TreeNode _tr;
 
@@ -97,7 +98,7 @@ WHEN NOT MATCHED THEN INSERT ({3}) VALUES ({4});
             return cmd;
         }
 
-        public TreeNode Return(SqlCommand cmd, int rowsAffected)
+        public Errorable<TreeNode> Return(SqlCommand cmd, int rowsAffected)
         {
             return this._tr;
         }

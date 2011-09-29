@@ -28,47 +28,95 @@ namespace IVO.Implementation.SQL
 
         public async Task<Errorable<TreeNode>> PersistTree(TreeID rootid, ImmutableContainer<TreeID, TreeNode> trees)
         {
+            if (trees == null) throw new ArgumentNullException("trees");
+            // TODO: better return value than `null`
+            if (trees.Count == 0) return (TreeNode)null;
+
             // Start a query to check what Trees exist already:
             var existTrees = await db.ExecuteListQueryAsync(new QueryTreesExist(trees.Keys), expectedCapacity: trees.Count);
 
-            // Trees must be created in dependency order!
-            HashSet<TreeID> treeIDsToPersistSet = new HashSet<TreeID>(trees.Keys.Except(existTrees));
-            Stack<TreeID> treeIDsToPersist = new Stack<TreeID>(treeIDsToPersistSet.Count);
+            // This code scans the tree breadth-first and builds a reversed depth-ordered stack:
 
-            // Run through trees from root to leaf:
-            Queue<TreeID> treeQueue = new Queue<TreeID>();
-            treeQueue.Enqueue(rootid);
+            var reverseDepthOrder = new { id = rootid, depth = 0 }.StackOf(trees.Count);
+            reverseDepthOrder.Pop();
 
-            Debug.WriteLine("{0,3}: Ordering trees in dependent order for persistence...", Task.CurrentId);
-            while (treeQueue.Count > 0)
+            var breadthFirstQueue = new { id = rootid, depth = 0 }.QueueOf(trees.Count);
+            while (breadthFirstQueue.Count > 0)
             {
-                TreeID trID = treeQueue.Dequeue();
-                if (treeIDsToPersistSet.Contains(trID))
-                    treeIDsToPersist.Push(trID);
+                var curr = breadthFirstQueue.Dequeue();
+                // Add it to the reverse stack:
+                reverseDepthOrder.Push(curr);
 
-                TreeNode tr = trees[trID];
-                if (tr.Trees == null) continue;
-
-                foreach (TreeTreeReference r in tr.Trees)
+                TreeNode node;
+                if (!trees.TryGetValue(curr.id, out node))
                 {
-                    treeQueue.Enqueue(r.TreeID);
+                    // TODO: didn't find the TreeID in the given collection, assume already persisted?
+                    continue;
                 }
+
+                // Queue up the child TreeIDs:
+                foreach (var trtr in node.Trees)
+                    breadthFirstQueue.Enqueue(new { id = trtr.TreeID, depth = curr.depth + 1 });
             }
 
-            // Asynchronously persist the trees in dependency order:
-            // FIXME: asynchronous fan-out per depth level
-            Task<TreeNode> runner = null;
-            while (treeIDsToPersist.Count > 0)
+            // This code takes the reverse depth-ordered stack and persists the tree nodes in groups per depth level.
+            // This ensures that all child nodes across the breadth of the tree at each depth level are persisted
+            // before moving up to their parents.
+
+            List<Task<Errorable<TreeNode>>> persistTasks = new List<Task<Errorable<TreeNode>>>();
+            // Initialize the `isPersisting` set with the set of TreeIDs that already exist.
+            HashSet<TreeID> isPersisting = new HashSet<TreeID>(existTrees);
+
+            int lastDepth = reverseDepthOrder.Peek().depth;
+            foreach (var curr in reverseDepthOrder)
             {
-                TreeID id = treeIDsToPersist.Pop();
+                Debug.WriteLine(String.Format("{0}: {1}", curr.depth, curr.id.ToString(firstLength: 7)));
+                // An invariant of the algorithm, enforced via assert:
+                Debug.Assert(curr.depth <= lastDepth);
 
-                Debug.WriteLine("{0,3}: PERSIST tree {1}", Task.CurrentId, id.ToString());
+                // Did we move to the next depth group:
+                if ((persistTasks.Count > 0) && (curr.depth != lastDepth))
+                {
+                    Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
+                    // Wait for the last depth group to finish persisting:
+                    await TaskEx.WhenAll(persistTasks);
 
-                runner = db.ExecuteNonQueryAsync(new PersistTree(trees[id]));
-                await runner;
+                    // Start a new depth group:
+                    persistTasks = new List<Task<Errorable<TreeNode>>>();
+                }
+
+                // Don't re-persist the same TreeID (this is a legit case - the same TreeID may be seen in different nodes of the tree):
+                if (isPersisting.Contains(curr.id))
+                {
+                    Debug.WriteLine(String.Format("Already persisting {0}", curr.id.ToString(firstLength: 7)));
+                    continue;
+                }
+
+                // Get the TreeNode and persist it:
+                TreeNode node = trees[curr.id];
+                isPersisting.Add(curr.id);
+
+                // Fire up a task to persist this tree node:
+                var tsk = db.ExecuteNonQueryAsync(new PersistTree(node));
+
+                // Add the task to the depth group to await:
+                Debug.WriteLine(String.Format("Adding to depth group {0}...", curr.depth));
+                persistTasks.Add(tsk);
+
+                // Keep track of the last depth level:
+                lastDepth = curr.depth;
             }
 
-            return trees[rootid];
+            // The final depth group should be depth 0 with only 1 element: the root node.
+            Debug.Assert(lastDepth == 0);
+            Debug.Assert(persistTasks.Count == 1);
+
+            // Await the last group (the root node):
+            Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
+            await TaskEx.WhenAll(persistTasks);
+
+            // Return the root TreeNode:
+            return persistTasks[0].Result;
         }
 
         public Task<Errorable<TreeNode>[]> GetTrees(params TreeID[] ids)
@@ -124,7 +172,7 @@ namespace IVO.Implementation.SQL
                     TreeID rootid = en.Current.Key;
                     CanonicalTreePath[] treePaths = en.Current.Select(tr => tr.Path).ToArray();
 
-                    tasks.Add( db.ExecuteSingleQueryAsync(new QueryTreeIDsByPaths(rootid, treePaths)) );
+                    tasks.Add(db.ExecuteSingleQueryAsync(new QueryTreeIDsByPaths(rootid, treePaths)));
                 }
             }
 
