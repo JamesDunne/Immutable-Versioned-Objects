@@ -134,7 +134,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
 
                 // Add a blob link to the child or parent tree:
                 if (!linked_blobid.IsNull)
-                    blobTree.Blobs.Add(new TreeBlobReference.Builder(blobname.Value, (BlobID)linked_blobid.Value));
+                    blobTree.Blobs.Add(new TreeBlobReference.Builder(blobname.Value, (BlobID)linked_blobid.Value.ToArray(20)));
             }
 
             // If no root assigned, then no tree retrieved:

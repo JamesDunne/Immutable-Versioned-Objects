@@ -44,7 +44,7 @@ namespace System.Linq
             T[] arr = new T[length];
             using (IEnumerator<T> e = src.GetEnumerator())
             {
-                for (int i = 0; e.MoveNext(); ++i)
+                for (int i = 0; (i < length) & e.MoveNext(); ++i)
                 {
                     arr[i] = e.Current;
                 }

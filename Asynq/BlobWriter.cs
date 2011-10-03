@@ -102,7 +102,7 @@ namespace Asynq
 
         public async Task UploadAsync(Stream input)
         {
-            const int bufferSize = 8040 * 4;
+            const int bufferSize = 8040;
             byte[] buf = new byte[bufferSize];
             byte[] chunk = buf;
             int nr;
@@ -112,7 +112,7 @@ namespace Asynq
             {
                 // Perform the first read:
                 nr = await bs.ReadAsync(buf, 0, bufferSize);
-                if (nr == 0) return;
+                //if (nr == 0) return;
 
                 // Did we read less than bufferSize?
                 if (nr < bufferSize)
@@ -124,6 +124,7 @@ namespace Asynq
                 // Perform the INSERT first:
                 object pk = await db.ExecuteNonQueryAsync(new InsertOperation(cmdInsert, chunk, pkValue));
                 this.Length += nr;
+
                 // Early out if we're done:
                 if (nr < bufferSize) return;
 

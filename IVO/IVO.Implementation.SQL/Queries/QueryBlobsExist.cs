@@ -40,7 +40,7 @@ namespace IVO.Implementation.SQL.Queries
 
         public BlobID Project(SqlCommand cmd, SqlDataReader dr)
         {
-            BlobID id = (BlobID) dr.GetSqlBinary(0).Value;
+            BlobID id = (BlobID) dr.GetSqlBinary(0).Value.ToArray(20);
 
             return id;
         }

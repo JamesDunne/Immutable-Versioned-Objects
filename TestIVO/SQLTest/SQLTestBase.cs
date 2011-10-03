@@ -36,6 +36,7 @@ namespace TestIVO.SQLTest
 
             var tm = getTestMethods(db);
 
+#if false
             // Set single-user mode:
             try
             {
@@ -54,6 +55,7 @@ namespace TestIVO.SQLTest
                 }
             }
             Thread.Sleep(10);
+#endif
 
             // Delete all data:
             try
@@ -73,6 +75,8 @@ namespace TestIVO.SQLTest
                     Assert.Fail(sqex.ToString());
                 }
             }
+
+#if false
             // Wait after cleanup for the SQL server to reset its state:
             Thread.Sleep(10);
 
@@ -94,9 +98,26 @@ namespace TestIVO.SQLTest
                     Assert.Fail(sqex.ToString());
                 }
             }
+            Thread.Sleep(10);
+
+            db.ExecuteNonQuery(new NullQuery());
+#endif
 
             // Run the test method now:
             run(tm).Wait();
+        }
+
+        private sealed class NullQuery : IDataOperation<int>
+        {
+            public SqlCommand ConstructCommand(SqlConnection cn)
+            {
+                return new SqlCommand("SELECT 0", cn);
+            }
+
+            public int Return(SqlCommand cmd, int rowsAffected)
+            {
+                return rowsAffected;
+            }
         }
     }
 }

@@ -7,10 +7,11 @@ using IVO.Definition.Models;
 using IVO.Definition.Errors;
 using IVO.Definition;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public sealed class QueryTag : ISimpleDataQuery<Errorable<Tag>>
+    public sealed class QueryTag : IComplexDataQuery<Errorable<Tag>>
     {
         private Either<TagID, TagName> _idOrName;
 
@@ -59,27 +60,34 @@ namespace IVO.Implementation.SQL.Queries
             return cmd;
         }
 
-        public Errorable<Tag> Project(SqlCommand cmd, SqlDataReader dr)
+        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
         {
-            TagID id = (TagID) dr.GetSqlBinary(0).Value;
+            return CommandBehavior.Default;
+        }
+
+        public Task<Errorable<Tag>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return TaskEx.FromResult(Retrieve(cmd, dr, expectedCapacity));
+        }
+
+        public Errorable<Tag> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            if (!dr.Read()) return new TagIDRecordDoesNotExistError();
+
+            TagID id = (TagID)dr.GetSqlBinary(0).Value;
 
             Tag.Builder tb = new Tag.Builder(
-                pName:          (TagName) dr.GetSqlString(1).Value,
-                pCommitID:      (CommitID)dr.GetSqlBinary(2).Value,
-                pTagger:        dr.GetSqlString(3).Value,
-                pDateTagged:    dr.GetDateTimeOffset(4),
-                pMessage:       dr.GetSqlString(5).Value
+                pName: (TagName)dr.GetSqlString(1).Value,
+                pCommitID: (CommitID)dr.GetSqlBinary(2).Value,
+                pTagger: dr.GetSqlString(3).Value,
+                pDateTagged: dr.GetDateTimeOffset(4),
+                pMessage: dr.GetSqlString(5).Value
             );
 
             Tag tg = tb;
             if (tg.ID != id) return new ComputedTagIDMismatchError();
 
             return tg;
-        }
-
-        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
-        {
-            return CommandBehavior.Default;
         }
     }
 }

@@ -6,10 +6,11 @@ using Asynq;
 using IVO.Definition.Models;
 using System.Data;
 using IVO.Definition.Errors;
+using System.Threading.Tasks;
 
 namespace IVO.Implementation.SQL.Queries
 {
-    public sealed class QueryRef : ISimpleDataQuery<Errorable<Ref>>
+    public sealed class QueryRef : IComplexDataQuery<Errorable<Ref>>
     {
         private RefName _name;
 
@@ -33,20 +34,27 @@ namespace IVO.Implementation.SQL.Queries
             return cmd;
         }
 
-        public Errorable<Ref> Project(SqlCommand cmd, SqlDataReader dr)
+        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
         {
+            return CommandBehavior.Default;
+        }
+
+        public Task<Errorable<Ref>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            return TaskEx.FromResult(Retrieve(cmd, dr, expectedCapacity));
+        }
+
+        public Errorable<Ref> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
+        {
+            if (!dr.Read()) return new RefDoesNotExistError();
+
             Ref.Builder b = new Ref.Builder(
-                pName:      (RefName) dr.GetSqlString(0).Value,
-                pCommitID:  (CommitID)dr.GetSqlBinary(1).Value
+                pName: (RefName)dr.GetSqlString(0).Value,
+                pCommitID: (CommitID)dr.GetSqlBinary(1).Value
             );
 
             Ref rf = b;
             return rf;
-        }
-
-        public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)
-        {
-            return CommandBehavior.Default;
         }
     }
 }

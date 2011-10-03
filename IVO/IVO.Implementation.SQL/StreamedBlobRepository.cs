@@ -28,6 +28,43 @@ namespace IVO.Implementation.SQL
             this.db = db;
         }
 
+        private sealed class BlobIDUpdate : IDataOperation<int>
+        {
+            private byte[] oldpk;
+            private byte[] newpk;
+
+            public BlobIDUpdate(byte[] oldpk, byte[] newpk)
+            {
+                this.oldpk = oldpk;
+                this.newpk = newpk.ToArray(21);
+            }
+
+            public SqlCommand ConstructCommand(SqlConnection cn)
+            {
+                var cmd = cn.CreateCommand();
+                // This could be the same blobid as an existing record, so check if an existing blobid exists
+                // and if so, delete the temporary blob just uploaded.
+                cmd.CommandText = String.Format(
+@"IF (EXISTS(SELECT 1 FROM {0} WITH (UPDLOCK) WHERE {1} = @newpk)) BEGIN
+  DELETE FROM {0} WHERE {1} = @pk;
+END ELSE BEGIN
+  UPDATE {0} SET {1} = @newpk WHERE {1} = @pk;
+END",
+                    Tables.TableName_Blob,
+                    Tables.TablePKs_Blob.Single()
+                );
+                cmd.CommandType = System.Data.CommandType.Text;
+                cmd.Parameters.Add("@pk", System.Data.SqlDbType.Binary, 21).Value = oldpk;
+                cmd.Parameters.Add("@newpk", System.Data.SqlDbType.Binary, 21).Value = newpk;
+                return cmd;
+            }
+
+            public int Return(SqlCommand cmd, int rowsAffected)
+            {
+                return rowsAffected;
+            }
+        }
+
         public async Task<Errorable<IStreamedBlob>> PersistBlob(PersistingBlob blob)
         {
             SqlCommand insert, update;
@@ -43,7 +80,8 @@ namespace IVO.Implementation.SQL
             // Create a random dummy ID for uploading:
             // FIXME: we need guaranteed uniqueness!
             byte[] dummyID = new byte[21];
-            new Random().NextBytes(dummyID);
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+                rng.GetBytes(dummyID);
             dummyID[20] = 0xFF;
 
             // Create a BlobWriter to INSERT and UPDATE to the database in chunks:
@@ -59,8 +97,9 @@ namespace IVO.Implementation.SQL
             byte[] blobHash = sha1Reader.GetHash();
 
             // Now update the Blob record with the new BlobID:
-            // TODO!
+            await db.ExecuteNonQueryAsync(new BlobIDUpdate(dummyID, blobHash));
 
+            // Return the StreamedBlob instance that can read from the uploaded blob record:
             return new StreamedBlob(this, new BlobID(blobHash), bw.Length);
         }
 

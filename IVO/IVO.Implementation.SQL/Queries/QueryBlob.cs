@@ -37,7 +37,7 @@ namespace IVO.Implementation.SQL.Queries
 
         public IStreamedBlob Project(SqlCommand cmd, SqlDataReader dr)
         {
-            BlobID id = (BlobID) dr.GetSqlBinary(0).Value;
+            BlobID id = (BlobID) dr.GetSqlBinary(0).Value.ToArray(20);
             long length = dr.GetSqlInt64(1).Value;
 
             return new StreamedBlob(this._blrepo, id, length);

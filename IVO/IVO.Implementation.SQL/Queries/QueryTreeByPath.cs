@@ -75,7 +75,7 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
             while (dr.Read())
             {
                 var name = dr.GetSqlString(0).Value;
-                var linked_blobid = (BlobID)dr.GetSqlBinary(1).Value;
+                var linked_blobid = (BlobID)dr.GetSqlBinary(1).Value.ToArray(20);
 
                 tb.Blobs.Add(new TreeBlobReference.Builder(name, linked_blobid));
             }

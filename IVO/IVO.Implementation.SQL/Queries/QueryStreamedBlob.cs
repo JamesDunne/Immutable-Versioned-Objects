@@ -54,7 +54,7 @@ namespace IVO.Implementation.SQL.Queries
             if (!dr.Read()) return default(TResult);
 
             // Read the BlobID:
-            BlobID id = (BlobID) dr.GetSqlBinary(0).Value;
+            BlobID id = (BlobID) dr.GetSqlBinary(0).Value.ToArray(20);
             if (id != this._id) throw new ComputedBlobIDMismatchError();
 
             // Read the length of the contents:
@@ -70,7 +70,7 @@ namespace IVO.Implementation.SQL.Queries
             if (!dr.Read()) return default(TResult);
 
             // Read the BlobID:
-            BlobID id = (BlobID)dr.GetSqlBinary(0).Value;
+            BlobID id = (BlobID)dr.GetSqlBinary(0).Value.ToArray(20);
             if (id != this._id) throw new ComputedBlobIDMismatchError();
 
             // Read the length of the contents:

@@ -62,7 +62,7 @@ WHERE tr.[path] + trbl.name = @path;";
         {
             if (!dr.Read()) return new BlobNotFoundByPathError();
 
-            BlobID id = (BlobID)dr.GetSqlBinary(0).Value;
+            BlobID id = (BlobID)dr.GetSqlBinary(0).Value.ToArray(20);
             long length = dr.GetSqlInt64(1).Value;
 
             return new TreePathStreamedBlob(this._treePath, new StreamedBlob(this._blrepo, id, length));

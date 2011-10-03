@@ -160,7 +160,10 @@ namespace Asynq
 
                 int rc = await cmd.ExecuteNonQueryAsync();
 
-                return op.Return(cmd, rc);
+                T result = op.Return(cmd, rc);
+
+                cn.Close();
+                return result;
             }
         }
 
@@ -186,6 +189,22 @@ namespace Asynq
 
                     return row;
                 }
+            }
+        }
+
+        public T ExecuteNonQuery<T>(IDataOperation<T> op)
+        {
+            using (var cn = new SqlConnection(this.connectionString))
+            {
+                var cmd = op.ConstructCommand(cn);
+                cn.Open();
+
+                int rc = cmd.ExecuteNonQuery();
+
+                T result = op.Return(cmd, rc);
+
+                cn.Close();
+                return result;
             }
         }
 

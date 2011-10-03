@@ -49,6 +49,14 @@ namespace TestIVO.CommonTest
             Console.WriteLine("Persisting {0} random blobs...", numBlobs);
             Stopwatch sw = Stopwatch.StartNew();
             var streamedBlobs = await blrepo.PersistBlobs(blobs);
+            sw.Stop();
+
+            Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, streamedBlobs.Sum(b => b.Value.Length) * 1000d / sw.ElapsedMilliseconds);
+            
+            // Repeat!
+            sw = Stopwatch.StartNew();
+            streamedBlobs = await blrepo.PersistBlobs(blobs);
+            sw.Stop();
 
             Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, streamedBlobs.Sum(b => b.Value.Length) * 1000d / sw.ElapsedMilliseconds);
         }
