@@ -89,6 +89,9 @@ namespace IVO.Implementation.SQL
                 if (isPersisting.Contains(curr.id))
                 {
                     Debug.WriteLine(String.Format("Already persisting {0}", curr.id.ToString(firstLength: 7)));
+
+                    // Keep track of the last depth level:
+                    lastDepth = curr.depth;
                     continue;
                 }
 
@@ -107,16 +110,16 @@ namespace IVO.Implementation.SQL
                 lastDepth = curr.depth;
             }
 
-            // The final depth group should be depth 0 with only 1 element: the root node.
             Debug.Assert(lastDepth == 0);
-            Debug.Assert(persistTasks.Count == 1);
-
-            // Await the last group (the root node):
-            Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
-            await TaskEx.WhenAll(persistTasks);
+            if (persistTasks.Count > 0)
+            {
+                // Await the last group (the root node):
+                Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
+                await TaskEx.WhenAll(persistTasks);
+            }
 
             // Return the root TreeNode:
-            return persistTasks[0].Result;
+            return trees[rootid];
         }
 
         public Task<Errorable<TreeNode>[]> GetTrees(params TreeID[] ids)
