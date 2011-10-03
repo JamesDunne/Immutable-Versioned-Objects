@@ -60,7 +60,7 @@ WHERE tr.[path] + trbl.name = @path;";
 
         public Errorable<TreePathStreamedBlob> retrieve(SqlCommand cmd, SqlDataReader dr)
         {
-            if (!dr.Read()) return new BlobNotFoundByPathError();
+            if (!dr.Read()) return new BlobNotFoundByPathError(this._treePath);
 
             BlobID id = (BlobID)dr.GetSqlBinary(0).Value.ToArray(20);
             long length = dr.GetSqlInt64(1).Value;

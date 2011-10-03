@@ -144,7 +144,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
             foreach (KeyValuePair<TreeID, TreeNode.Builder> pair in trees)
             {
                 TreeNode tr = pair.Value;
-                if (tr.ID != pair.Key) return new ComputedTreeIDMismatchError();
+                if (tr.ID != pair.Key) return new ComputedTreeIDMismatchError(tr.ID, pair.Key);
                 finals.Add(tr);
             }
 

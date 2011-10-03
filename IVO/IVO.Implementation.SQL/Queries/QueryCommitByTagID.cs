@@ -44,18 +44,18 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
 
         public Task<Errorable<Tuple<Tag, Commit>>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return TaskEx.FromResult(retrieve(cmd, dr));
+            return TaskEx.FromResult(retrieve(new TagIDRecordDoesNotExistError(this._id), cmd, dr));
         }
 
         public Errorable<Tuple<Tag, Commit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return retrieve(cmd, dr);
+            return retrieve(new TagIDRecordDoesNotExistError(this._id), cmd, dr);
         }
 
-        internal static Errorable<Tuple<Tag, Commit>> retrieve(SqlCommand cmd, SqlDataReader dr)
+        internal static Errorable<Tuple<Tag, Commit>> retrieve(SemanticError errorIfNotExist, SqlCommand cmd, SqlDataReader dr)
         {
             // If no result, return null:
-            if (!dr.Read()) return new TagIDRecordDoesNotExistError();
+            if (!dr.Read()) return errorIfNotExist;
 
             TagID tgid = (TagID)dr.GetSqlBinary(0).Value;
             Tag.Builder tgb = new Tag.Builder(
@@ -67,7 +67,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             );
 
             Tag tg = tgb;
-            if (tg.ID != tgid) return new ComputedTagIDMismatchError();
+            if (tg.ID != tgid) return new ComputedTagIDMismatchError(tg.ID, tgid);
 
             const int offs = 6;
             CommitID id = (CommitID)dr.GetSqlBinary(0 + offs).Value;
@@ -91,7 +91,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             }
 
             Commit cm = cmb;
-            if (cm.ID != id) return new ComputedCommitIDMismatchError();
+            if (cm.ID != id) return new ComputedCommitIDMismatchError(cm.ID, id);
 
             return new Tuple<Tag, Commit>(tg, cm);
         }

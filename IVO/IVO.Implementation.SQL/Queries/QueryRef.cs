@@ -46,7 +46,7 @@ namespace IVO.Implementation.SQL.Queries
 
         public Errorable<Ref> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            if (!dr.Read()) return new RefDoesNotExistError();
+            if (!dr.Read()) return new RefNameDoesNotExistError(this._name);
 
             Ref.Builder b = new Ref.Builder(
                 pName: (RefName)dr.GetSqlString(0).Value,

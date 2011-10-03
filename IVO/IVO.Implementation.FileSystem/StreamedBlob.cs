@@ -22,7 +22,7 @@ namespace IVO.Implementation.FileSystem
 #if DEBUG
             // Catch the error early-on.
             if (!blrepo.FileSystem.getPathByID(id).Exists)
-                throw new BlobIDRecordDoesNotExistError();
+                throw new BlobIDRecordDoesNotExistError(id);
 #endif
         }
 
@@ -33,7 +33,7 @@ namespace IVO.Implementation.FileSystem
         {
             FileInfo path = blrepo.FileSystem.getPathByID(this.ID);
 
-            if (!path.Exists) return new BlobIDRecordDoesNotExistError();
+            if (!path.Exists) return new BlobIDRecordDoesNotExistError(this.ID);
 
             // Open the file for reading and send it to the lambda function:
             using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -44,7 +44,7 @@ namespace IVO.Implementation.FileSystem
         {
             FileInfo path = blrepo.FileSystem.getPathByID(this.ID);
 
-            if (!path.Exists) return new BlobIDRecordDoesNotExistError();
+            if (!path.Exists) return new BlobIDRecordDoesNotExistError(this.ID);
 
             // Open the file for reading and send it to the lambda function:
             using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -55,7 +55,7 @@ namespace IVO.Implementation.FileSystem
         {
             FileInfo path = blrepo.FileSystem.getPathByID(this.ID);
 
-            if (!path.Exists) return new BlobIDRecordDoesNotExistError();
+            if (!path.Exists) return new BlobIDRecordDoesNotExistError(this.ID);
 
             // Open the file for reading and send it to the lambda function:
             using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -66,7 +66,7 @@ namespace IVO.Implementation.FileSystem
         {
             FileInfo path = blrepo.FileSystem.getPathByID(this.ID);
 
-            if (!path.Exists) return new BlobIDRecordDoesNotExistError();
+            if (!path.Exists) return new BlobIDRecordDoesNotExistError(this.ID);
 
             // Open the file for reading and send it to the lambda function:
             using (FileStream sr = new FileStream(path.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))

@@ -44,12 +44,12 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
 
         public Task<Errorable<Tuple<Tag, Commit>>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return TaskEx.FromResult(QueryCommitByTagID.retrieve(cmd, dr));
+            return TaskEx.FromResult(QueryCommitByTagID.retrieve(new TagNameDoesNotExistError(this._tagName), cmd, dr));
         }
 
         public Errorable<Tuple<Tag, Commit>> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return QueryCommitByTagID.retrieve(cmd, dr);
+            return QueryCommitByTagID.retrieve(new TagNameDoesNotExistError(this._tagName), cmd, dr);
         }
         
         public CommandBehavior GetCustomCommandBehaviors(SqlConnection cn, SqlCommand cmd)

@@ -20,6 +20,11 @@ namespace IVO.Definition.Models
 
         public TreeID RootTreeID { get; private set; }
         public CanonicalBlobPath Path { get; private set; }
+
+        public override string ToString()
+        {
+            return String.Format("{0}{1}", RootTreeID, Path);
+        }
     }
 
     public sealed class TreeBlobPathTypeConverter : TypeConverter

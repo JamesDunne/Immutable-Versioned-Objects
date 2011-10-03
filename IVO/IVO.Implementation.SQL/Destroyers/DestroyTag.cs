@@ -33,7 +33,7 @@ namespace IVO.Implementation.SQL.Persists
 
         public Errorable<TagID> Return(SqlCommand cmd, int rowsAffected)
         {
-            if (rowsAffected == 0) return new TagIDRecordDoesNotExistError();
+            if (rowsAffected == 0) return new TagIDRecordDoesNotExistError(this._id);
             return this._id;
         }
     }

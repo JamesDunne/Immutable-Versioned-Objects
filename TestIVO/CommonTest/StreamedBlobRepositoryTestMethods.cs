@@ -54,6 +54,13 @@ namespace TestIVO.CommonTest
             Console.WriteLine("Completed in {0} ms, {1} bytes/sec", sw.ElapsedMilliseconds, streamedBlobs.Sum(b => b.Value.Length) * 1000d / sw.ElapsedMilliseconds);
             
             // Repeat!
+            for (int i = 0; i < numBlobs; ++i)
+            {
+                var fs = (FileStream)blobs[i].Stream;
+                // Re-open the temporary filestream:
+                blobs[i] = new PersistingBlob(new FileStream(fs.Name, FileMode.Open, FileAccess.Read, FileShare.Read, 8040, true));
+            }
+
             sw = Stopwatch.StartNew();
             streamedBlobs = await blrepo.PersistBlobs(blobs);
             sw.Stop();

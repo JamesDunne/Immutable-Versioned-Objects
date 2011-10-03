@@ -29,12 +29,12 @@ namespace IVO.Implementation.FileSystem
             FileInfo fiTracker = system.getTagPathByTagName(tg.Name);
             // Does this tag name exist already?
             if (fiTracker.Exists)
-                return TaskEx.FromResult((Errorable<Tag>)new TagNameAlreadyExistsError());
+                return TaskEx.FromResult((Errorable<Tag>)new TagNameAlreadyExistsError(tg.Name));
 
             FileInfo fi = system.getPathByID(tg.ID);
             if (fi.Exists)
                 // FIXME: TagID already exists.
-                return TaskEx.FromResult((Errorable<Tag>)new TagNameAlreadyExistsError());
+                return TaskEx.FromResult((Errorable<Tag>)tg);
 
             // Create directory if it doesn't exist:
             if (!fi.Directory.Exists)
@@ -70,16 +70,12 @@ namespace IVO.Implementation.FileSystem
             return TaskEx.FromResult((Errorable<Tag>)tg);
         }
 
-        private Task<Errorable<TagID>> getTagIDByName(TagName tagName)
+        private async Task<Errorable<TagID>> getTagIDByName(TagName tagName)
         {
             FileInfo fiTracker = system.getTagPathByTagName(tagName);
-            return getTagIDByTracker(fiTracker);
-        }
-
-        private async Task<Errorable<TagID>> getTagIDByTracker(FileInfo fiTracker)
-        {
+            
             Debug.Assert(fiTracker != null);
-            if (!fiTracker.Exists) return new TagNameDoesNotExistError();
+            if (!fiTracker.Exists) return new TagNameDoesNotExistError(tagName);
 
             byte[] buf;
             int nr = 0;
@@ -100,7 +96,7 @@ namespace IVO.Implementation.FileSystem
             using (var sr = new StreamReader(ms, Encoding.UTF8))
             {
                 string line = sr.ReadLine();
-                if (line == null) return new TagNameDoesNotExistError();
+                if (line == null) return new TagNameDoesNotExistError(tagName);
 
                 return TagID.TryParse(line);
             }
@@ -109,7 +105,7 @@ namespace IVO.Implementation.FileSystem
         private async Task<Errorable<Tag>> getTag(TagID id)
         {
             FileInfo fi = system.getPathByID(id);
-            if (!fi.Exists) return new TagIDRecordDoesNotExistError();
+            if (!fi.Exists) return new TagIDRecordDoesNotExistError(id);
 
             byte[] buf;
             int nr = 0;
@@ -171,7 +167,7 @@ namespace IVO.Implementation.FileSystem
             // Create the immutable Tag from the Builder:
             Tag tg = tb;
             // Validate the computed TagID:
-            if (tg.ID != id) return new ComputedTagIDMismatchError();
+            if (tg.ID != id) return new ComputedTagIDMismatchError(tg.ID, id);
 
             return tg;
         }
@@ -234,7 +230,7 @@ namespace IVO.Implementation.FileSystem
             Tag tg = etg.Value;
 
             // Check that the retrieved TagName matches what we asked for:
-            if (tg.Name != tagName) return new TagNameDoesNotMatchExpectedError();
+            if (tg.Name != tagName) return new TagNameDoesNotMatchExpectedError(tg.Name, tagName);
 
             return etg;
         }

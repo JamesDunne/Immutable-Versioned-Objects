@@ -64,7 +64,7 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
                 tb.Trees.Add(new TreeTreeReference.Builder(name, linked_treeid));
             }
 
-            if (!dr.NextResult()) return null;
+            if (!dr.NextResult()) return new TreeIDRecordDoesNotExistError(_id);
 
             // Read the TreeBlobReferences:
             while (dr.Read())
@@ -76,7 +76,7 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
             }
 
             TreeNode tr = tb;
-            if (tr.ID != _id) return new ComputedTreeIDMismatchError();
+            if (tr.ID != _id) return new ComputedTreeIDMismatchError(tr.ID, _id);
 
             return tr;
         }

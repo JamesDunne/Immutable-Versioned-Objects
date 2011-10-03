@@ -110,7 +110,7 @@ WHERE   cm.depth <= @depth";
             {
                 Commit cm = pair.Value;
                 // TODO: Would it be useful to know which CommitIDs?
-                if (cm.ID != pair.Key) return new ComputedCommitIDMismatchError();
+                if (cm.ID != pair.Key) return new ComputedCommitIDMismatchError(cm.ID, pair.Key);
                 finals.Add(cm);
             }
             if (cmPartial != null) finals.Add((CommitPartial)cmPartial);

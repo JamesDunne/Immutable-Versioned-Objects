@@ -118,7 +118,7 @@ namespace IVO.Implementation.FileSystem
             // Create the immutable Commit from the Builder:
             Commit cm = cb;
             // Validate the computed CommitID:
-            if (cm.ID != id) return new ComputedCommitIDMismatchError();
+            if (cm.ID != id) return new ComputedCommitIDMismatchError(cm.ID, id);
 
             return cm;
         }

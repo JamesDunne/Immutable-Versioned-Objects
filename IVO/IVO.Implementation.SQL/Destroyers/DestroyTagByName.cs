@@ -40,7 +40,7 @@ END",
         {
             SqlBinary tagId = (SqlBinary)cmd.Parameters["@tagid"].SqlValue;
 
-            if (tagId.IsNull) return new TagNameDoesNotExistError();
+            if (tagId.IsNull) return new TagNameDoesNotExistError(this._tagName);
 
             return (TagID) tagId.Value;
         }

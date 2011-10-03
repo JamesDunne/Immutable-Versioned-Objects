@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IVO.Definition.Containers;
+using IVO.Definition.Errors;
 using IVO.Definition.Models;
 using IVO.Definition.Repositories;
-using System.IO;
-using IVO.Definition.Errors;
-using System.Diagnostics;
-using System.Collections.ObjectModel;
 
 namespace IVO.Implementation.FileSystem
 {
@@ -27,7 +27,7 @@ namespace IVO.Implementation.FileSystem
         private async Task<Errorable<TreeNode>> getTree(TreeID id)
         {
             FileInfo fi = system.getPathByID(id);
-            if (!fi.Exists) return new TreeIDRecordDoesNotExistError();
+            if (!fi.Exists) return new TreeIDRecordDoesNotExistError(id);
 
             byte[] buf;
             int nr = 0;
@@ -61,7 +61,7 @@ namespace IVO.Implementation.FileSystem
                         // Attempt to parse the TreeID and verify its existence:
                         Errorable<TreeID> trid = TreeID.TryParse(linked_treeid);
                         if (trid.HasErrors) return trid.Errors;
-                        if (!system.getPathByID(trid.Value).Exists) return new TreeIDRecordDoesNotExistError();
+                        if (!system.getPathByID(trid.Value).Exists) return new TreeIDRecordDoesNotExistError(trid.Value);
                         tb.Trees.Add(new TreeTreeReference.Builder(name, trid.Value));
                     }
                     else if (line.StartsWith("blob "))
@@ -72,7 +72,7 @@ namespace IVO.Implementation.FileSystem
                         // Attempt to parse the BlobID and verify its existence:
                         Errorable<BlobID> blid = BlobID.TryParse(linked_blobid);
                         if (blid.HasErrors) return blid.Errors;
-                        if (!system.getPathByID(blid.Value).Exists) return new BlobIDRecordDoesNotExistError();
+                        if (!system.getPathByID(blid.Value).Exists) return new BlobIDRecordDoesNotExistError(blid.Value);
                         tb.Blobs.Add(new TreeBlobReference.Builder(name, blid.Value));
                     }
                 }
@@ -81,7 +81,7 @@ namespace IVO.Implementation.FileSystem
             // Create the immutable Tree from the Builder:
             TreeNode tr = tb;
             // Validate the computed TreeID:
-            if (tr.ID != id) return new ComputedTreeIDMismatchError();
+            if (tr.ID != id) return new ComputedTreeIDMismatchError(tr.ID, id);
 
             return tr;
         }
@@ -94,16 +94,14 @@ namespace IVO.Implementation.FileSystem
             foreach (var trbl in tr.Blobs)
             {
                 if (!system.getPathByID(trbl.BlobID).Exists)
-                    // TODO: supply BlobID that is missing here.
-                    return new BlobIDRecordDoesNotExistError();
+                    return new BlobIDRecordDoesNotExistError(trbl.BlobID);
             }
 
             // Check that all referenced blobs are already persisted:
             foreach (var trtr in tr.Trees)
             {
                 if (!system.getPathByID(trtr.TreeID).Exists)
-                    // TODO: supply TreeID that is missing here.
-                    return new TreeIDRecordDoesNotExistError();
+                    return new TreeIDRecordDoesNotExistError(trtr.TreeID);
             }
 
             FileInfo fi = system.getPathByID(tr.ID);
@@ -271,6 +269,7 @@ namespace IVO.Implementation.FileSystem
                     Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
                     // Wait for the last depth group to finish persisting:
                     await TaskEx.WhenAll(persistTasks);
+                    // TODO: roll up errors!
 
                     // Start a new depth group:
                     persistTasks = new List<Task<Errorable<TreeNode>>>();
@@ -280,6 +279,9 @@ namespace IVO.Implementation.FileSystem
                 if (isPersisting.Contains(curr.id))
                 {
                     Debug.WriteLine(String.Format("Already persisting {0}", curr.id.ToString(firstLength: 7)));
+
+                    // Keep track of the last depth level:
+                    lastDepth = curr.depth;
                     continue;
                 }
 
@@ -298,13 +300,14 @@ namespace IVO.Implementation.FileSystem
                 lastDepth = curr.depth;
             }
 
-            // The final depth group should be depth 0 with only 1 element: the root node.
+            // The final depth group should be depth 0 with at most 1 element: the root node.
             Debug.Assert(lastDepth == 0);
-            Debug.Assert(persistTasks.Count == 1);
-
-            // Await the last group (the root node):
-            Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
-            await TaskEx.WhenAll(persistTasks);
+            if (persistTasks.Count > 0)
+            {
+                // Await the last group (the root node):
+                Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
+                await TaskEx.WhenAll(persistTasks);
+            }
 
             // Return the root TreeNode:
             return persistTasks[0].Result;
@@ -370,7 +373,8 @@ namespace IVO.Implementation.FileSystem
             if (etpm.HasErrors) return etpm.Errors;
 
             TreeIDPathMapping tpm = etpm.Value;
-            if (!tpm.TreeID.HasValue) return null;
+            // TODO: TreePathNotFoundError
+            if (!tpm.TreeID.HasValue) return (TreeTree)null;
 
             // Now use GetTreeRecursively to do the rest:
             return await GetTreeRecursively(tpm.TreeID.Value).ConfigureAwait(continueOnCapturedContext: false);

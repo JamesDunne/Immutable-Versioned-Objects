@@ -48,7 +48,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
         private Errorable<Commit> retrieve(SqlCommand cmd, SqlDataReader dr)
         {
             // If no result, return null:
-            if (!dr.Read()) return new CommitIDRecordNotFoundError();
+            if (!dr.Read()) return new CommitIDRecordDoesNotExistError(this._id);
 
             CommitID id = (CommitID)dr.GetSqlBinary(0).Value;
 
@@ -71,7 +71,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             }
 
             Commit cm = b;
-            if (cm.ID != id) throw new ComputedCommitIDMismatchError();
+            if (cm.ID != id) throw new ComputedCommitIDMismatchError(cm.ID, id);
 
             return cm;
         }

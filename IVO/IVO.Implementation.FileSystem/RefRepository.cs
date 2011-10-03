@@ -44,7 +44,7 @@ namespace IVO.Implementation.FileSystem
         private async Task<Errorable<Ref>> getRefByName(RefName refName)
         {
             FileInfo fiTracker = system.getRefPathByRefName(refName);
-            if (!fiTracker.Exists) return new RefDoesNotExistError();
+            if (!fiTracker.Exists) return new RefNameDoesNotExistError(refName);
 
             byte[] buf;
             int nr = 0;
@@ -65,7 +65,7 @@ namespace IVO.Implementation.FileSystem
             using (var sr = new StreamReader(ms, Encoding.UTF8))
             {
                 string line = sr.ReadLine();
-                if (line == null) return (Ref)null;
+                if (line == null) return new RefNameDoesNotExistError(refName);
 
                 var ecid = CommitID.TryParse(line);
                 if (ecid.HasErrors) return ecid.Errors;

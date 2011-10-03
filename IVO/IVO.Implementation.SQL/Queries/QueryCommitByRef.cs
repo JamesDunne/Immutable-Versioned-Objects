@@ -55,7 +55,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
         public Errorable<Tuple<Ref, Commit>> retrieve(SqlCommand cmd, SqlDataReader dr)
         {
             // If no result, return null:
-            if (!dr.Read()) return new RefDoesNotExistError();
+            if (!dr.Read()) return new RefNameDoesNotExistError(this._refName);
 
             Ref.Builder rfb = new Ref.Builder(
                 pName:      (RefName) dr.GetSqlString(0).Value,
@@ -87,7 +87,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             }
 
             Commit cm = cmb;
-            if (cm.ID != id) return new ComputedCommitIDMismatchError();
+            if (cm.ID != id) return new ComputedCommitIDMismatchError(cm.ID, id);
 
             return new Tuple<Ref, Commit>(rf, cm);
         }

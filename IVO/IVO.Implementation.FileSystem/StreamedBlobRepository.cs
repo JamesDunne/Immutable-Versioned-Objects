@@ -124,7 +124,7 @@ namespace IVO.Implementation.FileSystem
         {
             FileInfo path = system.getPathByID(id);
 
-            if (!path.Exists) return new BlobIDRecordDoesNotExistError();
+            if (!path.Exists) return new BlobIDRecordDoesNotExistError(id);
 
             path.Delete();
 
@@ -153,7 +153,7 @@ namespace IVO.Implementation.FileSystem
         private Task<Errorable<IStreamedBlob>> getBlob(BlobID id)
         {
             var fi = system.getPathByID(id);
-            if (!fi.Exists) return TaskEx.FromResult( (Errorable<IStreamedBlob>) new BlobIDRecordDoesNotExistError() );
+            if (!fi.Exists) return TaskEx.FromResult( (Errorable<IStreamedBlob>) new BlobIDRecordDoesNotExistError(id) );
 
             return TaskEx.FromResult( new Errorable<IStreamedBlob>((IStreamedBlob)new StreamedBlob(this, id, fi.Length)) );
         }
