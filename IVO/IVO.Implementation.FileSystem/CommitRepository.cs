@@ -39,11 +39,15 @@ namespace IVO.Implementation.FileSystem
                 fi.Directory.Create();
             }
 
-            // Write the commit contents to the file:
-            using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            lock (FileSystem.SystemLock)
             {
-                Debug.WriteLine(String.Format("New COMMIT '{0}'", fi.FullName));
-                cm.WriteTo(fs);
+                if (!fi.Exists)
+                    // Write the commit contents to the file:
+                    using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                    {
+                        Debug.WriteLine(String.Format("New COMMIT '{0}'", fi.FullName));
+                        cm.WriteTo(fs);
+                    }
             }
         }
 
@@ -126,9 +130,12 @@ namespace IVO.Implementation.FileSystem
         private void deleteCommit(CommitID id)
         {
             FileInfo fi = system.getPathByID(id);
-            if (!fi.Exists) return;
+            lock (FileSystem.SystemLock)
+            {
+                if (!fi.Exists) return;
 
-            fi.Delete();
+                fi.Delete();
+            }
         }
 
         #endregion
@@ -255,7 +262,7 @@ namespace IVO.Implementation.FileSystem
         public async Task<Errorable<Tuple<Tag, CommitTree>>> GetCommitTreeByTagName(TagName tagName, int depth = 10)
         {
             var etg = await tgrepo.GetTagByName(tagName).ConfigureAwait(continueOnCapturedContext: false);
-            if (etg.HasErrors) return null;
+            if (etg.HasErrors) return etg.Errors;
 
             Tag tg = etg.Value;
             var eall = await getCommitsRecursively(tg.CommitID, 1, depth).ConfigureAwait(continueOnCapturedContext: false);

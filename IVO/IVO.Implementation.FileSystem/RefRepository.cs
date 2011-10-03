@@ -32,12 +32,16 @@ namespace IVO.Implementation.FileSystem
                 Debug.WriteLine(String.Format("New DIR '{0}'", fi.Directory.FullName));
                 fi.Directory.Create();
             }
-
-            // Write the contents to the file:
-            using (var fs = new FileStream(fi.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+            
+            lock (FileSystem.SystemLock)
             {
-                Debug.WriteLine(String.Format("New REF '{0}'", fi.FullName));
-                rf.WriteTo(fs);
+                // Write the contents to the file:
+                if (!fi.Exists)
+                    using (var fs = new FileStream(fi.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+                    {
+                        Debug.WriteLine(String.Format("New REF '{0}'", fi.FullName));
+                        rf.WriteTo(fs);
+                    }
             }
         }
 
@@ -77,7 +81,10 @@ namespace IVO.Implementation.FileSystem
         private void deleteRef(RefName name)
         {
             FileInfo fi = system.getRefPathByRefName(name);
-            if (fi.Exists) fi.Delete();
+            lock (FileSystem.SystemLock)
+            {
+                if (fi.Exists) fi.Delete();
+            }
         }
 
         #endregion

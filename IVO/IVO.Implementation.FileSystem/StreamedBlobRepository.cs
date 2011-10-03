@@ -71,28 +71,33 @@ namespace IVO.Implementation.FileSystem
                     blid = new BlobID(sha1.GetHash());
                 }
             }
-            
+
             // Create the blob's subdirectory under 'objects':
             FileInfo path = system.getPathByID(blid);
-            path.Refresh();
-            if (!path.Directory.Exists)
+
+            // Serialize
+            lock (FileSystem.SystemLock)
             {
-                Debug.WriteLine(String.Format("New DIR '{0}'", path.Directory.FullName));
-                path.Directory.Create();
+                path.Refresh();
+                if (!path.Directory.Exists)
+                {
+                    Debug.WriteLine(String.Format("New DIR '{0}'", path.Directory.FullName));
+                    path.Directory.Create();
+                }
+
+                // Don't recreate an existing blob:
+                if (path.Exists)
+                {
+                    Debug.WriteLine(String.Format("Blob already exists at path '{0}', deleting temporary...", path.FullName));
+                    tmpPath.Delete();
+                    return new Errorable<IStreamedBlob>((IStreamedBlob)new StreamedBlob(this, blid, length));
+                }
+
+                // Move the temp file to the final blob filename:
+                File.Move(tmpPath.FullName, path.FullName);
             }
 
-            // Don't recreate an existing blob:
-            if (path.Exists)
-            {
-                Debug.WriteLine(String.Format("Blob already exists at path '{0}', deleting temporary...", path.FullName));
-                tmpPath.Delete();
-                return new Errorable<IStreamedBlob>( (IStreamedBlob)new StreamedBlob(this, blid, length) );
-            }
-
-            // Move the temp file to the final blob filename:
-            File.Move(tmpPath.FullName, path.FullName);
-
-            return new Errorable<IStreamedBlob>( (IStreamedBlob)new StreamedBlob(this, blid, length) );
+            return new Errorable<IStreamedBlob>((IStreamedBlob)new StreamedBlob(this, blid, length));
         }
 
         public async Task<Errorable<IStreamedBlob>[]> PersistBlobs(params PersistingBlob[] blobs)
@@ -124,9 +129,12 @@ namespace IVO.Implementation.FileSystem
         {
             FileInfo path = system.getPathByID(id);
 
-            if (!path.Exists) return new BlobIDRecordDoesNotExistError(id);
+            lock (FileSystem.SystemLock)
+            {
+                if (!path.Exists) return new BlobIDRecordDoesNotExistError(id);
 
-            path.Delete();
+                path.Delete();
+            }
 
             return id;
         }
@@ -153,9 +161,9 @@ namespace IVO.Implementation.FileSystem
         private Task<Errorable<IStreamedBlob>> getBlob(BlobID id)
         {
             var fi = system.getPathByID(id);
-            if (!fi.Exists) return TaskEx.FromResult( (Errorable<IStreamedBlob>) new BlobIDRecordDoesNotExistError(id) );
+            if (!fi.Exists) return TaskEx.FromResult((Errorable<IStreamedBlob>)new BlobIDRecordDoesNotExistError(id));
 
-            return TaskEx.FromResult( new Errorable<IStreamedBlob>((IStreamedBlob)new StreamedBlob(this, id, fi.Length)) );
+            return TaskEx.FromResult(new Errorable<IStreamedBlob>((IStreamedBlob)new StreamedBlob(this, id, fi.Length)));
         }
 
         public Task<Errorable<IStreamedBlob>[]> GetBlobs(params BlobID[] ids)
@@ -173,7 +181,7 @@ namespace IVO.Implementation.FileSystem
 
         public Task<Errorable<BlobID>> DeleteBlob(BlobID id)
         {
-            return TaskEx.FromResult( deleteBlob(id) );
+            return TaskEx.FromResult(deleteBlob(id));
         }
 
         public Task<Errorable<IStreamedBlob>> GetBlob(BlobID id)

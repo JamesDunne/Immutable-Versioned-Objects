@@ -15,13 +15,17 @@ namespace IVO.Implementation.FileSystem
         }
 
         public DirectoryInfo Root { get; private set; }
+        public static readonly object SystemLock = new object();
 
         internal DirectoryInfo getObjectsDirectory()
         {
             // Create the 'objects' subdirectory if it doesn't exist:
             DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(Root.FullName, "objects"));
-            if (!objDir.Exists)
-                objDir.Create();
+            lock (SystemLock)
+            {
+                if (!objDir.Exists)
+                    objDir.Create();
+            }
             return objDir;
         }
 
@@ -29,8 +33,11 @@ namespace IVO.Implementation.FileSystem
         {
             // Create the 'refs' subdirectory if it doesn't exist:
             DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(Root.FullName, "refs"));
-            if (!objDir.Exists)
-                objDir.Create();
+            lock (SystemLock)
+            {
+                if (!objDir.Exists)
+                    objDir.Create();
+            }
             return objDir;
         }
 
@@ -38,8 +45,11 @@ namespace IVO.Implementation.FileSystem
         {
             // Create the 'refs/tags' subdirectory if it doesn't exist:
             DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(Root.FullName, "refs", "tags"));
-            if (!objDir.Exists)
-                objDir.Create();
+            lock (SystemLock)
+            {
+                if (!objDir.Exists)
+                    objDir.Create();
+            }
             return objDir;
         }
 

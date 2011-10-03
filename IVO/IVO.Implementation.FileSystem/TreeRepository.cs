@@ -116,10 +116,14 @@ namespace IVO.Implementation.FileSystem
             }
 
             // Write the tree contents to the file:
-            using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            lock (FileSystem.SystemLock)
             {
-                Debug.WriteLine(String.Format("New TREE '{0}'", fi.FullName));
-                tr.WriteTo(fs);
+                if (!fi.Exists)
+                    using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                    {
+                        Debug.WriteLine(String.Format("New TREE '{0}'", fi.FullName));
+                        tr.WriteTo(fs);
+                    }
             }
 
             return tr;
@@ -128,9 +132,12 @@ namespace IVO.Implementation.FileSystem
         private void deleteTree(TreeID id)
         {
             FileInfo fi = system.getPathByID(id);
-            if (!fi.Exists) return;
+            lock (FileSystem.SystemLock)
+            {
+                if (!fi.Exists) return;
 
-            fi.Delete();
+                fi.Delete();
+            }
         }
 
         private async Task<Errorable<TreeNode[]>> getTreeRecursively(TreeID id)

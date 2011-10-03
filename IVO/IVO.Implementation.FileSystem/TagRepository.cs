@@ -43,11 +43,15 @@ namespace IVO.Implementation.FileSystem
                 fi.Directory.Create();
             }
 
-            // Write the commit contents to the file:
-            using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            lock (FileSystem.SystemLock)
             {
-                Debug.WriteLine(String.Format("New TAG '{0}'", fi.FullName));
-                tg.WriteTo(fs);
+                if (!fi.Exists)
+                    // Write the commit contents to the file:
+                    using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                    {
+                        Debug.WriteLine(String.Format("New TAG '{0}'", fi.FullName));
+                        tg.WriteTo(fs);
+                    }
             }
 
             // Now keep track of the tag by its name:
@@ -59,12 +63,16 @@ namespace IVO.Implementation.FileSystem
                 fiTracker.Directory.Create();
             }
 
-            using (var fs = new FileStream(fiTracker.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            lock (FileSystem.SystemLock)
             {
-                Debug.WriteLine(String.Format("New TAG '{0}'", fiTracker.FullName));
-                // TODO: write async?
-                byte[] rawID = Encoding.UTF8.GetBytes(tg.ID.ToString());
-                fs.Write(rawID, 0, rawID.Length);
+                if (!fiTracker.Exists)
+                    using (var fs = new FileStream(fiTracker.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                    {
+                        Debug.WriteLine(String.Format("New TAG '{0}'", fiTracker.FullName));
+                        // TODO: write async?
+                        byte[] rawID = Encoding.UTF8.GetBytes(tg.ID.ToString());
+                        fs.Write(rawID, 0, rawID.Length);
+                    }
             }
 
             return TaskEx.FromResult((Errorable<Tag>)tg);
@@ -175,9 +183,15 @@ namespace IVO.Implementation.FileSystem
         private void deleteTag(Tag tg)
         {
             FileInfo fi = system.getPathByID(tg.ID);
-            if (fi.Exists) fi.Delete();
+            lock (FileSystem.SystemLock)
+            {
+                if (fi.Exists) fi.Delete();
+            }
             FileInfo fiTracker = system.getTagPathByTagName(tg.Name);
-            if (fiTracker.Exists) fiTracker.Delete();
+            lock (FileSystem.SystemLock)
+            {
+                if (fiTracker.Exists) fiTracker.Delete();
+            }
         }
 
         #endregion
