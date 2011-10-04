@@ -82,7 +82,19 @@ namespace IVO.Implementation.FileSystem
             string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
             return new FileInfo(path);
         }
-        
+
+        internal FileInfo[] getPathsByPartialID(TreeID.Partial partial)
+        {
+            DirectoryInfo objDir = getObjectsDirectory();
+            string idStr = partial.ToString();
+
+            string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2));
+            var di = new DirectoryInfo(path);
+            if (!di.Exists) return new FileInfo[0];
+
+            return di.GetFiles(idStr.Substring(2) + "*");
+        }
+
         internal FileInfo getPathByID(CommitID id)
         {
             DirectoryInfo objDir = getObjectsDirectory();
@@ -92,6 +104,18 @@ namespace IVO.Implementation.FileSystem
             return new FileInfo(path);
         }
 
+        internal FileInfo[] getPathsByPartialID(CommitID.Partial partial)
+        {
+            DirectoryInfo objDir = getObjectsDirectory();
+            string idStr = partial.ToString();
+
+            string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2));
+            var di = new DirectoryInfo(path);
+            if (!di.Exists) return new FileInfo[0];
+
+            return di.GetFiles(idStr.Substring(2) + "*");
+        }
+
         internal FileInfo getPathByID(TagID id)
         {
             DirectoryInfo objDir = getObjectsDirectory();
@@ -99,6 +123,18 @@ namespace IVO.Implementation.FileSystem
 
             string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2), idStr.Substring(2));
             return new FileInfo(path);
+        }
+
+        internal FileInfo[] getPathsByPartialID(TagID.Partial partial)
+        {
+            DirectoryInfo objDir = getObjectsDirectory();
+            string idStr = partial.ToString();
+
+            string path = System.IO.Path.Combine(objDir.FullName, idStr.Substring(0, 2));
+            var di = new DirectoryInfo(path);
+            if (!di.Exists) return new FileInfo[0];
+
+            return di.GetFiles(idStr.Substring(2) + "*");
         }
 
         internal FileInfo getTagPathByTagName(TagName tagName)

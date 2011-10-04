@@ -92,5 +92,18 @@ namespace IVO.Implementation.SQL
             CommitTree cmtr = ecmtr.Value;
             return new Tuple<Ref, CommitTree>(rf, cmtr);
         }
+
+        public async Task<Errorable<CommitID>> ResolvePartialID(CommitID.Partial id)
+        {
+            var resolvedIDs = await db.ExecuteListQueryAsync(new ResolvePartialCommitID(id));
+            if (resolvedIDs.Length == 1) return resolvedIDs[0];
+            if (resolvedIDs.Length == 0) return new CommitIDPartialNoResolutionError(id);
+            return new CommitIDPartialAmbiguousResolutionError(id, resolvedIDs);
+        }
+
+        public Task<Errorable<CommitID>[]> ResolvePartialIDs(params CommitID.Partial[] ids)
+        {
+            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+        }
     }
 }

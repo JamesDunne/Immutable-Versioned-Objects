@@ -43,6 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommitRepository.cs" />
+    <Compile Include="Queries\ResolvePartialTagID.cs" />
+    <Compile Include="Queries\ResolvePartialBlobID.cs" />
+    <Compile Include="Queries\ResolvePartialTreeID.cs" />
+    <Compile Include="Queries\ResolvePartialCommitID.cs" />
     <Compile Include="Queries\QueryTreeIDsByPaths.cs" />
     <Compile Include="Queries\QueryTreeByPath.cs" />
     <Compile Include="Queries\QueryTree.cs" />

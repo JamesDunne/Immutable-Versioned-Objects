@@ -64,5 +64,18 @@ namespace IVO.Implementation.SQL
         {
             throw new NotImplementedException();
         }
+
+        public async Task<Errorable<TagID>> ResolvePartialID(TagID.Partial id)
+        {
+            var resolvedIDs = await db.ExecuteListQueryAsync(new ResolvePartialTagID(id));
+            if (resolvedIDs.Length == 1) return resolvedIDs[0];
+            if (resolvedIDs.Length == 0) return new TagIDPartialNoResolutionError(id);
+            return new TagIDPartialAmbiguousResolutionError(id, resolvedIDs);
+        }
+
+        public Task<Errorable<TagID>[]> ResolvePartialIDs(params TagID.Partial[] ids)
+        {
+            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+        }
     }
 }

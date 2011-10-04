@@ -16,8 +16,14 @@
         new ErrorDescriptor("CommitParseBadDateFormatError", "Parse error while parsing tag: bad date format"),
         new ErrorDescriptor("CommitParseExpectedBlankLineError", "Parse error while parsing commit: expected blank line"),
 
-        new ErrorDescriptor("BlobIDPartialNoResolutionError", "Partial BlobID {0} does not resolve to a BlobID", new ParameterDescriptor("blobID", "BlobID.Partial")),
-        new ErrorDescriptor("BlobIDPartialAmbiguousResolutionError", "Partial BlobID {0} resolves to multiple BlobIDs", new ParameterDescriptor("blobID", "BlobID.Partial"), new ParameterDescriptor("blobIDs", "params BlobID[]")),
+        new ErrorDescriptor("BlobIDPartialNoResolutionError", "Partial BlobID {0} does not resolve to a BlobID", new ParameterDescriptor("id", "BlobID.Partial")),
+        new ErrorDescriptor("BlobIDPartialAmbiguousResolutionError", "Partial BlobID {0} resolves to multiple BlobIDs", new ParameterDescriptor("id", "BlobID.Partial"), new ParameterDescriptor("ids", "params BlobID[]")),
+        new ErrorDescriptor("TreeIDPartialNoResolutionError", "Partial TreeID {0} does not resolve to a TreeID", new ParameterDescriptor("id", "TreeID.Partial")),
+        new ErrorDescriptor("TreeIDPartialAmbiguousResolutionError", "Partial TreeID {0} resolves to multiple TreeID", new ParameterDescriptor("id", "TreeID.Partial"), new ParameterDescriptor("ids", "params TreeID[]")),
+        new ErrorDescriptor("CommitIDPartialNoResolutionError", "Partial CommitID {0} does not resolve to a CommitID", new ParameterDescriptor("id", "CommitID.Partial")),
+        new ErrorDescriptor("CommitIDPartialAmbiguousResolutionError", "Partial CommitID {0} resolves to multiple CommitID", new ParameterDescriptor("id", "CommitID.Partial"), new ParameterDescriptor("ids", "params CommitID[]")),
+        new ErrorDescriptor("TagIDPartialNoResolutionError", "Partial TagID {0} does not resolve to a TagID", new ParameterDescriptor("id", "TagID.Partial")),
+        new ErrorDescriptor("TagIDPartialAmbiguousResolutionError", "Partial TagID {0} resolves to multiple TagID", new ParameterDescriptor("id", "TagID.Partial"), new ParameterDescriptor("ids", "params TagID[]")),
     };
 
     var semanticErrors = new ErrorDescriptor[]

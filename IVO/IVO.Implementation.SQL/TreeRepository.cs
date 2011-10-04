@@ -190,5 +190,18 @@ namespace IVO.Implementation.SQL
 
             return flattenedTreeIDs.ToArray(paths.Length);
         }
+
+        public async Task<Errorable<TreeID>> ResolvePartialID(TreeID.Partial id)
+        {
+            var resolvedIDs = await db.ExecuteListQueryAsync(new ResolvePartialTreeID(id));
+            if (resolvedIDs.Length == 1) return resolvedIDs[0];
+            if (resolvedIDs.Length == 0) return new TreeIDPartialNoResolutionError(id);
+            return new TreeIDPartialAmbiguousResolutionError(id, resolvedIDs);
+        }
+
+        public Task<Errorable<TreeID>[]> ResolvePartialIDs(params TreeID.Partial[] ids)
+        {
+            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+        }
     }
 }

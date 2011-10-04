@@ -386,5 +386,18 @@ namespace IVO.Implementation.FileSystem
             // Now use GetTreeRecursively to do the rest:
             return await GetTreeRecursively(tpm.TreeID.Value).ConfigureAwait(continueOnCapturedContext: false);
         }
+
+        public Task<Errorable<TreeID>> ResolvePartialID(TreeID.Partial id)
+        {
+            FileInfo[] fis = system.getPathsByPartialID(id);
+            if (fis.Length == 1) return TaskEx.FromResult(TreeID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name));
+            if (fis.Length == 0) return TaskEx.FromResult((Errorable<TreeID>)new TreeIDPartialNoResolutionError(id));
+            return TaskEx.FromResult((Errorable<TreeID>)new TreeIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => TreeID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)));
+        }
+
+        public Task<Errorable<TreeID>[]> ResolvePartialIDs(params TreeID.Partial[] ids)
+        {
+            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+        }
     }
 }

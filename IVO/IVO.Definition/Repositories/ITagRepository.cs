@@ -11,6 +11,10 @@ namespace IVO.Definition.Repositories
 {
     public interface ITagRepository
     {
+        Task<Errorable<TagID>> ResolvePartialID(TagID.Partial id);
+
+        Task<Errorable<TagID>[]> ResolvePartialIDs(params TagID.Partial[] ids);
+
         Task<Errorable<Tag>> PersistTag(Tag tg);
 
         Task<Errorable<TagID>> DeleteTag(TagID id);

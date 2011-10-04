@@ -368,5 +368,18 @@ namespace IVO.Implementation.FileSystem
 
             return new PagedQueryResponse<TagQuery, Tag, TagOrderBy>(query, new ReadOnlyCollection<Tag>(page), orderBy, paging, tags.Count);
         }
+
+        public Task<Errorable<TagID>> ResolvePartialID(TagID.Partial id)
+        {
+            FileInfo[] fis = system.getPathsByPartialID(id);
+            if (fis.Length == 1) return TaskEx.FromResult(TagID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name));
+            if (fis.Length == 0) return TaskEx.FromResult((Errorable<TagID>)new TagIDPartialNoResolutionError(id));
+            return TaskEx.FromResult((Errorable<TagID>)new TagIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => TagID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)));
+        }
+
+        public Task<Errorable<TagID>[]> ResolvePartialIDs(params TagID.Partial[] ids)
+        {
+            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+        }
     }
 }

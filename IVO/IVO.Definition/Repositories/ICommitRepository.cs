@@ -11,6 +11,10 @@ namespace IVO.Definition.Repositories
 {
     public interface ICommitRepository
     {
+        Task<Errorable<CommitID>> ResolvePartialID(CommitID.Partial id);
+
+        Task<Errorable<CommitID>[]> ResolvePartialIDs(params CommitID.Partial[] ids);
+
         Task<Errorable<Commit>> PersistCommit(Commit cm);
 
         Task<Errorable<CommitID>> DeleteCommit(CommitID id);

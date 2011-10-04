@@ -298,5 +298,18 @@ namespace IVO.Implementation.FileSystem
                 new CommitTree(all[0].ID, new ImmutableContainer<CommitID, ICommit>(cm => cm.ID, all))
             );
         }
+
+        public Task<Errorable<CommitID>> ResolvePartialID(CommitID.Partial id)
+        {
+            FileInfo[] fis = system.getPathsByPartialID(id);
+            if (fis.Length == 1) return TaskEx.FromResult(CommitID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name));
+            if (fis.Length == 0) return TaskEx.FromResult((Errorable<CommitID>)new CommitIDPartialNoResolutionError(id));
+            return TaskEx.FromResult((Errorable<CommitID>)new CommitIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => CommitID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)));
+        }
+
+        public Task<Errorable<CommitID>[]> ResolvePartialIDs(params CommitID.Partial[] ids)
+        {
+            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+        }
     }
 }

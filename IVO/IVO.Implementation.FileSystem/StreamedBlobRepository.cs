@@ -191,10 +191,10 @@ namespace IVO.Implementation.FileSystem
 
         public Task<Errorable<BlobID>> ResolvePartialID(BlobID.Partial id)
         {
-            FileInfo[] fi = system.getPathsByPartialID(id);
-            if (fi.Length == 1) return TaskEx.FromResult( BlobID.TryParse(id.ToString().Substring(0, 2) + fi[0].Name) );
-            if (fi.Length == 0) return TaskEx.FromResult( (Errorable<BlobID>) new BlobIDPartialNoResolutionError(id) );
-            return TaskEx.FromResult( (Errorable<BlobID>) new BlobIDPartialAmbiguousResolutionError(id, fi.SelectAsArray(f => BlobID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)) );
+            FileInfo[] fis = system.getPathsByPartialID(id);
+            if (fis.Length == 1) return TaskEx.FromResult( BlobID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name) );
+            if (fis.Length == 0) return TaskEx.FromResult( (Errorable<BlobID>) new BlobIDPartialNoResolutionError(id) );
+            return TaskEx.FromResult( (Errorable<BlobID>) new BlobIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => BlobID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)) );
         }
 
         public Task<Errorable<BlobID>[]> ResolvePartialIDs(params BlobID.Partial[] ids)

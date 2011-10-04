@@ -11,6 +11,10 @@ namespace IVO.Definition.Repositories
 {
     public interface ITreeRepository
     {
+        Task<Errorable<TreeID>> ResolvePartialID(TreeID.Partial id);
+
+        Task<Errorable<TreeID>[]> ResolvePartialIDs(params TreeID.Partial[] ids);
+
         /// <summary>
         /// Persists an entire tree structure starting from the root TreeID (<paramref name="rootid"/>).
         /// </summary>

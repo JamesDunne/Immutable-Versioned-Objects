@@ -145,15 +145,17 @@ END",
             return TaskEx.FromResult(blobs);
         }
 
-
-        public Task<Errorable<BlobID>> ResolvePartialID(BlobID.Partial id)
+        public async Task<Errorable<BlobID>> ResolvePartialID(BlobID.Partial id)
         {
-            throw new NotImplementedException();
+            var resolvedIDs = await db.ExecuteListQueryAsync(new ResolvePartialBlobID(id));
+            if (resolvedIDs.Length == 1) return resolvedIDs[0];
+            if (resolvedIDs.Length == 0) return new BlobIDPartialNoResolutionError(id);
+            return new BlobIDPartialAmbiguousResolutionError(id, resolvedIDs);
         }
 
         public Task<Errorable<BlobID>[]> ResolvePartialIDs(params BlobID.Partial[] ids)
         {
-            throw new NotImplementedException();
+            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
         }
     }
 }

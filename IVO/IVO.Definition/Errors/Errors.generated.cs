@@ -64,12 +64,42 @@ namespace IVO.Definition.Errors
 
     public sealed partial class BlobIDPartialNoResolutionError : InputError
     {
-        public BlobIDPartialNoResolutionError(BlobID.Partial blobID) : base("Partial BlobID {0} does not resolve to a BlobID", blobID) { }
+        public BlobIDPartialNoResolutionError(BlobID.Partial id) : base("Partial BlobID {0} does not resolve to a BlobID", id) { }
     }
 
     public sealed partial class BlobIDPartialAmbiguousResolutionError : InputError
     {
-        public BlobIDPartialAmbiguousResolutionError(BlobID.Partial blobID, params BlobID[] blobIDs) : base("Partial BlobID {0} resolves to multiple BlobIDs", blobID, blobIDs) { }
+        public BlobIDPartialAmbiguousResolutionError(BlobID.Partial id, params BlobID[] ids) : base("Partial BlobID {0} resolves to multiple BlobIDs", id, ids) { }
+    }
+
+    public sealed partial class TreeIDPartialNoResolutionError : InputError
+    {
+        public TreeIDPartialNoResolutionError(TreeID.Partial id) : base("Partial TreeID {0} does not resolve to a TreeID", id) { }
+    }
+
+    public sealed partial class TreeIDPartialAmbiguousResolutionError : InputError
+    {
+        public TreeIDPartialAmbiguousResolutionError(TreeID.Partial id, params TreeID[] ids) : base("Partial TreeID {0} resolves to multiple TreeID", id, ids) { }
+    }
+
+    public sealed partial class CommitIDPartialNoResolutionError : InputError
+    {
+        public CommitIDPartialNoResolutionError(CommitID.Partial id) : base("Partial CommitID {0} does not resolve to a CommitID", id) { }
+    }
+
+    public sealed partial class CommitIDPartialAmbiguousResolutionError : InputError
+    {
+        public CommitIDPartialAmbiguousResolutionError(CommitID.Partial id, params CommitID[] ids) : base("Partial CommitID {0} resolves to multiple CommitID", id, ids) { }
+    }
+
+    public sealed partial class TagIDPartialNoResolutionError : InputError
+    {
+        public TagIDPartialNoResolutionError(TagID.Partial id) : base("Partial TagID {0} does not resolve to a TagID", id) { }
+    }
+
+    public sealed partial class TagIDPartialAmbiguousResolutionError : InputError
+    {
+        public TagIDPartialAmbiguousResolutionError(TagID.Partial id, params TagID[] ids) : base("Partial TagID {0} resolves to multiple TagID", id, ids) { }
     }
 
     public sealed partial class TagNameDoesNotExistError : SemanticError
