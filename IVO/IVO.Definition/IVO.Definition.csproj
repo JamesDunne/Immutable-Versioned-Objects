@@ -49,7 +49,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Errors\PersistenceError.cs" />
-    <Compile Include="Errors\SemanticError.cs" />
+    <Compile Include="Errors\ConsistencyError.cs" />
     <Compile Include="Functional.cs" />
     <Compile Include="Models\AbsoluteBlobPath.cs" />
     <Compile Include="Models\AbsoluteTreePath.cs" />

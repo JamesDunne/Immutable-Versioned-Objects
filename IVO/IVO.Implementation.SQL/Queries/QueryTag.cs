@@ -72,7 +72,7 @@ namespace IVO.Implementation.SQL.Queries
 
         public Errorable<Tag> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            if (!dr.Read()) return this._idOrName.Collapse<SemanticError>(l => new TagIDRecordDoesNotExistError(l), r => new TagNameDoesNotExistError(r));
+            if (!dr.Read()) return this._idOrName.Collapse<ConsistencyError>(l => new TagIDRecordDoesNotExistError(l), r => new TagNameDoesNotExistError(r));
 
             TagID id = (TagID)dr.GetSqlBinary(0).Value;
 

@@ -52,7 +52,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
             return retrieve(new TagIDRecordDoesNotExistError(this._id), cmd, dr);
         }
 
-        internal static Errorable<Tuple<Tag, Commit>> retrieve(SemanticError errorIfNotExist, SqlCommand cmd, SqlDataReader dr)
+        internal static Errorable<Tuple<Tag, Commit>> retrieve(ConsistencyError errorIfNotExist, SqlCommand cmd, SqlDataReader dr)
         {
             // If no result, return null:
             if (!dr.Read()) return errorIfNotExist;

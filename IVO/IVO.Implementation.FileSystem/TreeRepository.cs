@@ -105,25 +105,25 @@ namespace IVO.Implementation.FileSystem
             }
 
             FileInfo fi = system.getPathByID(tr.ID);
-            // TODO: maybe a TreeIDRecordAlreadyExistsError?
-            if (fi.Exists) return tr;
-
-            // Create directory if it doesn't exist:
-            if (!fi.Directory.Exists)
-            {
-                Debug.WriteLine(String.Format("New DIR '{0}'", fi.Directory.FullName));
-                fi.Directory.Create();
-            }
-
-            // Write the tree contents to the file:
             lock (FileSystem.SystemLock)
             {
-                if (!fi.Exists)
-                    using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-                    {
-                        Debug.WriteLine(String.Format("New TREE '{0}'", fi.FullName));
-                        tr.WriteTo(fs);
-                    }
+                fi.Refresh();
+                // TODO: maybe a TreeIDRecordAlreadyExistsError?
+                if (fi.Exists) return tr;
+
+                // Create directory if it doesn't exist:
+                if (!fi.Directory.Exists)
+                {
+                    Debug.WriteLine(String.Format("New DIR '{0}'", fi.Directory.FullName));
+                    fi.Directory.Create();
+                }
+
+                // Write the tree contents to the file:
+                using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                {
+                    Debug.WriteLine(String.Format("New TREE '{0}'", fi.FullName));
+                    tr.WriteTo(fs);
+                }
             }
 
             return tr;
@@ -295,10 +295,10 @@ namespace IVO.Implementation.FileSystem
                 // Get the TreeNode and persist it:
                 TreeNode node = trees[curr.id];
                 isPersisting.Add(curr.id);
-                
+
                 // Fire up a task to persist this tree node:
                 var tsk = TaskEx.Run(() => persistTree(node));
-                
+
                 // Add the task to the depth group to await:
                 Debug.WriteLine(String.Format("Adding to depth group {0}...", curr.depth));
                 persistTasks.Add(tsk);

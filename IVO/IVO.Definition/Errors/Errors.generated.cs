@@ -102,72 +102,72 @@ namespace IVO.Definition.Errors
         public TagIDPartialAmbiguousResolutionError(TagID.Partial id, params TagID[] ids) : base("Partial TagID {0} resolves to multiple TagID", id, ids) { }
     }
 
-    public sealed partial class TagNameDoesNotExistError : SemanticError
+    public sealed partial class TagNameDoesNotExistError : ConsistencyError
     {
         public TagNameDoesNotExistError(TagName tagName) : base("A tag with tag name '{0}' does not exist", tagName) { }
     }
 
-    public sealed partial class RefNameDoesNotExistError : SemanticError
+    public sealed partial class RefNameDoesNotExistError : ConsistencyError
     {
         public RefNameDoesNotExistError(RefName refName) : base("A ref with ref name '{0}' does not exist", refName) { }
     }
 
-    public sealed partial class CommitIDRecordDoesNotExistError : SemanticError
+    public sealed partial class CommitIDRecordDoesNotExistError : ConsistencyError
     {
         public CommitIDRecordDoesNotExistError(CommitID commitID) : base("A commit with CommitID {0} does not exist", commitID) { }
     }
 
-    public sealed partial class TagIDRecordDoesNotExistError : SemanticError
+    public sealed partial class TagIDRecordDoesNotExistError : ConsistencyError
     {
         public TagIDRecordDoesNotExistError(TagID tagID) : base("A tag with TagID {0} does not exist", tagID) { }
     }
 
-    public sealed partial class TreeIDRecordDoesNotExistError : SemanticError
+    public sealed partial class TreeIDRecordDoesNotExistError : ConsistencyError
     {
         public TreeIDRecordDoesNotExistError(TreeID treeID) : base("A tree with TreeID {0} does not exist", treeID) { }
     }
 
-    public sealed partial class BlobIDRecordDoesNotExistError : SemanticError
+    public sealed partial class BlobIDRecordDoesNotExistError : ConsistencyError
     {
         public BlobIDRecordDoesNotExistError(BlobID blobID) : base("A blob with BlobID {0} does not exist", blobID) { }
     }
 
-    public sealed partial class TreeTreePathDoesNotExistError : SemanticError
+    public sealed partial class TreeTreePathDoesNotExistError : ConsistencyError
     {
         public TreeTreePathDoesNotExistError(TreeTreePath path) : base("A tree with path '{0}' does not exist", path) { }
     }
 
-    public sealed partial class TagNameAlreadyExistsError : SemanticError
+    public sealed partial class TagNameAlreadyExistsError : ConsistencyError
     {
         public TagNameAlreadyExistsError(TagName tagName) : base("A tag with tag name '{0}' already exists", tagName) { }
     }
 
-    public sealed partial class BlobNotFoundByPathError : SemanticError
+    public sealed partial class BlobNotFoundByPathError : ConsistencyError
     {
         public BlobNotFoundByPathError(TreeBlobPath path) : base("A blob was not found given path '{0}'", path) { }
     }
 
-    public sealed partial class ComputedTagIDMismatchError : SemanticError
+    public sealed partial class ComputedTagIDMismatchError : ConsistencyError
     {
         public ComputedTagIDMismatchError(TagID computedID, TagID expectedID) : base("Computed TagID {0} does not match expected TagID {1}", computedID, expectedID) { }
     }
 
-    public sealed partial class ComputedCommitIDMismatchError : SemanticError
+    public sealed partial class ComputedCommitIDMismatchError : ConsistencyError
     {
         public ComputedCommitIDMismatchError(CommitID computedID, CommitID expectedID) : base("Computed CommitID {0} does not match expected CommitID {1}", computedID, expectedID) { }
     }
 
-    public sealed partial class ComputedTreeIDMismatchError : SemanticError
+    public sealed partial class ComputedTreeIDMismatchError : ConsistencyError
     {
         public ComputedTreeIDMismatchError(TreeID computedID, TreeID expectedID) : base("Computed TreeID {0} does not match expected TreeID {1}", computedID, expectedID) { }
     }
 
-    public sealed partial class ComputedBlobIDMismatchError : SemanticError
+    public sealed partial class ComputedBlobIDMismatchError : ConsistencyError
     {
         public ComputedBlobIDMismatchError(BlobID computedID, BlobID expectedID) : base("Computed BlobID {0} does not match expected BlobID {1}", computedID, expectedID) { }
     }
 
-    public sealed partial class TagNameDoesNotMatchExpectedError : SemanticError
+    public sealed partial class TagNameDoesNotMatchExpectedError : ConsistencyError
     {
         public TagNameDoesNotMatchExpectedError(TagName retrievedName, TagName expectedName) : base("Retrieved tag name '{0}' does not match expected tag name '{1}'", retrievedName, expectedName) { }
     }

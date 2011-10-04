@@ -34,7 +34,7 @@ namespace IVO.Definition
 
         public override long Length
         {
-            get { throw new NotImplementedException(); }
+            get { return input.Length; }
         }
 
         public override long Position

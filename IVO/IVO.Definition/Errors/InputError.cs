@@ -5,9 +5,9 @@ using System.Text;
 
 namespace IVO.Definition.Errors
 {
-    public abstract class InputError : ErrorBase
+    public class InputError : ErrorBase
     {
-        protected InputError(string message) : base(message) { }
-        protected InputError(string format, params object[] args) : base(format, args) { }
+        public InputError(string message) : base(message) { }
+        public InputError(string format, params object[] args) : base(format, args) { }
     }
 }

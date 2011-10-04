@@ -29,12 +29,12 @@ namespace IVO.Definition
 
         public override void Flush()
         {
-            throw new NotImplementedException();
+            output.Flush();
         }
 
         public override long Length
         {
-            get { throw new NotImplementedException(); }
+            get { return output.Length; }
         }
 
         public override long Position
@@ -61,7 +61,7 @@ namespace IVO.Definition
 
         public override void SetLength(long value)
         {
-            throw new NotImplementedException();
+            output.SetLength(value);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
