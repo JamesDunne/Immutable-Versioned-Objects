@@ -26,9 +26,12 @@ namespace IVO.Definition.Models
 
 <#
         }
+
+        string typeName = types[i];
+        string partialTypeName = types[i] + ".Partial";
 #>
-	[TypeConverter(typeof(<#= types[i] #>TypeConverter))]
-    public struct <#= types[i] #> : IEquatable<<#= types[i] #>>
+	[TypeConverter(typeof(<#= typeName #>TypeConverter))]
+    public struct <#= typeName #> : IEquatable<<#= typeName #>>
     {
         public const int ByteArrayLength = 20;
         public const int HexCharLength = ByteArrayLength * 2;
@@ -37,32 +40,14 @@ namespace IVO.Definition.Models
         private int _quickHash;
         private string _toString;
 
-        public <#= types[i] #>(byte[] value)
+        public <#= typeName #>(byte[] value)
         {
             // Sanity check first:
-            if (value.Length != ByteArrayLength) throw new ArgumentOutOfRangeException("value", String.Format("<#= types[i] #> value must be {0} bytes in length", ByteArrayLength));
+            if (value.Length != ByteArrayLength) throw new ArgumentOutOfRangeException("value", String.Format("<#= typeName #> value must be {0} bytes in length", ByteArrayLength));
             
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = _idValue.ToHexString(0, 20);
-        }
-
-        public static Maybe<<#= types[i] #>> Parse(string hexValue)
-        {
-            // Sanity check first:
-            if (hexValue.Length != HexCharLength) return Maybe<<#= types[i] #>>.Nothing;
-
-            byte[] tmp = new byte[ByteArrayLength];
-            for (int i = 0; i < ByteArrayLength; ++i)
-            {
-                int v1 = deHex(hexValue[i * 2 + 0]);
-                int v2 = deHex(hexValue[i * 2 + 1]);
-                if (v1 == -1) return Maybe<<#= types[i] #>>.Nothing;
-                if (v2 == -1) return Maybe<<#= types[i] #>>.Nothing;
-                tmp[i] = (byte)((v1 << 4) | v2);
-            }
-
-            return new <#= types[i] #>(tmp);
         }
 
         public sealed class ParseError : InputError
@@ -71,10 +56,10 @@ namespace IVO.Definition.Models
             internal ParseError(string format, params object[] args) : base(format, args) { }
         }
 
-        public static Errorable<<#= types[i] #>> TryParse(string hexValue)
+        public static Errorable<<#= typeName #>> TryParse(string hexValue)
         {
             // Sanity check first:
-            if (hexValue.Length != HexCharLength) return new ParseError("<#= types[i] #> must be {0} characters in length", HexCharLength);
+            if (hexValue.Length != HexCharLength) return new ParseError("<#= typeName #> must be {0} characters in length", HexCharLength);
 
             byte[] tmp = new byte[ByteArrayLength];
             for (int i = 0; i < ByteArrayLength; ++i)
@@ -82,13 +67,13 @@ namespace IVO.Definition.Models
                 int v1 = deHex(hexValue[i * 2 + 0]);
                 int v2 = deHex(hexValue[i * 2 + 1]);
 
-                if (v1 == -1) return new ParseError("<#= types[i] #> character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]);
-                if (v2 == -1) return new ParseError("<#= types[i] #> character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]);
+                if (v1 == -1) return new ParseError("<#= typeName #> character position {0} has invalid hex character '{1}'", i * 2 + 0, hexValue[i * 2 + 0]);
+                if (v2 == -1) return new ParseError("<#= typeName #> character position {0} has invalid hex character '{1}'", i * 2 + 1, hexValue[i * 2 + 1]);
 
                 tmp[i] = (byte)((v1 << 4) | v2);
             }
 
-            return new <#= types[i] #>(tmp);
+            return new <#= typeName #>(tmp);
         }
 
         private static int deHex(char c)
@@ -99,32 +84,32 @@ namespace IVO.Definition.Models
             return -1;
         }
 
-        public static explicit operator byte[](<#= types[i] #> id)
+        public static explicit operator byte[](<#= typeName #> id)
         {
             return id._idValue;
         }
 
-        public static explicit operator <#= types[i] #>(byte[] hash)
+        public static explicit operator <#= typeName #>(byte[] hash)
         {
-            return new <#= types[i] #>(hash);
+            return new <#= typeName #>(hash);
         }
         
-        public static bool operator ==(<#= types[i] #> a, <#= types[i] #> b)
+        public static bool operator ==(<#= typeName #> a, <#= typeName #> b)
         {
             return a.Equals(b);
         }
 
-        public static bool operator !=(<#= types[i] #> a, <#= types[i] #> b)
+        public static bool operator !=(<#= typeName #> a, <#= typeName #> b)
         {
             return !a.Equals(b);
         }
         
         public override bool Equals(object obj)
         {
-            return this.Equals((<#= types[i] #>)obj);
+            return this.Equals((<#= typeName #>)obj);
         }
 
-        public bool Equals(<#= types[i] #> other)
+        public bool Equals(<#= typeName #> other)
         {
             if ((this._idValue == null) != (other._idValue == null)) return false;
 
@@ -154,9 +139,9 @@ namespace IVO.Definition.Models
             return _toString.Substring(0, firstLength);
         }
 
-        public class Comparer : IComparer<<#= types[i] #>>
+        public class Comparer : IComparer<<#= typeName #>>
         {
-            public int Compare(<#= types[i] #> x, <#= types[i] #> y)
+            public int Compare(<#= typeName #> x, <#= typeName #> y)
             {
                 for (int i = 0; i < ByteArrayLength; ++i)
                 {
@@ -166,9 +151,115 @@ namespace IVO.Definition.Models
                 return 0;
             }
         }
+
+        public bool StartsWith(Partial partialID)
+        {
+            return this._toString.StartsWith(partialID._hexValue, StringComparison.OrdinalIgnoreCase);
+        }
+
+        #region Partial ID
+
+        [TypeConverter(typeof(PartialTypeConverter))]
+        public struct Partial
+        {
+            public const int MinimumHexCharLength = 6;
+
+            internal string _hexValue;
+
+            private Partial(string hexValue)
+            {
+                _hexValue = hexValue;
+            }
+
+            public sealed class ParseError : InputError
+            {
+                internal ParseError(string message) : base(message) { }
+                internal ParseError(string format, params object[] args) : base(format, args) { }
+            }
+
+            public static Errorable<Partial> TryParse(string hexValue)
+            {
+                // Sanity check first:
+                if (hexValue.Length < MinimumHexCharLength) return new ParseError("<#= partialTypeName #> must be at least {0} characters in length", MinimumHexCharLength);
+                if (hexValue.Length > <#= typeName #>.HexCharLength) return new ParseError("<#= partialTypeName #> must be at most {0} characters in length", <#= types[i] #>.HexCharLength);
+
+                for (int i = 0; i < hexValue.Length; ++i)
+                {
+                    int v = deHex(hexValue[i]);
+
+                    if (v == -1) return new ParseError("<#= partialTypeName #> character position {0} has invalid hex character '{1}'", i, hexValue[i]);
+                }
+
+                return new <#= partialTypeName #>(hexValue);
+            }
+
+            private static int deHex(char c)
+            {
+                if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
+                if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
+                if (c >= '0' && c <= '9') return (int)(c - '0');
+                return -1;
+            }
+
+            public bool IsStartOf(string hexValue)
+            {
+                return hexValue.StartsWith(this._hexValue, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public override string ToString()
+            {
+                return _hexValue;
+            }
+        }
+
+        public sealed class PartialTypeConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                if (typeof(string) == sourceType)
+                    return true;
+                else
+                    return base.CanConvertFrom(context, sourceType);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+				    return Partial.TryParse(strValue).Value;
+
+                return base.ConvertFrom(context, culture, value);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(string) == destinationType)
+                    return true;
+                else if (typeof(Errorable<Partial>) == destinationType)
+                    return true;
+                else
+                    return base.CanConvertTo(context, destinationType);
+            }
+
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                if (typeof(string) == destinationType)
+                    return ((Partial)value).ToString();
+                else if (typeof(Errorable<Partial>) == destinationType)
+                {
+                    string strValue = value as string;
+                    if (strValue != null)
+                        return Partial.TryParse(strValue);
+                }
+
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
+
+        #endregion
     }
 
-    public sealed class <#= types[i] #>TypeConverter : TypeConverter
+    public sealed class <#= typeName #>TypeConverter : TypeConverter
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
@@ -182,7 +273,7 @@ namespace IVO.Definition.Models
         {
             string strValue = value as string;
             if (strValue != null)
-				return <#= types[i] #>.Parse(strValue).Value;
+				return <#= typeName #>.TryParse(strValue).Value;
 
             return base.ConvertFrom(context, culture, value);
         }
@@ -191,6 +282,8 @@ namespace IVO.Definition.Models
         {
             if (typeof(string) == destinationType)
                 return true;
+            else if (typeof(Errorable<<#= typeName #>>) == destinationType)
+                return true;
             else
                 return base.CanConvertTo(context, destinationType);
         }
@@ -198,9 +291,15 @@ namespace IVO.Definition.Models
         public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
         {
             if (typeof(string) == destinationType)
-                return ((<#= types[i] #>)value).ToString();
-            else
-                return base.ConvertTo(context, culture, value, destinationType);
+                return ((<#= typeName #>)value).ToString();
+            else if (typeof(Errorable<<#= typeName #>>) == destinationType)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+                    return <#= typeName #>.TryParse(strValue);
+            }
+
+            return base.ConvertTo(context, culture, value, destinationType);
         }
     }
 <#

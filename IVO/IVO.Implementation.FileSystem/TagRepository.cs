@@ -139,7 +139,9 @@ namespace IVO.Implementation.FileSystem
 
                 // Set CommitID:
                 if (line == null || !line.StartsWith("commit ")) return new TagParseExpectedCommitError();
-                tb.CommitID = CommitID.Parse(line.Substring("commit ".Length)).Value;
+                var ecid = CommitID.TryParse(line.Substring("commit ".Length));
+                if (ecid.HasErrors) return ecid.Errors;
+                tb.CommitID = ecid.Value;
 
                 // Set Name:
                 line = sr.ReadLine();

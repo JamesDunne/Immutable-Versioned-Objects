@@ -27,24 +27,6 @@ namespace IVO.Definition.Models
             _toString = _idValue.ToHexString(0, 20);
         }
 
-        public static Maybe<CommitID> Parse(string hexValue)
-        {
-            // Sanity check first:
-            if (hexValue.Length != HexCharLength) return Maybe<CommitID>.Nothing;
-
-            byte[] tmp = new byte[ByteArrayLength];
-            for (int i = 0; i < ByteArrayLength; ++i)
-            {
-                int v1 = deHex(hexValue[i * 2 + 0]);
-                int v2 = deHex(hexValue[i * 2 + 1]);
-                if (v1 == -1) return Maybe<CommitID>.Nothing;
-                if (v2 == -1) return Maybe<CommitID>.Nothing;
-                tmp[i] = (byte)((v1 << 4) | v2);
-            }
-
-            return new CommitID(tmp);
-        }
-
         public sealed class ParseError : InputError
         {
             internal ParseError(string message) : base(message) { }
@@ -146,6 +128,112 @@ namespace IVO.Definition.Models
                 return 0;
             }
         }
+
+        public bool StartsWith(Partial partialID)
+        {
+            return this._toString.StartsWith(partialID._hexValue, StringComparison.OrdinalIgnoreCase);
+        }
+
+        #region Partial ID
+
+        [TypeConverter(typeof(PartialTypeConverter))]
+        public struct Partial
+        {
+            public const int MinimumHexCharLength = 6;
+
+            internal string _hexValue;
+
+            private Partial(string hexValue)
+            {
+                _hexValue = hexValue;
+            }
+
+            public sealed class ParseError : InputError
+            {
+                internal ParseError(string message) : base(message) { }
+                internal ParseError(string format, params object[] args) : base(format, args) { }
+            }
+
+            public static Errorable<Partial> TryParse(string hexValue)
+            {
+                // Sanity check first:
+                if (hexValue.Length < MinimumHexCharLength) return new ParseError("CommitID.Partial must be at least {0} characters in length", MinimumHexCharLength);
+                if (hexValue.Length > CommitID.HexCharLength) return new ParseError("CommitID.Partial must be at most {0} characters in length", CommitID.HexCharLength);
+
+                for (int i = 0; i < hexValue.Length; ++i)
+                {
+                    int v = deHex(hexValue[i]);
+
+                    if (v == -1) return new ParseError("CommitID.Partial character position {0} has invalid hex character '{1}'", i, hexValue[i]);
+                }
+
+                return new CommitID.Partial(hexValue);
+            }
+
+            private static int deHex(char c)
+            {
+                if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
+                if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
+                if (c >= '0' && c <= '9') return (int)(c - '0');
+                return -1;
+            }
+
+            public bool IsStartOf(string hexValue)
+            {
+                return hexValue.StartsWith(this._hexValue, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public override string ToString()
+            {
+                return _hexValue;
+            }
+        }
+
+        public sealed class PartialTypeConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                if (typeof(string) == sourceType)
+                    return true;
+                else
+                    return base.CanConvertFrom(context, sourceType);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+				    return Partial.TryParse(strValue).Value;
+
+                return base.ConvertFrom(context, culture, value);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(string) == destinationType)
+                    return true;
+                else if (typeof(Errorable<Partial>) == destinationType)
+                    return true;
+                else
+                    return base.CanConvertTo(context, destinationType);
+            }
+
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                if (typeof(string) == destinationType)
+                    return ((Partial)value).ToString();
+                else if (typeof(Errorable<Partial>) == destinationType)
+                {
+                    string strValue = value as string;
+                    if (strValue != null)
+                        return Partial.TryParse(strValue);
+                }
+
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
+
+        #endregion
     }
 
     public sealed class CommitIDTypeConverter : TypeConverter
@@ -162,7 +250,7 @@ namespace IVO.Definition.Models
         {
             string strValue = value as string;
             if (strValue != null)
-				return CommitID.Parse(strValue).Value;
+				return CommitID.TryParse(strValue).Value;
 
             return base.ConvertFrom(context, culture, value);
         }
@@ -170,6 +258,8 @@ namespace IVO.Definition.Models
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
             if (typeof(string) == destinationType)
+                return true;
+            else if (typeof(Errorable<CommitID>) == destinationType)
                 return true;
             else
                 return base.CanConvertTo(context, destinationType);
@@ -179,8 +269,14 @@ namespace IVO.Definition.Models
         {
             if (typeof(string) == destinationType)
                 return ((CommitID)value).ToString();
-            else
-                return base.ConvertTo(context, culture, value, destinationType);
+            else if (typeof(Errorable<CommitID>) == destinationType)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+                    return CommitID.TryParse(strValue);
+            }
+
+            return base.ConvertTo(context, culture, value, destinationType);
         }
     }
 
@@ -202,24 +298,6 @@ namespace IVO.Definition.Models
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = _idValue.ToHexString(0, 20);
-        }
-
-        public static Maybe<TreeID> Parse(string hexValue)
-        {
-            // Sanity check first:
-            if (hexValue.Length != HexCharLength) return Maybe<TreeID>.Nothing;
-
-            byte[] tmp = new byte[ByteArrayLength];
-            for (int i = 0; i < ByteArrayLength; ++i)
-            {
-                int v1 = deHex(hexValue[i * 2 + 0]);
-                int v2 = deHex(hexValue[i * 2 + 1]);
-                if (v1 == -1) return Maybe<TreeID>.Nothing;
-                if (v2 == -1) return Maybe<TreeID>.Nothing;
-                tmp[i] = (byte)((v1 << 4) | v2);
-            }
-
-            return new TreeID(tmp);
         }
 
         public sealed class ParseError : InputError
@@ -323,6 +401,112 @@ namespace IVO.Definition.Models
                 return 0;
             }
         }
+
+        public bool StartsWith(Partial partialID)
+        {
+            return this._toString.StartsWith(partialID._hexValue, StringComparison.OrdinalIgnoreCase);
+        }
+
+        #region Partial ID
+
+        [TypeConverter(typeof(PartialTypeConverter))]
+        public struct Partial
+        {
+            public const int MinimumHexCharLength = 6;
+
+            internal string _hexValue;
+
+            private Partial(string hexValue)
+            {
+                _hexValue = hexValue;
+            }
+
+            public sealed class ParseError : InputError
+            {
+                internal ParseError(string message) : base(message) { }
+                internal ParseError(string format, params object[] args) : base(format, args) { }
+            }
+
+            public static Errorable<Partial> TryParse(string hexValue)
+            {
+                // Sanity check first:
+                if (hexValue.Length < MinimumHexCharLength) return new ParseError("TreeID.Partial must be at least {0} characters in length", MinimumHexCharLength);
+                if (hexValue.Length > TreeID.HexCharLength) return new ParseError("TreeID.Partial must be at most {0} characters in length", TreeID.HexCharLength);
+
+                for (int i = 0; i < hexValue.Length; ++i)
+                {
+                    int v = deHex(hexValue[i]);
+
+                    if (v == -1) return new ParseError("TreeID.Partial character position {0} has invalid hex character '{1}'", i, hexValue[i]);
+                }
+
+                return new TreeID.Partial(hexValue);
+            }
+
+            private static int deHex(char c)
+            {
+                if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
+                if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
+                if (c >= '0' && c <= '9') return (int)(c - '0');
+                return -1;
+            }
+
+            public bool IsStartOf(string hexValue)
+            {
+                return hexValue.StartsWith(this._hexValue, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public override string ToString()
+            {
+                return _hexValue;
+            }
+        }
+
+        public sealed class PartialTypeConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                if (typeof(string) == sourceType)
+                    return true;
+                else
+                    return base.CanConvertFrom(context, sourceType);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+				    return Partial.TryParse(strValue).Value;
+
+                return base.ConvertFrom(context, culture, value);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(string) == destinationType)
+                    return true;
+                else if (typeof(Errorable<Partial>) == destinationType)
+                    return true;
+                else
+                    return base.CanConvertTo(context, destinationType);
+            }
+
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                if (typeof(string) == destinationType)
+                    return ((Partial)value).ToString();
+                else if (typeof(Errorable<Partial>) == destinationType)
+                {
+                    string strValue = value as string;
+                    if (strValue != null)
+                        return Partial.TryParse(strValue);
+                }
+
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
+
+        #endregion
     }
 
     public sealed class TreeIDTypeConverter : TypeConverter
@@ -339,7 +523,7 @@ namespace IVO.Definition.Models
         {
             string strValue = value as string;
             if (strValue != null)
-				return TreeID.Parse(strValue).Value;
+				return TreeID.TryParse(strValue).Value;
 
             return base.ConvertFrom(context, culture, value);
         }
@@ -347,6 +531,8 @@ namespace IVO.Definition.Models
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
             if (typeof(string) == destinationType)
+                return true;
+            else if (typeof(Errorable<TreeID>) == destinationType)
                 return true;
             else
                 return base.CanConvertTo(context, destinationType);
@@ -356,8 +542,14 @@ namespace IVO.Definition.Models
         {
             if (typeof(string) == destinationType)
                 return ((TreeID)value).ToString();
-            else
-                return base.ConvertTo(context, culture, value, destinationType);
+            else if (typeof(Errorable<TreeID>) == destinationType)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+                    return TreeID.TryParse(strValue);
+            }
+
+            return base.ConvertTo(context, culture, value, destinationType);
         }
     }
 
@@ -379,24 +571,6 @@ namespace IVO.Definition.Models
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = _idValue.ToHexString(0, 20);
-        }
-
-        public static Maybe<BlobID> Parse(string hexValue)
-        {
-            // Sanity check first:
-            if (hexValue.Length != HexCharLength) return Maybe<BlobID>.Nothing;
-
-            byte[] tmp = new byte[ByteArrayLength];
-            for (int i = 0; i < ByteArrayLength; ++i)
-            {
-                int v1 = deHex(hexValue[i * 2 + 0]);
-                int v2 = deHex(hexValue[i * 2 + 1]);
-                if (v1 == -1) return Maybe<BlobID>.Nothing;
-                if (v2 == -1) return Maybe<BlobID>.Nothing;
-                tmp[i] = (byte)((v1 << 4) | v2);
-            }
-
-            return new BlobID(tmp);
         }
 
         public sealed class ParseError : InputError
@@ -500,6 +674,112 @@ namespace IVO.Definition.Models
                 return 0;
             }
         }
+
+        public bool StartsWith(Partial partialID)
+        {
+            return this._toString.StartsWith(partialID._hexValue, StringComparison.OrdinalIgnoreCase);
+        }
+
+        #region Partial ID
+
+        [TypeConverter(typeof(PartialTypeConverter))]
+        public struct Partial
+        {
+            public const int MinimumHexCharLength = 6;
+
+            internal string _hexValue;
+
+            private Partial(string hexValue)
+            {
+                _hexValue = hexValue;
+            }
+
+            public sealed class ParseError : InputError
+            {
+                internal ParseError(string message) : base(message) { }
+                internal ParseError(string format, params object[] args) : base(format, args) { }
+            }
+
+            public static Errorable<Partial> TryParse(string hexValue)
+            {
+                // Sanity check first:
+                if (hexValue.Length < MinimumHexCharLength) return new ParseError("BlobID.Partial must be at least {0} characters in length", MinimumHexCharLength);
+                if (hexValue.Length > BlobID.HexCharLength) return new ParseError("BlobID.Partial must be at most {0} characters in length", BlobID.HexCharLength);
+
+                for (int i = 0; i < hexValue.Length; ++i)
+                {
+                    int v = deHex(hexValue[i]);
+
+                    if (v == -1) return new ParseError("BlobID.Partial character position {0} has invalid hex character '{1}'", i, hexValue[i]);
+                }
+
+                return new BlobID.Partial(hexValue);
+            }
+
+            private static int deHex(char c)
+            {
+                if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
+                if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
+                if (c >= '0' && c <= '9') return (int)(c - '0');
+                return -1;
+            }
+
+            public bool IsStartOf(string hexValue)
+            {
+                return hexValue.StartsWith(this._hexValue, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public override string ToString()
+            {
+                return _hexValue;
+            }
+        }
+
+        public sealed class PartialTypeConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                if (typeof(string) == sourceType)
+                    return true;
+                else
+                    return base.CanConvertFrom(context, sourceType);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+				    return Partial.TryParse(strValue).Value;
+
+                return base.ConvertFrom(context, culture, value);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(string) == destinationType)
+                    return true;
+                else if (typeof(Errorable<Partial>) == destinationType)
+                    return true;
+                else
+                    return base.CanConvertTo(context, destinationType);
+            }
+
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                if (typeof(string) == destinationType)
+                    return ((Partial)value).ToString();
+                else if (typeof(Errorable<Partial>) == destinationType)
+                {
+                    string strValue = value as string;
+                    if (strValue != null)
+                        return Partial.TryParse(strValue);
+                }
+
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
+
+        #endregion
     }
 
     public sealed class BlobIDTypeConverter : TypeConverter
@@ -516,7 +796,7 @@ namespace IVO.Definition.Models
         {
             string strValue = value as string;
             if (strValue != null)
-				return BlobID.Parse(strValue).Value;
+				return BlobID.TryParse(strValue).Value;
 
             return base.ConvertFrom(context, culture, value);
         }
@@ -524,6 +804,8 @@ namespace IVO.Definition.Models
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
             if (typeof(string) == destinationType)
+                return true;
+            else if (typeof(Errorable<BlobID>) == destinationType)
                 return true;
             else
                 return base.CanConvertTo(context, destinationType);
@@ -533,8 +815,14 @@ namespace IVO.Definition.Models
         {
             if (typeof(string) == destinationType)
                 return ((BlobID)value).ToString();
-            else
-                return base.ConvertTo(context, culture, value, destinationType);
+            else if (typeof(Errorable<BlobID>) == destinationType)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+                    return BlobID.TryParse(strValue);
+            }
+
+            return base.ConvertTo(context, culture, value, destinationType);
         }
     }
 
@@ -556,24 +844,6 @@ namespace IVO.Definition.Models
             _idValue = value;
             _quickHash = BitConverter.ToInt32(_idValue, 0);
             _toString = _idValue.ToHexString(0, 20);
-        }
-
-        public static Maybe<TagID> Parse(string hexValue)
-        {
-            // Sanity check first:
-            if (hexValue.Length != HexCharLength) return Maybe<TagID>.Nothing;
-
-            byte[] tmp = new byte[ByteArrayLength];
-            for (int i = 0; i < ByteArrayLength; ++i)
-            {
-                int v1 = deHex(hexValue[i * 2 + 0]);
-                int v2 = deHex(hexValue[i * 2 + 1]);
-                if (v1 == -1) return Maybe<TagID>.Nothing;
-                if (v2 == -1) return Maybe<TagID>.Nothing;
-                tmp[i] = (byte)((v1 << 4) | v2);
-            }
-
-            return new TagID(tmp);
         }
 
         public sealed class ParseError : InputError
@@ -677,6 +947,112 @@ namespace IVO.Definition.Models
                 return 0;
             }
         }
+
+        public bool StartsWith(Partial partialID)
+        {
+            return this._toString.StartsWith(partialID._hexValue, StringComparison.OrdinalIgnoreCase);
+        }
+
+        #region Partial ID
+
+        [TypeConverter(typeof(PartialTypeConverter))]
+        public struct Partial
+        {
+            public const int MinimumHexCharLength = 6;
+
+            internal string _hexValue;
+
+            private Partial(string hexValue)
+            {
+                _hexValue = hexValue;
+            }
+
+            public sealed class ParseError : InputError
+            {
+                internal ParseError(string message) : base(message) { }
+                internal ParseError(string format, params object[] args) : base(format, args) { }
+            }
+
+            public static Errorable<Partial> TryParse(string hexValue)
+            {
+                // Sanity check first:
+                if (hexValue.Length < MinimumHexCharLength) return new ParseError("TagID.Partial must be at least {0} characters in length", MinimumHexCharLength);
+                if (hexValue.Length > TagID.HexCharLength) return new ParseError("TagID.Partial must be at most {0} characters in length", TagID.HexCharLength);
+
+                for (int i = 0; i < hexValue.Length; ++i)
+                {
+                    int v = deHex(hexValue[i]);
+
+                    if (v == -1) return new ParseError("TagID.Partial character position {0} has invalid hex character '{1}'", i, hexValue[i]);
+                }
+
+                return new TagID.Partial(hexValue);
+            }
+
+            private static int deHex(char c)
+            {
+                if (c >= 'A' && c <= 'F') return (int)(c - 'A' + 10);
+                if (c >= 'a' && c <= 'f') return (int)(c - 'a' + 10);
+                if (c >= '0' && c <= '9') return (int)(c - '0');
+                return -1;
+            }
+
+            public bool IsStartOf(string hexValue)
+            {
+                return hexValue.StartsWith(this._hexValue, StringComparison.OrdinalIgnoreCase);
+            }
+
+            public override string ToString()
+            {
+                return _hexValue;
+            }
+        }
+
+        public sealed class PartialTypeConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                if (typeof(string) == sourceType)
+                    return true;
+                else
+                    return base.CanConvertFrom(context, sourceType);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+				    return Partial.TryParse(strValue).Value;
+
+                return base.ConvertFrom(context, culture, value);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(string) == destinationType)
+                    return true;
+                else if (typeof(Errorable<Partial>) == destinationType)
+                    return true;
+                else
+                    return base.CanConvertTo(context, destinationType);
+            }
+
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                if (typeof(string) == destinationType)
+                    return ((Partial)value).ToString();
+                else if (typeof(Errorable<Partial>) == destinationType)
+                {
+                    string strValue = value as string;
+                    if (strValue != null)
+                        return Partial.TryParse(strValue);
+                }
+
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
+
+        #endregion
     }
 
     public sealed class TagIDTypeConverter : TypeConverter
@@ -693,7 +1069,7 @@ namespace IVO.Definition.Models
         {
             string strValue = value as string;
             if (strValue != null)
-				return TagID.Parse(strValue).Value;
+				return TagID.TryParse(strValue).Value;
 
             return base.ConvertFrom(context, culture, value);
         }
@@ -701,6 +1077,8 @@ namespace IVO.Definition.Models
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
             if (typeof(string) == destinationType)
+                return true;
+            else if (typeof(Errorable<TagID>) == destinationType)
                 return true;
             else
                 return base.CanConvertTo(context, destinationType);
@@ -710,8 +1088,14 @@ namespace IVO.Definition.Models
         {
             if (typeof(string) == destinationType)
                 return ((TagID)value).ToString();
-            else
-                return base.ConvertTo(context, culture, value, destinationType);
+            else if (typeof(Errorable<TagID>) == destinationType)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+                    return TagID.TryParse(strValue);
+            }
+
+            return base.ConvertTo(context, culture, value, destinationType);
         }
     }
 }

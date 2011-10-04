@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace IVO.Definition.Errors
 {
+    [TypeConverter(typeof(ErrorableTypeConverter))]
     public sealed class Errorable<Tsuccess>
     {
         public Errorable(Tsuccess value)
@@ -41,6 +43,34 @@ namespace IVO.Definition.Errors
 
         public bool HasErrors { get; private set; }
         public ErrorContainer Errors { get; private set; }
+    }
+
+    public sealed class ErrorableTypeConverter : TypeConverter
+    {
+        static ErrorableTypeConverter()
+        {
+            TypeDescriptor.AddAttributes(typeof(string), new TypeConverterAttribute(typeof(ErrorableTypeConverter)));
+        }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            if (destinationType.IsGenericType && destinationType.Name == "Errorable`1" && destinationType.Namespace == "IVO.Definition.Errors")
+            {
+                TypeConverter cvt = TypeDescriptor.GetConverter(destinationType.GetGenericArguments()[0]);
+                return cvt.CanConvertTo(context, destinationType);
+            }
+            return base.CanConvertTo(context, destinationType);
+        }
+
+        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        {
+            if (destinationType.IsGenericType && destinationType.Name == "Errorable`1" && destinationType.Namespace == "IVO.Definition.Errors")
+            {
+                TypeConverter cvt = TypeDescriptor.GetConverter(destinationType.GetGenericArguments()[0]);
+                return cvt.ConvertTo(context, culture, value, destinationType);
+            }
+            return base.ConvertTo(context, culture, value, destinationType);
+        }
     }
     
     public sealed class Errorable

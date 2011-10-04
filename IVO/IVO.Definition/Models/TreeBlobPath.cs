@@ -46,7 +46,7 @@ namespace IVO.Definition.Models
                 int firstSlash = strValue.IndexOf('/');
                 if (firstSlash < 0) goto fail;
                 
-                TreeID root = TreeID.Parse(strValue.Substring(0, firstSlash)).Value;
+                TreeID root = TreeID.TryParse(strValue.Substring(0, firstSlash)).Value;
                 CanonicalBlobPath path = (CanonicalBlobPath)strValue.Substring(firstSlash);
                 
                 return new TreeBlobPath(root, path);

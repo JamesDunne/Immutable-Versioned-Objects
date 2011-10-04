@@ -62,6 +62,16 @@ namespace IVO.Definition.Errors
         public CommitParseExpectedBlankLineError() : base("Parse error while parsing commit: expected blank line") { }
     }
 
+    public sealed partial class BlobIDPartialNoResolutionError : InputError
+    {
+        public BlobIDPartialNoResolutionError(BlobID.Partial blobID) : base("Partial BlobID {0} does not resolve to a BlobID", blobID) { }
+    }
+
+    public sealed partial class BlobIDPartialAmbiguousResolutionError : InputError
+    {
+        public BlobIDPartialAmbiguousResolutionError(BlobID.Partial blobID, params BlobID[] blobIDs) : base("Partial BlobID {0} resolves to multiple BlobIDs", blobID, blobIDs) { }
+    }
+
     public sealed partial class TagNameDoesNotExistError : SemanticError
     {
         public TagNameDoesNotExistError(TagName tagName) : base("A tag with tag name '{0}' does not exist", tagName) { }

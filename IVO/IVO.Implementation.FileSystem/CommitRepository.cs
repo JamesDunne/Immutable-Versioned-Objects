@@ -87,12 +87,16 @@ namespace IVO.Implementation.FileSystem
                     if (!line.StartsWith("parent ")) break;
 
                     string parent_commitid = line.Substring("parent ".Length);
-                    cb.Parents.Add(CommitID.Parse(parent_commitid).Value);
+                    var ecid = CommitID.TryParse(parent_commitid);
+                    if (ecid.HasErrors) return ecid.Errors;
+                    cb.Parents.Add(ecid.Value);
                 }
 
                 // Set TreeID:
                 if (line == null || !line.StartsWith("tree ")) return new CommitParseExpectedTreeError();
-                cb.TreeID = TreeID.Parse(line.Substring("tree ".Length)).Value;
+                var etrid = TreeID.TryParse(line.Substring("tree ".Length));
+                if (etrid.HasErrors) return etrid.Errors;
+                cb.TreeID = etrid.Value;
 
                 // Set Committer:
                 line = sr.ReadLine();

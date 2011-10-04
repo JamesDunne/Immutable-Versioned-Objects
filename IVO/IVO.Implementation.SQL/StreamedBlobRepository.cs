@@ -144,5 +144,16 @@ END",
                 blobs[i] = new StreamedBlob(this, ids[i]);
             return TaskEx.FromResult(blobs);
         }
+
+
+        public Task<Errorable<BlobID>> ResolvePartialID(BlobID.Partial id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Errorable<BlobID>[]> ResolvePartialIDs(params BlobID.Partial[] ids)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

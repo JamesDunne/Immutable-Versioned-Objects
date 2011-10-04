@@ -46,5 +46,14 @@ namespace IVO.Definition.Repositories
         Task<Errorable<IStreamedBlob>[]> GetBlobs(params BlobID[] ids);
 
         Task<Errorable<IStreamedBlob>> GetBlob(BlobID id);
+
+        /// <summary>
+        /// Resolves a partial ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<Errorable<BlobID>> ResolvePartialID(BlobID.Partial id);
+
+        Task<Errorable<BlobID>[]> ResolvePartialIDs(params BlobID.Partial[] ids);
     }
 }

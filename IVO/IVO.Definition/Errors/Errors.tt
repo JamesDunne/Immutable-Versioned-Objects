@@ -15,6 +15,9 @@
         new ErrorDescriptor("CommitParseExpectedDateError", "Parse error while parsing commit: expected 'date'"),
         new ErrorDescriptor("CommitParseBadDateFormatError", "Parse error while parsing tag: bad date format"),
         new ErrorDescriptor("CommitParseExpectedBlankLineError", "Parse error while parsing commit: expected blank line"),
+
+        new ErrorDescriptor("BlobIDPartialNoResolutionError", "Partial BlobID {0} does not resolve to a BlobID", new ParameterDescriptor("blobID", "BlobID.Partial")),
+        new ErrorDescriptor("BlobIDPartialAmbiguousResolutionError", "Partial BlobID {0} resolves to multiple BlobIDs", new ParameterDescriptor("blobID", "BlobID.Partial"), new ParameterDescriptor("blobIDs", "params BlobID[]")),
     };
 
     var semanticErrors = new ErrorDescriptor[]
