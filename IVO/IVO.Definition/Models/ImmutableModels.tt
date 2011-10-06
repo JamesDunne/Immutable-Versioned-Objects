@@ -83,6 +83,16 @@
                 new { name = "Name",        type = "RefName",   bType = (string)null, convert = (string)null, revert = (string)null },
                 new { name = "CommitID",    type = "CommitID",  bType = (string)null, convert = (string)null, revert = (string)null },
             }
+        },
+
+        new {
+            name = "Stage",
+            comment = "A staging area to create the next commit for a user.",
+            idType = (string)null,
+            members = new [] {
+                new { name = "Name",    type = "StageName", bType = (string)null, convert = (string)null, revert = (string)null },
+                new { name = "TreeID",  type = "TreeID",    bType = (string)null, convert = (string)null, revert = (string)null },
+            }
         }
     };
 #>

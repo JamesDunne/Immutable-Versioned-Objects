@@ -15,6 +15,8 @@
         new ErrorDescriptor("CommitParseExpectedDateError", "Parse error while parsing commit: expected 'date'"),
         new ErrorDescriptor("CommitParseBadDateFormatError", "Parse error while parsing tag: bad date format"),
         new ErrorDescriptor("CommitParseExpectedBlankLineError", "Parse error while parsing commit: expected blank line"),
+        new ErrorDescriptor("StageParseExpectedNameError", "Parse error while parsing stage: expected 'name'"),
+        new ErrorDescriptor("StageParseExpectedTreeError", "Parse error while parsing stage: expected 'tree'"),
 
         new ErrorDescriptor("BlobIDPartialNoResolutionError", "Partial BlobID {0} does not resolve to a BlobID", new ParameterDescriptor("id", "BlobID.Partial")),
         new ErrorDescriptor("BlobIDPartialAmbiguousResolutionError", "Partial BlobID {0} resolves to multiple BlobIDs", new ParameterDescriptor("id", "BlobID.Partial"), new ParameterDescriptor("ids", "params BlobID[]")),
@@ -30,6 +32,8 @@
     {
         new ErrorDescriptor("TagNameDoesNotExistError", "A tag with tag name '{0}' does not exist", new ParameterDescriptor("tagName", "TagName")),
         new ErrorDescriptor("RefNameDoesNotExistError", "A ref with ref name '{0}' does not exist", new ParameterDescriptor("refName", "RefName")),
+        new ErrorDescriptor("StageNameDoesNotExistError", "A stage with stage name '{0}' does not exist", new ParameterDescriptor("stageName", "StageName")),
+
         new ErrorDescriptor("CommitIDRecordDoesNotExistError", "A commit with CommitID {0} does not exist", new ParameterDescriptor("commitID", "CommitID")),
         new ErrorDescriptor("TagIDRecordDoesNotExistError", "A tag with TagID {0} does not exist", new ParameterDescriptor("tagID", "TagID")),
         new ErrorDescriptor("TreeIDRecordDoesNotExistError", "A tree with TreeID {0} does not exist", new ParameterDescriptor("treeID", "TreeID")),

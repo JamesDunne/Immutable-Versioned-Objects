@@ -372,4 +372,47 @@ namespace IVO.Definition.Models
             return new Ref(b);
         }
     }
+
+    /// <summary>
+    /// A staging area to create the next commit for a user.
+    /// </summary>
+    public sealed partial class Stage
+    {
+        public StageName Name { get; private set; }
+        public TreeID TreeID { get; private set; }
+
+        public Stage(Builder b)
+        {
+            this.Name = b.Name;
+            this.TreeID = b.TreeID;
+        }
+
+        public sealed class Builder
+        {
+            public StageName Name { get; set; }
+            public TreeID TreeID { get; set; }
+
+            public Builder() { }
+
+            public Builder(Stage imm)
+            {
+                this.Name = imm.Name;
+                this.TreeID = imm.TreeID;
+            }
+
+            public Builder(
+                StageName pName
+               ,TreeID pTreeID
+            )
+            {
+                this.Name = pName;
+                this.TreeID = pTreeID;
+            }
+        }
+
+        public static implicit operator Stage(Builder b)
+        {
+            return new Stage(b);
+        }
+    }
 }

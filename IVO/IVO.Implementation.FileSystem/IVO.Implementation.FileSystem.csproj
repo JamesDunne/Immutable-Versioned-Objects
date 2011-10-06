@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommitRepository.cs" />
+    <Compile Include="StageRepository.cs" />
     <Compile Include="TagRepository.cs" />
     <Compile Include="RefRepository.cs" />
     <Compile Include="StreamedBlobRepository.cs" />

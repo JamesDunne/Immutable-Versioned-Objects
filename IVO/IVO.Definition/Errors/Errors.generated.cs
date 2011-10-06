@@ -62,6 +62,16 @@ namespace IVO.Definition.Errors
         public CommitParseExpectedBlankLineError() : base("Parse error while parsing commit: expected blank line") { }
     }
 
+    public sealed partial class StageParseExpectedNameError : InputError
+    {
+        public StageParseExpectedNameError() : base("Parse error while parsing stage: expected 'name'") { }
+    }
+
+    public sealed partial class StageParseExpectedTreeError : InputError
+    {
+        public StageParseExpectedTreeError() : base("Parse error while parsing stage: expected 'tree'") { }
+    }
+
     public sealed partial class BlobIDPartialNoResolutionError : InputError
     {
         public BlobIDPartialNoResolutionError(BlobID.Partial id) : base("Partial BlobID {0} does not resolve to a BlobID", id) { }
@@ -110,6 +120,11 @@ namespace IVO.Definition.Errors
     public sealed partial class RefNameDoesNotExistError : ConsistencyError
     {
         public RefNameDoesNotExistError(RefName refName) : base("A ref with ref name '{0}' does not exist", refName) { }
+    }
+
+    public sealed partial class StageNameDoesNotExistError : ConsistencyError
+    {
+        public StageNameDoesNotExistError(StageName stageName) : base("A stage with stage name '{0}' does not exist", stageName) { }
     }
 
     public sealed partial class CommitIDRecordDoesNotExistError : ConsistencyError

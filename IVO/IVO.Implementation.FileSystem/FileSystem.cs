@@ -41,6 +41,18 @@ namespace IVO.Implementation.FileSystem
             return objDir;
         }
 
+        internal DirectoryInfo getStageDirectory()
+        {
+            // Create the 'stage' subdirectory if it doesn't exist:
+            DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(Root.FullName, "stage"));
+            lock (SystemLock)
+            {
+                if (!objDir.Exists)
+                    objDir.Create();
+            }
+            return objDir;
+        }
+
         internal DirectoryInfo getTagsDirectory()
         {
             // Create the 'refs/tags' subdirectory if it doesn't exist:
@@ -155,6 +167,17 @@ namespace IVO.Implementation.FileSystem
             DirectoryInfo refDir = getRefsDirectory();
 
             string[] parts = new string[1] { refDir.FullName }.Concat(refName.Parts).ToArray(refName.Parts.Count + 1);
+            string path = System.IO.Path.Combine(parts);
+            return new FileInfo(path);
+        }
+
+        internal FileInfo getStagePathByStageName(StageName stageName)
+        {
+            if (stageName == null) throw new ArgumentNullException("stageName");
+
+            DirectoryInfo stgDir = getStageDirectory();
+
+            string[] parts = new string[1] { stgDir.FullName }.Concat(stageName.Parts).ToArray(stageName.Parts.Count + 1);
             string path = System.IO.Path.Combine(parts);
             return new FileInfo(path);
         }

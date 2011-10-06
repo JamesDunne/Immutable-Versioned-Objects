@@ -50,6 +50,7 @@
     <Compile Include="Queries\QueryTreeIDsByPaths.cs" />
     <Compile Include="Queries\QueryTreeByPath.cs" />
     <Compile Include="Queries\QueryTree.cs" />
+    <Compile Include="StageRepository.cs" />
     <Compile Include="StreamedBlobRepository.cs" />
     <Compile Include="Destroyers\DestroyRefByName.cs" />
     <Compile Include="Destroyers\DestroyBlob.cs" />
