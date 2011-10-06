@@ -256,5 +256,21 @@ namespace TestIVO.CommonTest
             var erec = await trrepo.DeleteTreeRecursively(rootId);
             assertNoErrors(erec);
         }
+
+        internal async Task GetTreeNodesAlongPath()
+        {
+            await createTrees();
+
+            await trrepo.PersistTree(rootId, trees);
+
+            var etrnodes = await trrepo.GetTreeNodesAlongPath(new TreeTreePath(rootId, (CanonicalTreePath)"/content/images/"));
+            assertNoErrors(etrnodes);
+            
+            var trnodes = etrnodes.Value;
+            Assert.AreEqual(3, trnodes.Length);
+            Assert.AreEqual(rootId, trnodes[0].ID);
+            Assert.AreEqual(trContent.ID, trnodes[1].ID);
+            Assert.AreEqual(trImages.ID, trnodes[2].ID);
+        }
     }
 }

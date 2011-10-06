@@ -71,5 +71,11 @@ namespace TestIVO.FileSystemTest
         {
             runTestMethod(tm => tm.DeleteTreeRecursivelyTest());
         }
+
+        [TestMethod()]
+        public void GetTreeNodesAlongPathTest()
+        {
+            runTestMethod(tm => tm.GetTreeNodesAlongPath());
+        }
     }
 }
