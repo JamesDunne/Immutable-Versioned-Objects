@@ -203,5 +203,10 @@ namespace IVO.Implementation.SQL
         {
             return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
         }
+
+        public Task<Errorable<TreeNode[]>> GetTreeNodesAlongPath(TreeTreePath path)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

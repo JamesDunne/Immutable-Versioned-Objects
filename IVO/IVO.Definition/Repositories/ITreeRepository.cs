@@ -70,9 +70,13 @@ namespace IVO.Definition.Repositories
         /// <summary>
         /// Recursively retrieves all Tree objects from the absolute path from a root TreeID.
         /// </summary>
-        /// <param name="rootid"></param>
-        /// <param name="path"></param>
         /// <returns></returns>
         Task<Errorable<TreeTree>> GetTreeRecursivelyFromPath(TreeTreePath path);
+
+        /// <summary>
+        /// Retrieves only the Tree nodes which build the path from root to leaf.
+        /// </summary>
+        /// <returns></returns>
+        Task<Errorable<TreeNode[]>> GetTreeNodesAlongPath(TreeTreePath path);
     }
 }

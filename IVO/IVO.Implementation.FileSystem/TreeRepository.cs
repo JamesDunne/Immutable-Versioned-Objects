@@ -399,5 +399,29 @@ namespace IVO.Implementation.FileSystem
         {
             return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
         }
+
+        public async Task<Errorable<TreeNode[]>> GetTreeNodesAlongPath(TreeTreePath path)
+        {
+            // TODO: test me!
+            List<TreeNode> trnodes = new List<TreeNode>(path.Path.Parts.Count + 1);
+            Errorable<TreeNode> etr;
+
+            etr = await getTree(path.RootTreeID);
+            if (etr.HasErrors) return etr.Errors;
+            trnodes.Add(etr.Value);
+
+            for (int i = 0; i < path.Path.Parts.Count; ++i)
+            {
+                TreeTreeReference trrf = etr.Value.Trees.SingleOrDefault(tr => tr.Name == path.Path.Parts[i]);
+                if (trrf == null) break;
+
+                etr = await getTree(trrf.TreeID);
+                if (etr.HasErrors) return etr.Errors;
+
+                trnodes.Add(etr.Value);
+            }
+
+            return trnodes.ToArray();
+        }
     }
 }
