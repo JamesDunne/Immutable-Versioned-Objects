@@ -105,5 +105,43 @@ namespace IVO.Definition.Models
 
             return base.ConvertFrom(context, culture, value);
         }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return true;
+            else if (typeof(Errorable<RefName>) == destinationType)
+                return true;
+            else
+                return base.CanConvertTo(context, destinationType);
+        }
+
+        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return ((RefName)value).ToString();
+            else if (typeof(Errorable<RefName>) == destinationType)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+                {
+                    try
+                    {
+                        RefName name = (RefName)strValue;
+                        return (Errorable<RefName>)name;
+                    }
+                    catch (ErrorBase err)
+                    {
+                        return (Errorable<RefName>)err;
+                    }
+                    catch (Exception ex)
+                    {
+                        return (Errorable<RefName>)new InputError(ex.Message);
+                    }
+                }
+            }
+
+            return base.ConvertTo(context, culture, value, destinationType);
+        }
     }
 }

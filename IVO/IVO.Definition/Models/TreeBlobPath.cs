@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using IVO.Definition.Errors;
 
 namespace IVO.Definition.Models
 {
@@ -45,15 +46,62 @@ namespace IVO.Definition.Models
                 // {TreeID}{/CanonicalBlobPath}
                 int firstSlash = strValue.IndexOf('/');
                 if (firstSlash < 0) goto fail;
-                
+
                 TreeID root = TreeID.TryParse(strValue.Substring(0, firstSlash)).Value;
                 CanonicalBlobPath path = (CanonicalBlobPath)strValue.Substring(firstSlash);
-                
+
                 return new TreeBlobPath(root, path);
             }
 
         fail:
             return base.ConvertFrom(context, culture, value);
+        }
+
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return true;
+            else if (typeof(Errorable<TreeBlobPath>) == destinationType)
+                return true;
+            else
+                return base.CanConvertTo(context, destinationType);
+        }
+
+        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        {
+            if (typeof(string) == destinationType)
+                return ((TreeBlobPath)value).ToString();
+            else if (typeof(Errorable<TreeBlobPath>) == destinationType)
+            {
+                string strValue = value as string;
+                if (strValue != null)
+                {
+                    try
+                    {
+                        // {TreeID}{/CanonicalBlobPath}
+                        int firstSlash = strValue.IndexOf('/');
+                        if (firstSlash < 0) return (Errorable<TreeBlobPath>)new TreeID.ParseError("Could not find first '/' char of TreeBlobPath");
+
+                        var eroot = TreeID.TryParse(strValue.Substring(0, firstSlash));
+                        if (eroot.HasErrors) return (Errorable<TreeBlobPath>)eroot.Errors;
+
+                        // TODO: TryParse on CanonicalBlobPath...
+                        CanonicalBlobPath path = (CanonicalBlobPath)strValue.Substring(firstSlash);
+
+                        return (Errorable<TreeBlobPath>)new TreeBlobPath(eroot.Value, path);
+                    }
+                    catch (ErrorBase err)
+                    {
+                        return (Errorable<TreeBlobPath>)err;
+                    }
+                    catch (Exception ex)
+                    {
+                        return (Errorable<TreeBlobPath>)new InputError(ex.Message);
+                    }
+                }
+            }
+
+            return base.ConvertTo(context, culture, value, destinationType);
         }
     }
 }
