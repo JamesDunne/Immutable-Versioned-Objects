@@ -11,8 +11,18 @@ namespace IVO.Definition.Repositories
 {
     public interface ITreeRepository
     {
+        /// <summary>
+        /// Resolves a partial TreeID to a full TreeID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         Task<Errorable<TreeID>> ResolvePartialID(TreeID.Partial id);
 
+        /// <summary>
+        /// Resolves multiple partial TreeIDs to full TreeIDs.
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
         Task<Errorable<TreeID>[]> ResolvePartialIDs(params TreeID.Partial[] ids);
 
         /// <summary>
@@ -40,7 +50,6 @@ namespace IVO.Definition.Repositories
         /// <summary>
         /// Gets a TreeID from its path relative to a root TreeID.
         /// </summary>
-        /// <param name="rootid"></param>
         /// <param name="path"></param>
         /// <returns></returns>
         Task<Errorable<TreeIDPathMapping>> GetTreeIDByPath(TreeTreePath path);
@@ -48,8 +57,7 @@ namespace IVO.Definition.Repositories
         /// <summary>
         /// Gets a TreeID from its path relative to a root TreeID.
         /// </summary>
-        /// <param name="rootid"></param>
-        /// <param name="path"></param>
+        /// <param name="paths"></param>
         /// <returns></returns>
         Task<Errorable<TreeIDPathMapping>[]> GetTreeIDsByPaths(params TreeTreePath[] paths);
 
@@ -58,25 +66,35 @@ namespace IVO.Definition.Repositories
         /// </summary>
         /// <param name="rootid">The TreeID of the tree's root to delete.</param>
         /// <returns></returns>
-        Task<Errorable<TreeID>> DeleteTreeRecursively(TreeID rootid);
+        Task<Errorable<TreeID>> DeleteTreeRecursively(TreeID rootID);
 
         /// <summary>
         /// Retrieves an entire tree structure starting from the root TreeID (<paramref name="rootid"/>).
         /// </summary>
         /// <param name="rootid">The TreeID of the tree's root to retrieve.</param>
         /// <returns></returns>
-        Task<Errorable<TreeTree>> GetTreeRecursively(TreeID rootid);
+        Task<Errorable<TreeTree>> GetTreeRecursively(TreeID rootID);
 
         /// <summary>
         /// Recursively retrieves all Tree objects from the absolute path from a root TreeID.
         /// </summary>
+        /// <param name="path"></param>
         /// <returns></returns>
         Task<Errorable<TreeTree>> GetTreeRecursivelyFromPath(TreeTreePath path);
 
         /// <summary>
         /// Retrieves only the Tree nodes which build the path from root to leaf.
         /// </summary>
+        /// <param name="path"></param>
         /// <returns></returns>
         Task<Errorable<TreeNode[]>> GetTreeNodesAlongPath(TreeTreePath path);
+
+        /// <summary>
+        /// Persists TreeNodes given a root TreeID and a set of blob paths paired with their BlobIDs to create.
+        /// </summary>
+        /// <param name="rootID"></param>
+        /// <param name="paths"></param>
+        /// <returns></returns>
+        Task<Errorable<TreeTree>> PersistTreeNodesByBlobPaths(TreeID? rootID, IEnumerable<CanonicalBlobIDPath> paths);
     }
 }

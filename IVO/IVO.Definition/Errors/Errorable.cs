@@ -39,7 +39,7 @@ namespace IVO.Definition.Errors
         }
 
         private Tsuccess _value;
-        public Tsuccess Value { get { if (this.HasErrors) throw new Exception(); return this._value; } }
+        public Tsuccess Value { get { if (this.HasErrors) throw new AggregateException(Errors); return this._value; } }
 
         public bool HasErrors { get; private set; }
         public ErrorContainer Errors { get; private set; }

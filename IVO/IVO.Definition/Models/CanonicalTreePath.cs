@@ -13,6 +13,7 @@ namespace IVO.Definition.Models
     public sealed class CanonicalTreePath : PathObjectModel
     {
         private string _asString;
+        private CanonicalTreePath _parent;
 
         internal CanonicalTreePath(IList<string> parts)
         {
@@ -30,6 +31,26 @@ namespace IVO.Definition.Models
         /// Gets the path components.
         /// </summary>
         public ReadOnlyCollection<string> Parts { get; private set; }
+
+        public string Name { get { return Parts[Parts.Count - 1]; } }
+
+        private CanonicalTreePath getPartialTree(int depth)
+        {
+            return new CanonicalTreePath(Parts.Take(depth), depth);
+        }
+
+        public CanonicalTreePath GetPartialTree(int depth)
+        {
+            if (depth < 0) throw new ArgumentNullException("depth");
+            if (depth > Parts.Count) throw new ArgumentNullException("depth");
+
+            return getPartialTree(depth);
+        }
+
+        public CanonicalTreePath GetParent()
+        {
+            return getPartialTree(Parts.Count - 1);
+        }
 
         public static AbsoluteTreePath operator +(CanonicalTreePath root, RelativeTreePath rel)
         {

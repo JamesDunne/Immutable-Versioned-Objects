@@ -272,5 +272,33 @@ namespace TestIVO.CommonTest
             Assert.AreEqual(trContent.ID, trnodes[1].ID);
             Assert.AreEqual(trImages.ID, trnodes[2].ID);
         }
+
+        internal async Task PersistTreeNodesByBlobPaths()
+        {
+            await createTrees();
+
+            await trrepo.PersistTree(rootId, trees);
+
+            BlobID blid = sblobs[0].Value.ID; // BlobID.TryParse("0123456789012345678901234567890123456789").Value;
+            var etrnodes = await trrepo.PersistTreeNodesByBlobPaths(rootId, new CanonicalBlobIDPath[] {
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/blob", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/blob2", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/blob3", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/content/blob", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/content/blob2", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/content/blob3", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/content/images/blob", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/content/images/blob2", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/content/images/blob3", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/templates/html", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/templates/page", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/pages/sample", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/pages/section1/sample", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/pages/section2/sample2", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/pages/section3/sample3", blid),
+                new CanonicalBlobIDPath((CanonicalBlobPath)"/newfolder/newsubfolder/sample4", blid)
+            });
+            assertNoErrors(etrnodes);
+        }
     }
 }

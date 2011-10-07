@@ -77,5 +77,8 @@ namespace TestIVO.FileSystemTest
         {
             runTestMethod(tm => tm.GetTreeNodesAlongPath());
         }
+
+        [TestMethod]
+        public void PersistTreeNodesByBlobPathsTest() { runTestMethod(tm => tm.PersistTreeNodesByBlobPaths()); }
     }
 }

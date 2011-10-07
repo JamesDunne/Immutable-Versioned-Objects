@@ -208,5 +208,10 @@ namespace IVO.Implementation.SQL
         {
             throw new NotImplementedException();
         }
+
+        public Task<Errorable<TreeTree>> PersistTreeNodesByBlobPaths(TreeID? rootID, IEnumerable<CanonicalBlobIDPath> paths)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

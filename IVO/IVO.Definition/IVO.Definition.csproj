@@ -39,6 +39,7 @@
     <Compile Include="Containers\ImmutableContainer.cs" />
     <Compile Include="Models\Stage.cs" />
     <Compile Include="Models\StageName.cs" />
+    <Compile Include="Models\CanonicalBlobIDPath.cs" />
     <Compile Include="Repositories\IStageRepository.cs" />
     <Compile Include="SHA1StreamReader.cs" />
     <Compile Include="Errors\ErrorBase.cs" />
