@@ -74,30 +74,30 @@ namespace IVO.Definition.Models
             else if (typeof(Errorable<TreeBlobPath>) == destinationType)
             {
                 string strValue = value as string;
-                if (strValue != null)
+                if (strValue == null)
+                    return (Errorable<TreeBlobPath>)null;
+
+                try
                 {
-                    try
-                    {
-                        // {TreeID}{/CanonicalBlobPath}
-                        int firstSlash = strValue.IndexOf('/');
-                        if (firstSlash < 0) return (Errorable<TreeBlobPath>)new TreeID.ParseError("Could not find first '/' char of TreeBlobPath");
+                    // {TreeID}{/CanonicalBlobPath}
+                    int firstSlash = strValue.IndexOf('/');
+                    if (firstSlash < 0) return (Errorable<TreeBlobPath>)new TreeID.ParseError("Could not find first '/' char of TreeBlobPath");
 
-                        var eroot = TreeID.TryParse(strValue.Substring(0, firstSlash));
-                        if (eroot.HasErrors) return (Errorable<TreeBlobPath>)eroot.Errors;
+                    var eroot = TreeID.TryParse(strValue.Substring(0, firstSlash));
+                    if (eroot.HasErrors) return (Errorable<TreeBlobPath>)eroot.Errors;
 
-                        // TODO: TryParse on CanonicalBlobPath...
-                        CanonicalBlobPath path = (CanonicalBlobPath)strValue.Substring(firstSlash);
+                    // TODO: TryParse on CanonicalBlobPath...
+                    CanonicalBlobPath path = (CanonicalBlobPath)strValue.Substring(firstSlash);
 
-                        return (Errorable<TreeBlobPath>)new TreeBlobPath(eroot.Value, path);
-                    }
-                    catch (ErrorBase err)
-                    {
-                        return (Errorable<TreeBlobPath>)err;
-                    }
-                    catch (Exception ex)
-                    {
-                        return (Errorable<TreeBlobPath>)new InputError(ex.Message);
-                    }
+                    return (Errorable<TreeBlobPath>)new TreeBlobPath(eroot.Value, path);
+                }
+                catch (ErrorBase err)
+                {
+                    return (Errorable<TreeBlobPath>)err;
+                }
+                catch (Exception ex)
+                {
+                    return (Errorable<TreeBlobPath>)new InputError(ex.Message);
                 }
             }
 

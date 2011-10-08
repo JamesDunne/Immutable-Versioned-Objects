@@ -18,13 +18,8 @@ namespace TestIVO
             // This mimics the MVC model binding behavior:
             TypeConverter cvtr;
 
-            // This part is necessary to start up the static ctor on Errorable<T> that then registers the TypeConverter on typeof(String):
-            cvtr = TypeDescriptor.GetConverter(typeof(Errorable<T>));
-            if (cvtr.CanConvertFrom(typeof(string)))
-                return (Errorable<T>)cvtr.ConvertFrom(null, System.Globalization.CultureInfo.InvariantCulture, value);
-
             // Here is where the real conversion happens:
-            cvtr = TypeDescriptor.GetConverter(typeof(string));
+            cvtr = TypeDescriptor.GetConverter(typeof(T));
             if (cvtr.CanConvertTo(typeof(Errorable<T>)))
                 return (Errorable<T>)cvtr.ConvertTo(null, System.Globalization.CultureInfo.InvariantCulture, value, typeof(Errorable<T>));
 
