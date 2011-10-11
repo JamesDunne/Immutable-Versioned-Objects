@@ -454,7 +454,7 @@ namespace IVO.Implementation.FileSystem
             if (rootID.HasValue)
                 tpl = new Tuple<CanonicalTreePath, TreeNode.Builder>(rootPath, new TreeNode.Builder(root));
             else
-                tpl = new Tuple<CanonicalTreePath, TreeNode.Builder>(rootPath, new TreeNode.Builder());
+                tpl = new Tuple<CanonicalTreePath, TreeNode.Builder>(rootPath, new TreeNode.Builder(new List<TreeTreeReference>(), new List<TreeBlobReference>()));
             nodeByPath.Add(rootPath.ToString(), tpl);
 
             // Initialize the depthGroups array:
