@@ -52,15 +52,15 @@ namespace IVO.Definition.Models
 
                 try
                 {
-                    // {TreeID}{:CanonicalBlobPath}
-                    int firstSlash = strValue.IndexOf(':');
-                    if (firstSlash < 0) return (Errorable<TreeBlobPath>)new TreeID.ParseError("Could not find first ':' char of TreeBlobPath");
+                    // {TreeID}:{CanonicalBlobPath}
+                    int colon = strValue.IndexOf(':');
+                    if (colon < 0) return (Errorable<TreeBlobPath>)new TreeID.ParseError("Could not find first ':' char of TreeBlobPath");
 
-                    var eroot = TreeID.TryParse(strValue.Substring(0, firstSlash));
+                    var eroot = TreeID.TryParse(strValue.Substring(0, colon));
                     if (eroot.HasErrors) return (Errorable<TreeBlobPath>)eroot.Errors;
 
                     // TODO: TryParse on CanonicalBlobPath...
-                    CanonicalBlobPath path = (CanonicalBlobPath)strValue.Substring(firstSlash);
+                    CanonicalBlobPath path = (CanonicalBlobPath)('/' + strValue.Substring(colon + 1));
 
                     return (Errorable<TreeBlobPath>)new TreeBlobPath(eroot.Value, path);
                 }

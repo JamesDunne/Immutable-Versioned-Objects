@@ -10,7 +10,7 @@ namespace IVO.Definition.Models
     /// <summary>
     /// A canonicalized tree path is an absolute tree path that is guaranteed to contain no directory traversals and is in a normalized form.
     /// </summary>
-    public sealed class CanonicalTreePath : PathObjectModel
+    public sealed class CanonicalTreePath : PathObjectModel, IEquatable<CanonicalTreePath>
     {
         private string _asString;
         private CanonicalTreePath _parent;
@@ -79,6 +79,35 @@ namespace IVO.Definition.Models
         public static implicit operator AbsoluteTreePath(CanonicalTreePath path)
         {
             return new AbsoluteTreePath(path.Parts);
+        }
+
+        public static bool operator ==(CanonicalTreePath a, CanonicalTreePath b)
+        {
+            bool aisnull = Object.ReferenceEquals(a, null);
+            bool bisnull = Object.ReferenceEquals(b, null);
+
+            if (aisnull && bisnull) return true;
+            if (aisnull || bisnull) return false;
+
+            return a._asString == b._asString;
+        }
+
+        public static bool operator !=(CanonicalTreePath a, CanonicalTreePath b)
+        {
+            bool aisnull = Object.ReferenceEquals(a, null);
+            bool bisnull = Object.ReferenceEquals(b, null);
+
+            if (aisnull && bisnull) return false;
+            if (aisnull || bisnull) return true;
+
+            return a._asString != b._asString;
+        }
+
+        public bool Equals(CanonicalTreePath other)
+        {
+            if (Object.ReferenceEquals(other, null)) return false;
+
+            return _asString == other._asString;
         }
 
         /// <summary>
