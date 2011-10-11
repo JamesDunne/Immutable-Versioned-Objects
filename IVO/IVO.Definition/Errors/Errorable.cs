@@ -16,6 +16,12 @@ namespace IVO.Definition.Errors
             this.Errors = null;
         }
 
+        public Errorable(ErrorBase error)
+        {
+            this.HasErrors = true;
+            this.Errors = (ErrorContainer)error;
+        }
+
         private Errorable(ErrorContainer errors)
         {
             this.HasErrors = true;

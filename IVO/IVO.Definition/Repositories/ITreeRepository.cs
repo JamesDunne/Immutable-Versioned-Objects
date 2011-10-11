@@ -95,6 +95,6 @@ namespace IVO.Definition.Repositories
         /// <param name="rootID"></param>
         /// <param name="paths"></param>
         /// <returns></returns>
-        Task<Errorable<TreeTree>> PersistTreeNodesByBlobPaths(TreeID? rootID, IEnumerable<CanonicalBlobIDPath> paths);
+        Task<Errorable<TreeTree>> PersistTreeNodesByBlobPaths(Maybe<TreeID> rootID, IEnumerable<CanonicalBlobIDPath> paths);
     }
 }

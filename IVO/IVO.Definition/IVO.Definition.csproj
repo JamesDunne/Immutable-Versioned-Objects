@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Containers\ImmutableContainer.cs" />
+    <Compile Include="Models\MaybeTreeBlobPath.cs" />
     <Compile Include="Models\Stage.cs" />
     <Compile Include="Models\StageName.cs" />
     <Compile Include="Models\CanonicalBlobIDPath.cs" />

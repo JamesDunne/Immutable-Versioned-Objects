@@ -430,7 +430,7 @@ namespace IVO.Implementation.FileSystem
             return trnodes.ToArray();
         }
 
-        public async Task<Errorable<TreeTree>> PersistTreeNodesByBlobPaths(TreeID? rootID, IEnumerable<CanonicalBlobIDPath> paths)
+        public async Task<Errorable<TreeTree>> PersistTreeNodesByBlobPaths(Maybe<TreeID> rootID, IEnumerable<CanonicalBlobIDPath> paths)
         {
             TreeNode root;
             if (rootID.HasValue)

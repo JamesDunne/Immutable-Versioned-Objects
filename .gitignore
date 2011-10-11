@@ -1,6 +1,8 @@
 bin/
 obj/
 TestResults/
+Data/IVO.mdf
+Data/IVO_log.ldf
 .gitignore
 *.exe
 *.msi
