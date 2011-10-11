@@ -29,12 +29,12 @@ namespace IVO.Implementation.FileSystem
             FileInfo fiTracker = system.getTagPathByTagName(tg.Name);
             // Does this tag name exist already?
             if (fiTracker.Exists)
-                return TaskEx.FromResult((Errorable<Tag>)new TagNameAlreadyExistsError(tg.Name));
+                return Task.FromResult((Errorable<Tag>)new TagNameAlreadyExistsError(tg.Name));
 
             FileInfo fi = system.getPathByID(tg.ID);
             if (fi.Exists)
                 // FIXME: TagID already exists.
-                return TaskEx.FromResult((Errorable<Tag>)tg);
+                return Task.FromResult((Errorable<Tag>)tg);
 
             // Create directory if it doesn't exist:
             if (!fi.Directory.Exists)
@@ -75,7 +75,7 @@ namespace IVO.Implementation.FileSystem
                     }
             }
 
-            return TaskEx.FromResult((Errorable<Tag>)tg);
+            return Task.FromResult((Errorable<Tag>)tg);
         }
 
         private async Task<Errorable<TagID>> getTagIDByName(TagName tagName)
@@ -372,14 +372,14 @@ namespace IVO.Implementation.FileSystem
         public Task<Errorable<TagID>> ResolvePartialID(TagID.Partial id)
         {
             FileInfo[] fis = system.getPathsByPartialID(id);
-            if (fis.Length == 1) return TaskEx.FromResult(TagID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name));
-            if (fis.Length == 0) return TaskEx.FromResult((Errorable<TagID>)new TagIDPartialNoResolutionError(id));
-            return TaskEx.FromResult((Errorable<TagID>)new TagIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => TagID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)));
+            if (fis.Length == 1) return Task.FromResult(TagID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name));
+            if (fis.Length == 0) return Task.FromResult((Errorable<TagID>)new TagIDPartialNoResolutionError(id));
+            return Task.FromResult((Errorable<TagID>)new TagIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => TagID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)));
         }
 
         public Task<Errorable<TagID>[]> ResolvePartialIDs(params TagID.Partial[] ids)
         {
-            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+            return Task.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
         }
     }
 }

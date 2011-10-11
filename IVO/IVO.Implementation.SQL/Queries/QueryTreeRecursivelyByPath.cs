@@ -63,7 +63,7 @@ LEFT JOIN [dbo].[TreeBlob] bl ON bl.treeid = tr.linked_treeid";
 
         public Task<Errorable<TreeTree>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return TaskEx.FromResult(retrieve(cmd, dr, expectedCapacity));
+            return Task.FromResult(retrieve(cmd, dr, expectedCapacity));
         }
 
         public Errorable<TreeTree> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)

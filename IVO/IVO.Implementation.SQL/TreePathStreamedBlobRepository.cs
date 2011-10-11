@@ -23,7 +23,7 @@ namespace IVO.Implementation.SQL
             var tasks = new Task<Errorable<TreePathStreamedBlob>>[treePaths.Length];
             for (int i = 0; i < treePaths.Length; ++i)
                 tasks[i] = db.ExecuteSingleQueryAsync(new QueryBlobByPath(blrepo, treePaths[i]));
-            return await TaskEx.WhenAll(tasks);
+            return await Task.WhenAll(tasks);
         }
 
         public Task<Errorable<TreePathStreamedBlob>> GetBlobByTreePath(TreeBlobPath treePath)

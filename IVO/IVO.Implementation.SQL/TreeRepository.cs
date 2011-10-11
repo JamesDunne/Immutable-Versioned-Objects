@@ -79,7 +79,7 @@ namespace IVO.Implementation.SQL
                 {
                     Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
                     // Wait for the last depth group to finish persisting:
-                    await TaskEx.WhenAll(persistTasks);
+                    await Task.WhenAll(persistTasks);
 
                     // Start a new depth group:
                     persistTasks = new List<Task<Errorable<TreeNode>>>();
@@ -115,7 +115,7 @@ namespace IVO.Implementation.SQL
             {
                 // Await the last group (the root node):
                 Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
-                await TaskEx.WhenAll(persistTasks);
+                await Task.WhenAll(persistTasks);
             }
 
             // Return the root TreeNode:
@@ -130,7 +130,7 @@ namespace IVO.Implementation.SQL
                 TreeID id = ids[i];
                 tasks[i] = db.ExecuteSingleQueryAsync(new QueryTree(id));
             }
-            return TaskEx.WhenAll(tasks);
+            return Task.WhenAll(tasks);
         }
 
         public Task<Errorable<TreeTree>> GetTreeRecursively(TreeID rootid)
@@ -180,7 +180,7 @@ namespace IVO.Implementation.SQL
             }
 
             // Wait for all the queries to come back:
-            var allTreeIDs = await TaskEx.WhenAll(tasks);
+            var allTreeIDs = await Task.WhenAll(tasks);
 
             // Flatten out the array-of-arrays:
             var flattenedTreeIDs =
@@ -201,7 +201,7 @@ namespace IVO.Implementation.SQL
 
         public Task<Errorable<TreeID>[]> ResolvePartialIDs(params TreeID.Partial[] ids)
         {
-            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+            return Task.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
         }
 
         public Task<Errorable<TreeNode[]>> GetTreeNodesAlongPath(TreeTreePath path)

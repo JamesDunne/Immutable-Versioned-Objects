@@ -113,7 +113,7 @@ END",
             }
 
             // When all persists are complete, roll up the results from all the tasks into a single array:
-            var streamedBlobs = await TaskEx.WhenAll(tasks);
+            var streamedBlobs = await Task.WhenAll(tasks);
 
             return streamedBlobs;
         }
@@ -129,12 +129,12 @@ END",
             for (int i = 0; i < ids.Length; ++i)
                 tasks[i] = DeleteBlob(ids[i]);
 
-            return TaskEx.WhenAll(tasks);
+            return Task.WhenAll(tasks);
         }
 
         public Task<Errorable<IStreamedBlob>> GetBlob(BlobID id)
         {
-            return TaskEx.FromResult((Errorable<IStreamedBlob>)new StreamedBlob(this, id));
+            return Task.FromResult((Errorable<IStreamedBlob>)new StreamedBlob(this, id));
         }
 
         public Task<Errorable<IStreamedBlob>[]> GetBlobs(params BlobID[] ids)
@@ -142,7 +142,7 @@ END",
             var blobs = new Errorable<IStreamedBlob>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
                 blobs[i] = new StreamedBlob(this, ids[i]);
-            return TaskEx.FromResult(blobs);
+            return Task.FromResult(blobs);
         }
 
         public async Task<Errorable<BlobID>> ResolvePartialID(BlobID.Partial id)
@@ -155,7 +155,7 @@ END",
 
         public Task<Errorable<BlobID>[]> ResolvePartialIDs(params BlobID.Partial[] ids)
         {
-            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+            return Task.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
         }
     }
 }

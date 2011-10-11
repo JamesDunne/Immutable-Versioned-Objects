@@ -43,7 +43,7 @@ SELECT bl.name, bl.linked_blobid FROM [dbo].[TreeBlob] bl WHERE [{0}] = @treeid;
 
         public Task<Errorable<TreeNode>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return TaskEx.FromResult(retrieve(cmd, dr));
+            return Task.FromResult(retrieve(cmd, dr));
         }
 
         public Errorable<TreeNode> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)

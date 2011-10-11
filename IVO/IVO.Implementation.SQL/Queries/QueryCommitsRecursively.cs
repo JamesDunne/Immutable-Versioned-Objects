@@ -49,7 +49,7 @@ WHERE   cm.depth <= @depth";
 
         public Task<Errorable<CommitTree>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCount)
         {
-            return TaskEx.FromResult(retrieve(cmd, dr, expectedCount));
+            return Task.FromResult(retrieve(cmd, dr, expectedCount));
         }
 
         public Errorable<CommitTree> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCount)

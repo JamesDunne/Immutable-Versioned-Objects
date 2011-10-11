@@ -92,7 +92,7 @@ namespace IVO.Implementation.FileSystem
         public Task<Errorable<Ref>> PersistRef(Ref rf)
         {
             persistRef(rf);
-            return TaskEx.FromResult((Errorable<Ref>)rf);
+            return Task.FromResult((Errorable<Ref>)rf);
         }
 
         public Task<Errorable<Ref>> GetRefByName(RefName name)

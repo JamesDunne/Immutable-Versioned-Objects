@@ -37,7 +37,7 @@ namespace IVO.Implementation.SQL.Queries
 
         public Task<TreeID[]> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return TaskEx.FromResult(retrieve(cmd, dr, expectedCapacity));
+            return Task.FromResult(retrieve(cmd, dr, expectedCapacity));
         }
 
         public TreeID[] Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)

@@ -41,7 +41,7 @@ namespace IVO.Implementation.SQL.Queries
 
         public Task<Errorable<Ref>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return TaskEx.FromResult(Retrieve(cmd, dr, expectedCapacity));
+            return Task.FromResult(Retrieve(cmd, dr, expectedCapacity));
         }
 
         public Errorable<Ref> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)

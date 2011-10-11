@@ -103,7 +103,7 @@ namespace IVO.Implementation.SQL
 
         public Task<Errorable<CommitID>[]> ResolvePartialIDs(params CommitID.Partial[] ids)
         {
-            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+            return Task.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
         }
     }
 }

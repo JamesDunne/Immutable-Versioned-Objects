@@ -158,7 +158,7 @@ namespace IVO.Implementation.FileSystem
             }
 
             // Await all the tree retrievals:
-            var allTrees = await TaskEx.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
+            var allTrees = await Task.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
 
             // Roll up all the errors:
             ErrorContainer errors =
@@ -281,7 +281,7 @@ namespace IVO.Implementation.FileSystem
                 {
                     Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
                     // Wait for the last depth group to finish persisting:
-                    await TaskEx.WhenAll(persistTasks);
+                    await Task.WhenAll(persistTasks);
                     // TODO: roll up errors!
 
                     // Start a new depth group:
@@ -303,7 +303,7 @@ namespace IVO.Implementation.FileSystem
                 isPersisting.Add(curr.id);
 
                 // Fire up a task to persist this tree node:
-                var tsk = TaskEx.Run(() => persistTree(node));
+                var tsk = Task.Run(() => persistTree(node));
 
                 // Add the task to the depth group to await:
                 Debug.WriteLine(String.Format("Adding to depth group {0}...", curr.depth));
@@ -319,7 +319,7 @@ namespace IVO.Implementation.FileSystem
             {
                 // Await the last group (the root node):
                 Debug.WriteLine(String.Format("Awaiting depth group {0}...", lastDepth));
-                await TaskEx.WhenAll(persistTasks);
+                await Task.WhenAll(persistTasks);
             }
 
             // Return the root TreeNode:
@@ -339,7 +339,7 @@ namespace IVO.Implementation.FileSystem
                 TreeID id = ids[i];
                 tasks[i] = getTree(id);
             }
-            return TaskEx.WhenAll(tasks);
+            return Task.WhenAll(tasks);
         }
 
         public Task<Errorable<TreeIDPathMapping>> GetTreeIDByPath(TreeTreePath path)
@@ -349,7 +349,7 @@ namespace IVO.Implementation.FileSystem
 
         public Task<Errorable<TreeIDPathMapping>[]> GetTreeIDsByPaths(params TreeTreePath[] paths)
         {
-            return TaskEx.WhenAll(paths.SelectAsArray(path => getTreeIDByPath(path)));
+            return Task.WhenAll(paths.SelectAsArray(path => getTreeIDByPath(path)));
         }
 
         public async Task<Errorable<TreeID>> DeleteTreeRecursively(TreeID rootid)
@@ -360,9 +360,9 @@ namespace IVO.Implementation.FileSystem
             var trees = etrees.Value;
 
             // TODO: test that 'tr' is captured properly in the lambda.
-            Task[] tasks = trees.SelectAsArray(tr => TaskEx.Run(() => deleteTree(tr.ID)));
+            Task[] tasks = trees.SelectAsArray(tr => Task.Run(() => deleteTree(tr.ID)));
 
-            await TaskEx.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
+            await Task.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
 
             return rootid;
         }
@@ -396,14 +396,14 @@ namespace IVO.Implementation.FileSystem
         public Task<Errorable<TreeID>> ResolvePartialID(TreeID.Partial id)
         {
             FileInfo[] fis = system.getPathsByPartialID(id);
-            if (fis.Length == 1) return TaskEx.FromResult(TreeID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name));
-            if (fis.Length == 0) return TaskEx.FromResult((Errorable<TreeID>)new TreeIDPartialNoResolutionError(id));
-            return TaskEx.FromResult((Errorable<TreeID>)new TreeIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => TreeID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)));
+            if (fis.Length == 1) return Task.FromResult(TreeID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name));
+            if (fis.Length == 0) return Task.FromResult((Errorable<TreeID>)new TreeIDPartialNoResolutionError(id));
+            return Task.FromResult((Errorable<TreeID>)new TreeIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => TreeID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)));
         }
 
         public Task<Errorable<TreeID>[]> ResolvePartialIDs(params TreeID.Partial[] ids)
         {
-            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+            return Task.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
         }
 
         public async Task<Errorable<TreeNode[]>> GetTreeNodesAlongPath(TreeTreePath path)
@@ -594,7 +594,7 @@ namespace IVO.Implementation.FileSystem
                     result.Add(tn.ID, tn);
 
                     // Start persistence task and add to `awaiting`
-                    var tsk = TaskEx.Run(() => persistTree(tn));
+                    var tsk = Task.Run(() => persistTree(tn));
                     awaiting.Add(tsk);
                 }
                 else
@@ -609,7 +609,7 @@ namespace IVO.Implementation.FileSystem
                 if (awaiting.Count > 0)
                 {
                     Debug.WriteLine(String.Format("Awaiting previous depth group's persistence"));
-                    var errs = await TaskEx.WhenAll(awaiting);
+                    var errs = await Task.WhenAll(awaiting);
                     if (errs.Any(err => err.HasErrors))
                         return errs.Aggregate(new ErrorContainer(), (acc, err) => acc + err.Errors);
                 }
@@ -650,7 +650,7 @@ namespace IVO.Implementation.FileSystem
                         result.Add(tn.ID, tn);
 
                         // Start persistence task and add to `awaiting`
-                        var tsk = TaskEx.Run(() => persistTree(tn));
+                        var tsk = Task.Run(() => persistTree(tn));
                         awaiting.Add(tsk);
                     }
                     else
@@ -665,7 +665,7 @@ namespace IVO.Implementation.FileSystem
             if (awaiting.Count > 0)
             {
                 Debug.WriteLine(String.Format("Awaiting previous depth group's persistence"));
-                var errs = await TaskEx.WhenAll(awaiting);
+                var errs = await Task.WhenAll(awaiting);
                 if (errs.Any(err => err.HasErrors))
                     return errs.Aggregate(new ErrorContainer(), (acc, err) => acc + err.Errors);
             }

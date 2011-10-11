@@ -101,7 +101,7 @@ namespace IVO.Implementation.FileSystem
         public Task<Errorable<Stage>> PersistStage(Stage stg)
         {
             persistStage(stg);
-            return TaskEx.FromResult((Errorable<Stage>)stg);
+            return Task.FromResult((Errorable<Stage>)stg);
         }
 
         public Task<Errorable<Stage>> GetStageByName(StageName name)

@@ -50,7 +50,7 @@ WHERE tr.[path] + trbl.name = @path;";
         
         public Task<Errorable<TreePathStreamedBlob>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return TaskEx.FromResult(retrieve(cmd, dr));
+            return Task.FromResult(retrieve(cmd, dr));
         }
 
         public Errorable<TreePathStreamedBlob> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)

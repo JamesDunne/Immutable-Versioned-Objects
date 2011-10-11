@@ -37,7 +37,7 @@ namespace IVO.Implementation.SQL.Queries
 
         public Task<BlobID[]> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return TaskEx.FromResult(retrieve(cmd, dr, expectedCapacity));
+            return Task.FromResult(retrieve(cmd, dr, expectedCapacity));
         }
 
         public BlobID[] Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)

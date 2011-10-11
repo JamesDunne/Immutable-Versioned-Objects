@@ -37,7 +37,7 @@ SELECT [parent_commitid] FROM [dbo].[CommitParent] WHERE [commitid] = @commitid;
 
         public Task<Errorable<Commit>> RetrieveAsync(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)
         {
-            return TaskEx.FromResult(retrieve(cmd, dr));
+            return Task.FromResult(retrieve(cmd, dr));
         }
 
         public Errorable<Commit> Retrieve(SqlCommand cmd, SqlDataReader dr, int expectedCapacity = 10)

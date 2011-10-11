@@ -75,7 +75,7 @@ namespace IVO.Implementation.SQL
 
         public Task<Errorable<TagID>[]> ResolvePartialIDs(params TagID.Partial[] ids)
         {
-            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+            return Task.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
         }
     }
 }

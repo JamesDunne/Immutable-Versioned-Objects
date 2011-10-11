@@ -146,14 +146,14 @@ namespace IVO.Implementation.FileSystem
 
         public async Task<Errorable<Commit>> PersistCommit(Commit cm)
         {
-            await TaskEx.Run(() => persistCommit(cm)).ConfigureAwait(continueOnCapturedContext: false);
+            await Task.Run(() => persistCommit(cm)).ConfigureAwait(continueOnCapturedContext: false);
 
             return cm;
         }
 
         public async Task<Errorable<CommitID>> DeleteCommit(CommitID id)
         {
-            await TaskEx.Run(() => deleteCommit(id)).ConfigureAwait(continueOnCapturedContext: false);
+            await Task.Run(() => deleteCommit(id)).ConfigureAwait(continueOnCapturedContext: false);
 
             return id;
         }
@@ -230,7 +230,7 @@ namespace IVO.Implementation.FileSystem
             }
 
             // Await all the tree retrievals:
-            var allCommits = await TaskEx.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
+            var allCommits = await Task.WhenAll(tasks).ConfigureAwait(continueOnCapturedContext: false);
 
             // Roll up all the errors:
             ErrorContainer errors =
@@ -302,14 +302,14 @@ namespace IVO.Implementation.FileSystem
         public Task<Errorable<CommitID>> ResolvePartialID(CommitID.Partial id)
         {
             FileInfo[] fis = system.getPathsByPartialID(id);
-            if (fis.Length == 1) return TaskEx.FromResult(CommitID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name));
-            if (fis.Length == 0) return TaskEx.FromResult((Errorable<CommitID>)new CommitIDPartialNoResolutionError(id));
-            return TaskEx.FromResult((Errorable<CommitID>)new CommitIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => CommitID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)));
+            if (fis.Length == 1) return Task.FromResult(CommitID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name));
+            if (fis.Length == 0) return Task.FromResult((Errorable<CommitID>)new CommitIDPartialNoResolutionError(id));
+            return Task.FromResult((Errorable<CommitID>)new CommitIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => CommitID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)));
         }
 
         public Task<Errorable<CommitID>[]> ResolvePartialIDs(params CommitID.Partial[] ids)
         {
-            return TaskEx.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
+            return Task.WhenAll(ids.SelectAsArray(id => ResolvePartialID(id)));
         }
     }
 }

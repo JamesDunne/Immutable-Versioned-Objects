@@ -117,7 +117,7 @@ namespace IVO.Implementation.FileSystem
             }
 
             Debug.WriteLine("Awaiting all persistence tasks...");
-            var streamedBlobs = await TaskEx.WhenAll(persistTasks).ConfigureAwait(continueOnCapturedContext: false);
+            var streamedBlobs = await Task.WhenAll(persistTasks).ConfigureAwait(continueOnCapturedContext: false);
 
             Debug.WriteLine("All completed.");
 
@@ -142,7 +142,7 @@ namespace IVO.Implementation.FileSystem
         public Task<Errorable<BlobID>[]> DeleteBlobs(params BlobID[] ids)
         {
             if (ids == null) throw new ArgumentNullException("ids");
-            if (ids.Length == 0) return TaskEx.FromResult(new Errorable<BlobID>[0]);
+            if (ids.Length == 0) return Task.FromResult(new Errorable<BlobID>[0]);
 
             // Delete each blob synchronously:
             Errorable<BlobID>[] results = new Errorable<BlobID>[ids.Length];
@@ -155,15 +155,15 @@ namespace IVO.Implementation.FileSystem
             // TODO: Run through all the 'objects' directories and prune empty ones.
             // Too eager? Could cause conflicts with other threads.
 
-            return TaskEx.FromResult(results);
+            return Task.FromResult(results);
         }
 
         private Task<Errorable<IStreamedBlob>> getBlob(BlobID id)
         {
             var fi = system.getPathByID(id);
-            if (!fi.Exists) return TaskEx.FromResult((Errorable<IStreamedBlob>)new BlobIDRecordDoesNotExistError(id));
+            if (!fi.Exists) return Task.FromResult((Errorable<IStreamedBlob>)new BlobIDRecordDoesNotExistError(id));
 
-            return TaskEx.FromResult(new Errorable<IStreamedBlob>((IStreamedBlob)new StreamedBlob(this, id, fi.Length)));
+            return Task.FromResult(new Errorable<IStreamedBlob>((IStreamedBlob)new StreamedBlob(this, id, fi.Length)));
         }
 
         public Task<Errorable<IStreamedBlob>[]> GetBlobs(params BlobID[] ids)
@@ -171,7 +171,7 @@ namespace IVO.Implementation.FileSystem
             Task<Errorable<IStreamedBlob>>[] tasks = new Task<Errorable<IStreamedBlob>>[ids.Length];
             for (int i = 0; i < ids.Length; ++i)
                 tasks[i] = getBlob(ids[i]);
-            return TaskEx.WhenAll(tasks);
+            return Task.WhenAll(tasks);
         }
 
         public Task<Errorable<IStreamedBlob>> PersistBlob(PersistingBlob blob)
@@ -181,7 +181,7 @@ namespace IVO.Implementation.FileSystem
 
         public Task<Errorable<BlobID>> DeleteBlob(BlobID id)
         {
-            return TaskEx.FromResult(deleteBlob(id));
+            return Task.FromResult(deleteBlob(id));
         }
 
         public Task<Errorable<IStreamedBlob>> GetBlob(BlobID id)
@@ -192,14 +192,14 @@ namespace IVO.Implementation.FileSystem
         public Task<Errorable<BlobID>> ResolvePartialID(BlobID.Partial id)
         {
             FileInfo[] fis = system.getPathsByPartialID(id);
-            if (fis.Length == 1) return TaskEx.FromResult( BlobID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name) );
-            if (fis.Length == 0) return TaskEx.FromResult( (Errorable<BlobID>) new BlobIDPartialNoResolutionError(id) );
-            return TaskEx.FromResult( (Errorable<BlobID>) new BlobIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => BlobID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)) );
+            if (fis.Length == 1) return Task.FromResult( BlobID.TryParse(id.ToString().Substring(0, 2) + fis[0].Name) );
+            if (fis.Length == 0) return Task.FromResult( (Errorable<BlobID>) new BlobIDPartialNoResolutionError(id) );
+            return Task.FromResult( (Errorable<BlobID>) new BlobIDPartialAmbiguousResolutionError(id, fis.SelectAsArray(f => BlobID.TryParse(id.ToString().Substring(0, 2) + f.Name).Value)) );
         }
 
         public Task<Errorable<BlobID>[]> ResolvePartialIDs(params BlobID.Partial[] ids)
         {
-            return TaskEx.WhenAll( ids.SelectAsArray(id => ResolvePartialID(id)) );
+            return Task.WhenAll( ids.SelectAsArray(id => ResolvePartialID(id)) );
         }
     }
 }
