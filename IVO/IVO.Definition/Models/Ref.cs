@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace IVO.Definition.Models
 {
     public sealed partial class Ref
     {
-        public void WriteTo(System.IO.Stream fs)
+        public StringBuilder WriteTo(StringBuilder sb)
         {
-            var bw = new BinaryWriter(fs);
-            bw.WriteRaw(this.CommitID.ToString());
+            sb.Append(this.CommitID.ToString());
+            return sb;
         }
     }
 }

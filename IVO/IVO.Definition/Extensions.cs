@@ -2,19 +2,32 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace System.IO
 {
-    internal static class IOExtensions
+    public static class IOExtensions
     {
         /// <summary>
-        /// Write a UTF-8 encoded string (no length prefix).
+        /// Writes a UTF-8 encoded string (with no length prefix) to the output stream.
         /// </summary>
-        /// <param name="bw"></param>
-        /// <param name="value"></param>
-        internal static void WriteRaw(this BinaryWriter bw, string value)
+        /// <param name="fs">Stream to write to</param>
+        /// <param name="value">String value to write</param>
+        public static void WriteRaw(this Stream fs, string value)
         {
-            bw.Write(Encoding.UTF8.GetBytes(value));
+            byte[] utf8 = Encoding.UTF8.GetBytes(value);
+            fs.Write(utf8, 0, utf8.Length);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a UTF-8 encoded string (with no length prefix) to the output stream.
+        /// </summary>
+        /// <param name="fs">Stream to write to</param>
+        /// <param name="value">String value to write</param>
+        public static async Task WriteRawAsync(this Stream fs, string value)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(value);
+            await fs.WriteAsync(utf8, 0, utf8.Length);
         }
     }
 }

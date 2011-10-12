@@ -42,6 +42,10 @@
         new ErrorDescriptor("TreeTreePathDoesNotExistError", "A tree with path '{0}' does not exist", new ParameterDescriptor("path", "TreeTreePath")),
 
         new ErrorDescriptor("TagNameAlreadyExistsError", "A tag with tag name '{0}' already exists", new ParameterDescriptor("tagName", "TagName")),
+        new ErrorDescriptor("CommitRecordAlreadyExistsError", "A commit with CommitID {0} already exists", new ParameterDescriptor("id", "CommitID")),
+        new ErrorDescriptor("TreeRecordAlreadyExistsError", "A tree with TreeID {0} already exists", new ParameterDescriptor("id", "TreeID")),
+        new ErrorDescriptor("TagRecordAlreadyExistsError", "A tag with TagID {0} already exists", new ParameterDescriptor("id", "TagID")),
+
         new ErrorDescriptor("BlobNotFoundByPathError", "A blob was not found given path '{0}'", new ParameterDescriptor("path", "TreeBlobPath")),
 
         new ErrorDescriptor("ComputedTagIDMismatchError", "Computed TagID {0} does not match expected TagID {1}", new ParameterDescriptor("computedID", "TagID"), new ParameterDescriptor("expectedID", "TagID")),

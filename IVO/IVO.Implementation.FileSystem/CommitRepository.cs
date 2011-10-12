@@ -8,6 +8,7 @@ using IVO.Definition.Containers;
 using IVO.Definition.Repositories;
 using System.IO;
 using System.Diagnostics;
+using IVO.Definition;
 using IVO.Definition.Errors;
 
 namespace IVO.Implementation.FileSystem
@@ -27,28 +28,37 @@ namespace IVO.Implementation.FileSystem
 
         #region Private details
 
-        private void persistCommit(Commit cm)
+        private async Task<Errorable<Commit>> persistCommit(Commit cm)
         {
-            FileInfo fi = system.getPathByID(cm.ID);
-            if (fi.Exists) return;
+            FileInfo tmpFile = system.getTemporaryFile();
 
-            // Create directory if it doesn't exist:
-            if (!fi.Directory.Exists)
+            // Write the commit contents to the file:
+            using (var fs = new FileStream(tmpFile.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None, bufferSize: 16834, useAsync: true))
             {
-                Debug.WriteLine(String.Format("New DIR '{0}'", fi.Directory.FullName));
-                fi.Directory.Create();
+                await fs.WriteRawAsync(cm.WriteTo(new StringBuilder()).ToString());
             }
 
             lock (FileSystem.SystemLock)
             {
-                if (!fi.Exists)
-                    // Write the commit contents to the file:
-                    using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-                    {
-                        Debug.WriteLine(String.Format("New COMMIT '{0}'", fi.FullName));
-                        cm.WriteTo(fs);
-                    }
+                FileInfo fi = system.getPathByID(cm.ID);
+                if (fi.Exists)
+                {
+                    tmpFile.Delete();
+                    return new CommitRecordAlreadyExistsError(cm.ID);
+                }
+
+                // Create directory if it doesn't exist:
+                if (!fi.Directory.Exists)
+                {
+                    Debug.WriteLine(String.Format("New DIR '{0}'", fi.Directory.FullName));
+                    fi.Directory.Create();
+                }
+
+                Debug.WriteLine(String.Format("New COMMIT '{0}'", fi.FullName));
+                File.Move(tmpFile.FullName, fi.FullName);
             }
+
+            return cm;
         }
 
         private async Task<Errorable<Commit>> getCommit(CommitID id)
@@ -167,7 +177,7 @@ namespace IVO.Implementation.FileSystem
         {
             var etg = await tgrepo.GetTag(id).ConfigureAwait(continueOnCapturedContext: false);
             if (etg.HasErrors) return etg.Errors;
-            
+
             Tag tg = etg.Value;
 
             var ecm = await getCommit(tg.CommitID).ConfigureAwait(continueOnCapturedContext: false);
@@ -210,7 +220,7 @@ namespace IVO.Implementation.FileSystem
             // Get the current commit:
             var eroot = await getCommit(id).ConfigureAwait(continueOnCapturedContext: false);
             if (eroot.HasErrors) return eroot.Errors;
-            
+
             var root = eroot.Value;
             var rootArr = new Commit[1] { root };
 

@@ -174,7 +174,6 @@ namespace Asynq
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="query"></param>
-        /// <param name="factory"></param>
         /// <returns></returns>
         public T ExecuteSingleQuery<T>(IComplexDataQuery<T> query)
         {

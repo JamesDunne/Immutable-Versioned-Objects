@@ -86,7 +86,7 @@ namespace IVO.Implementation.FileSystem
             return tr;
         }
 
-        private Errorable<TreeNode> persistTree(TreeNode tr)
+        private async Task<Errorable<TreeNode>> persistTree(TreeNode tr)
         {
             Debug.Assert(tr != null);
 
@@ -104,12 +104,21 @@ namespace IVO.Implementation.FileSystem
                     return new TreeIDRecordDoesNotExistError(trtr.TreeID);
             }
 
-            FileInfo fi = system.getPathByID(tr.ID);
+            // Write the tree contents to the file:
+            FileInfo tmpFile = system.getTemporaryFile();
+            using (var fs = new FileStream(tmpFile.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None, bufferSize: 16384, useAsync: true))
+            {
+                await fs.WriteRawAsync(tr.WriteTo(new StringBuilder()).ToString());
+            }
+
             lock (FileSystem.SystemLock)
             {
-                fi.Refresh();
-                // TODO: maybe a TreeIDRecordAlreadyExistsError?
-                if (fi.Exists) return tr;
+                FileInfo fi = system.getPathByID(tr.ID);
+                if (fi.Exists)
+                {
+                    tmpFile.Delete();
+                    return new TreeRecordAlreadyExistsError(tr.ID);
+                }
 
                 // Create directory if it doesn't exist:
                 if (!fi.Directory.Exists)
@@ -118,12 +127,8 @@ namespace IVO.Implementation.FileSystem
                     fi.Directory.Create();
                 }
 
-                // Write the tree contents to the file:
-                using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-                {
-                    Debug.WriteLine(String.Format("New TREE '{0}'", fi.FullName));
-                    tr.WriteTo(fs);
-                }
+                Debug.WriteLine(String.Format("New TREE '{0}'", fi.FullName));
+                File.Move(tmpFile.FullName, fi.FullName);
             }
 
             return tr;
@@ -131,12 +136,10 @@ namespace IVO.Implementation.FileSystem
 
         private void deleteTree(TreeID id)
         {
-            FileInfo fi = system.getPathByID(id);
             lock (FileSystem.SystemLock)
             {
-                if (!fi.Exists) return;
-
-                fi.Delete();
+                FileInfo fi = system.getPathByID(id);
+                if (fi.Exists) fi.Delete();
             }
         }
 

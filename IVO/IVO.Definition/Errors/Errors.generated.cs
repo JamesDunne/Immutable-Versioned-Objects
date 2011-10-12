@@ -157,6 +157,21 @@ namespace IVO.Definition.Errors
         public TagNameAlreadyExistsError(TagName tagName) : base("A tag with tag name '{0}' already exists", tagName) { }
     }
 
+    public sealed partial class CommitRecordAlreadyExistsError : ConsistencyError
+    {
+        public CommitRecordAlreadyExistsError(CommitID id) : base("A commit with CommitID {0} already exists", id) { }
+    }
+
+    public sealed partial class TreeRecordAlreadyExistsError : ConsistencyError
+    {
+        public TreeRecordAlreadyExistsError(TreeID id) : base("A tree with TreeID {0} already exists", id) { }
+    }
+
+    public sealed partial class TagRecordAlreadyExistsError : ConsistencyError
+    {
+        public TagRecordAlreadyExistsError(TagID id) : base("A tag with TagID {0} already exists", id) { }
+    }
+
     public sealed partial class BlobNotFoundByPathError : ConsistencyError
     {
         public BlobNotFoundByPathError(TreeBlobPath path) : base("A blob was not found given path '{0}'", path) { }

@@ -22,12 +22,20 @@ namespace IVO.Implementation.FileSystem
 
         #region Private details
 
-        private void persistStage(Stage stg)
+        private async Task<Errorable<Stage>> persistStage(Stage stg)
         {
+            FileInfo tmpFile = system.getTemporaryFile();
+            using (var fs = new FileStream(tmpFile.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, bufferSize: 16386, useAsync: true))
+            {
+                await fs.WriteRawAsync(stg.WriteTo(new StringBuilder()).ToString());
+            }
+
             lock (FileSystem.SystemLock)
             {
                 FileInfo fi = system.getStagePathByStageName(stg.Name);
-                
+                if (fi.Exists)
+                    fi.Delete();
+
                 // Create directory if it doesn't exist:
                 if (!fi.Directory.Exists)
                 {
@@ -36,13 +44,11 @@ namespace IVO.Implementation.FileSystem
                 }
 
                 // Write the contents to the file:
-                if (!fi.Exists)
-                    using (var fs = new FileStream(fi.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
-                    {
-                        Debug.WriteLine(String.Format("New STAGE '{0}'", fi.FullName));
-                        stg.WriteTo(fs);
-                    }
+                Debug.WriteLine(String.Format("New STAGE '{0}'", fi.FullName));
+                File.Move(tmpFile.FullName, fi.FullName);
             }
+
+            return stg;
         }
 
         private async Task<Errorable<Stage>> getStageByName(StageName stageName)

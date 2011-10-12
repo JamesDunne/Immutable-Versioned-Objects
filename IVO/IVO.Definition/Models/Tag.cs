@@ -9,36 +9,31 @@ namespace IVO.Definition.Models
 {
     public sealed partial class Tag
     {
-        public void WriteTo(Stream ms)
+        public StringBuilder WriteTo(StringBuilder sb)
         {
-            var bw = new BinaryWriter(ms, Encoding.UTF8);
-
-            bw.WriteRaw(String.Format("commit {0}\n", CommitID.ToString()));
-            bw.WriteRaw(String.Format("name {0}\n", Name.ToString()));
-            bw.WriteRaw(String.Format("tagger {0}\n", Tagger));
-            bw.WriteRaw(string.Format("date {0}\n\n", DateTagged.ToString()));
+            sb.AppendFormat("commit {0}\n", CommitID.ToString());
+            sb.AppendFormat("name {0}\n", Name.ToString());
+            sb.AppendFormat("tagger {0}\n", Tagger);
+            sb.AppendFormat("date {0}\n\n", DateTagged.ToString());
 
             if (!String.IsNullOrEmpty(Message))
             {
-                bw.WriteRaw(Message);
+                sb.Append(Message);
             }
-            bw.Flush();
+
+            return sb;
         }
 
         private void computeID()
         {
-            int initialCapacity = "commit ".Length + TagID.ByteArrayLength;
+            string data = this.WriteTo(new StringBuilder()).ToString();
+            byte[] tmp = Encoding.UTF8.GetBytes(data);
 
-            using (var ms = new MemoryStream(initialCapacity))
-            {
-                WriteTo(ms);
+            // SHA-1 the data:
+            var sha1 = SHA1.Create();
+            byte[] hash = sha1.ComputeHash(tmp);
 
-                // SHA-1 the data:
-                // SHA1 instances are NOT thread-safe.
-                var sha1 = SHA1.Create();
-                byte[] hash = sha1.ComputeHash(ms.ToArray());
-                this.ID = new TagID(hash);
-            }
+            this.ID = new TagID(hash);
         }
     }
 }

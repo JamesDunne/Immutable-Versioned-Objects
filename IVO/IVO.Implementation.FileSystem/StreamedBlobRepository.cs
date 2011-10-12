@@ -34,12 +34,7 @@ namespace IVO.Implementation.FileSystem
             Debug.WriteLine(String.Format("Starting persistence of blob"));
 
             // Find a temporary filename:
-            string objDir = system.getObjectsDirectory().FullName;
-            FileInfo tmpPath;
-            do
-            {
-                tmpPath = new FileInfo(Path.Combine(objDir, Path.GetRandomFileName()));
-            } while (tmpPath.Exists);
+            FileInfo tmpPath = system.getTemporaryFile();
 
             long length = -1;
             BlobID blid;
@@ -72,13 +67,13 @@ namespace IVO.Implementation.FileSystem
                 }
             }
 
-            // Create the blob's subdirectory under 'objects':
-            FileInfo path = system.getPathByID(blid);
-
-            // Serialize
+            // Serialize access to the official blob file:
             lock (FileSystem.SystemLock)
             {
+                // Create the blob's subdirectory under 'objects':
+                FileInfo path = system.getPathByID(blid);
                 path.Refresh();
+
                 if (!path.Directory.Exists)
                 {
                     Debug.WriteLine(String.Format("New DIR '{0}'", path.Directory.FullName));

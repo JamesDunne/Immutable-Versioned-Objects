@@ -8,13 +8,12 @@ namespace IVO.Definition.Models
 {
     public sealed partial class Stage
     {
-        public void WriteTo(Stream fs)
+        public StringBuilder WriteTo(StringBuilder sb)
         {
-            var bw = new BinaryWriter(fs, Encoding.UTF8);
+            sb.AppendFormat("name {0}\n", Name);
+            sb.AppendFormat("tree {0}\n", TreeID);
 
-            bw.WriteRaw(String.Format("name {0}\n", Name));
-            bw.WriteRaw(String.Format("tree {0}\n", TreeID));
-            bw.Flush();
+            return sb;
         }
     }
 }

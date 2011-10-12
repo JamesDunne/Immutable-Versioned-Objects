@@ -23,65 +23,70 @@ namespace IVO.Implementation.FileSystem
 
         #region Private details
 
-        // TODO: I wish creating directories was async. Maybe at least do an async file write?
-        private Task<Errorable<Tag>> persistTag(Tag tg)
+        private async Task<Errorable<Tag>> persistTag(Tag tg)
         {
-            FileInfo fiTracker = system.getTagPathByTagName(tg.Name);
-            // Does this tag name exist already?
-            if (fiTracker.Exists)
-                return Task.FromResult((Errorable<Tag>)new TagNameAlreadyExistsError(tg.Name));
-
-            FileInfo fi = system.getPathByID(tg.ID);
-            if (fi.Exists)
-                // FIXME: TagID already exists.
-                return Task.FromResult((Errorable<Tag>)tg);
-
-            // Create directory if it doesn't exist:
-            if (!fi.Directory.Exists)
+            // Write the commit contents to the file:
+            FileInfo tmpFile = system.getTemporaryFile();
+            using (var fs = new FileStream(tmpFile.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
-                Debug.WriteLine(String.Format("New DIR '{0}'", fi.Directory.FullName));
-                fi.Directory.Create();
+                await fs.WriteRawAsync(tg.WriteTo(new StringBuilder()).ToString());
             }
 
             lock (FileSystem.SystemLock)
             {
-                if (!fi.Exists)
-                    // Write the commit contents to the file:
-                    using (var fs = new FileStream(fi.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-                    {
-                        Debug.WriteLine(String.Format("New TAG '{0}'", fi.FullName));
-                        tg.WriteTo(fs);
-                    }
+                FileInfo fi = system.getPathByID(tg.ID);
+                if (fi.Exists)
+                {
+                    tmpFile.Delete();
+                    return new TagRecordAlreadyExistsError(tg.ID);
+                }
+
+                // Create directory if it doesn't exist:
+                if (!fi.Directory.Exists)
+                {
+                    Debug.WriteLine(String.Format("New DIR '{0}'", fi.Directory.FullName));
+                    fi.Directory.Create();
+                }
+
+                Debug.WriteLine(String.Format("New TAG '{0}'", fi.FullName));
+                File.Move(tmpFile.FullName, fi.FullName);
             }
 
             // Now keep track of the tag by its name:
-
-            // Create directory if it doesn't exist:
-            if (!fiTracker.Directory.Exists)
+            tmpFile = system.getTemporaryFile();
+            using (var fs = new FileStream(tmpFile.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             {
-                Debug.WriteLine(String.Format("New DIR '{0}'", fiTracker.Directory.FullName));
-                fiTracker.Directory.Create();
+                await fs.WriteRawAsync(tg.ID.ToString());
             }
 
             lock (FileSystem.SystemLock)
             {
-                if (!fiTracker.Exists)
-                    using (var fs = new FileStream(fiTracker.FullName, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-                    {
-                        Debug.WriteLine(String.Format("New TAG '{0}'", fiTracker.FullName));
-                        // TODO: write async?
-                        byte[] rawID = Encoding.UTF8.GetBytes(tg.ID.ToString());
-                        fs.Write(rawID, 0, rawID.Length);
-                    }
+                FileInfo fiTracker = system.getTagPathByTagName(tg.Name);
+                // Does this tag name exist already?
+                if (fiTracker.Exists)
+                {
+                    tmpFile.Delete();
+                    return new TagNameAlreadyExistsError(tg.Name);
+                }
+
+                // Create directory if it doesn't exist:
+                if (!fiTracker.Directory.Exists)
+                {
+                    Debug.WriteLine(String.Format("New DIR '{0}'", fiTracker.Directory.FullName));
+                    fiTracker.Directory.Create();
+                }
+
+                Debug.WriteLine(String.Format("New TAG '{0}'", fiTracker.FullName));
+                File.Move(tmpFile.FullName, fiTracker.FullName);
             }
 
-            return Task.FromResult((Errorable<Tag>)tg);
+            return tg;
         }
 
         private async Task<Errorable<TagID>> getTagIDByName(TagName tagName)
         {
             FileInfo fiTracker = system.getTagPathByTagName(tagName);
-            
+
             Debug.Assert(fiTracker != null);
             if (!fiTracker.Exists) return new TagNameDoesNotExistError(tagName);
 

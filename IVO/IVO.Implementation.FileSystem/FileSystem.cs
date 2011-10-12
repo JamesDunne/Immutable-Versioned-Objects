@@ -65,6 +65,17 @@ namespace IVO.Implementation.FileSystem
             return objDir;
         }
 
+        internal FileInfo getTemporaryFile()
+        {
+            string objDir = getObjectsDirectory().FullName;
+            FileInfo tmpPath;
+            do
+            {
+                tmpPath = new FileInfo(Path.Combine(objDir, Path.GetRandomFileName()));
+            } while (tmpPath.Exists);
+            return tmpPath;
+        }
+
         internal FileInfo getPathByID(BlobID id)
         {
             DirectoryInfo objDir = getObjectsDirectory();

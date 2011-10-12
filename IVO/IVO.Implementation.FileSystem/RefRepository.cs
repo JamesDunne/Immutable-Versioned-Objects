@@ -22,27 +22,33 @@ namespace IVO.Implementation.FileSystem
 
         #region Private details
 
-        private void persistRef(Ref rf)
+        private async Task<Errorable<Ref>> persistRef(Ref rf)
         {
+            FileInfo tmpFile = system.getTemporaryFile();
+
+            // Write the ref's contents to the temporary file:
+            using (var fs = new FileStream(tmpFile.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None, 16384, true))
+                await fs.WriteRawAsync(rf.WriteTo(new StringBuilder()).ToString());
+
             lock (FileSystem.SystemLock)
             {
+                // TODO: would love to see FileInfo.DeleteAsync, DirectoryInfo.CreateAsync, etc.
                 FileInfo fi = system.getRefPathByRefName(rf.Name);
-
-                // Create directory if it doesn't exist:
-                if (!fi.Directory.Exists)
-                {
-                    Debug.WriteLine(String.Format("New DIR '{0}'", fi.Directory.FullName));
-                    fi.Directory.Create();
-                }
-
-                // Write the contents to the file:
-                if (!fi.Exists)
-                    using (var fs = new FileStream(fi.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None))
+                if (fi.Exists) fi.Delete();
+                else
+                    // Create directory if it doesn't exist:
+                    if (!fi.Directory.Exists)
                     {
-                        Debug.WriteLine(String.Format("New REF '{0}'", fi.FullName));
-                        rf.WriteTo(fs);
+                        Debug.WriteLine(String.Format("New DIR '{0}'", fi.Directory.FullName));
+                        fi.Directory.Create();
                     }
+
+                // Move the temp file to the real file:
+                Debug.WriteLine(String.Format("New REF '{0}'", fi.FullName));
+                File.Move(tmpFile.FullName, fi.FullName);
             }
+
+            return rf;
         }
 
         private async Task<Errorable<Ref>> getRefByName(RefName refName)
@@ -80,9 +86,9 @@ namespace IVO.Implementation.FileSystem
 
         private void deleteRef(RefName name)
         {
-            FileInfo fi = system.getRefPathByRefName(name);
             lock (FileSystem.SystemLock)
             {
+                FileInfo fi = system.getRefPathByRefName(name);
                 if (fi.Exists) fi.Delete();
             }
         }
@@ -91,8 +97,8 @@ namespace IVO.Implementation.FileSystem
 
         public Task<Errorable<Ref>> PersistRef(Ref rf)
         {
-            persistRef(rf);
-            return Task.FromResult((Errorable<Ref>)rf);
+            return persistRef(rf);
+            //return Task.FromResult((Errorable<Ref>)rf);
         }
 
         public Task<Errorable<Ref>> GetRefByName(RefName name)
