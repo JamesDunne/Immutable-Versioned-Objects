@@ -35,10 +35,13 @@ namespace IVO.Implementation.FileSystem
             lock (FileSystem.SystemLock)
             {
                 FileInfo fi = system.getPathByID(tg.ID);
+
+                // NOTE: if the record already exists we can either error out or overwrite the existing file with contents known to be good in the case the existing file got corrupt.
+                // Let's stick with the self-repair scenario since erroring out doesn't help anyone.
                 if (fi.Exists)
                 {
-                    tmpFile.Delete();
-                    return new TagRecordAlreadyExistsError(tg.ID);
+                    Debug.WriteLine(String.Format("Self-repair scenario: overwriting old TagID {0} with new contents", tg.ID));
+                    fi.Delete();
                 }
 
                 // Create directory if it doesn't exist:

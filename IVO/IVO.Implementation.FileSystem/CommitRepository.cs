@@ -41,10 +41,13 @@ namespace IVO.Implementation.FileSystem
             lock (FileSystem.SystemLock)
             {
                 FileInfo fi = system.getPathByID(cm.ID);
+
+                // NOTE: if the record already exists we can either error out or overwrite the existing file with contents known to be good in the case the existing file got corrupt.
+                // Let's stick with the self-repair scenario since erroring out doesn't help anyone.
                 if (fi.Exists)
                 {
-                    tmpFile.Delete();
-                    return new CommitRecordAlreadyExistsError(cm.ID);
+                    Debug.WriteLine(String.Format("Self-repair scenario: overwriting old CommitID {0} with new contents", cm.ID));
+                    fi.Delete();
                 }
 
                 // Create directory if it doesn't exist:

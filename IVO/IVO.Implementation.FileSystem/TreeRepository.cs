@@ -114,10 +114,13 @@ namespace IVO.Implementation.FileSystem
             lock (FileSystem.SystemLock)
             {
                 FileInfo fi = system.getPathByID(tr.ID);
+
+                // NOTE: if the record already exists we can either error out or overwrite the existing file with contents known to be good in the case the existing file got corrupt.
+                // Let's stick with the self-repair scenario since erroring out doesn't help anyone.
                 if (fi.Exists)
                 {
-                    tmpFile.Delete();
-                    return new TreeRecordAlreadyExistsError(tr.ID);
+                    Debug.WriteLine(String.Format("Self-repair scenario: overwriting old TreeID {0} with new contents", tr.ID));
+                    fi.Delete();
                 }
 
                 // Create directory if it doesn't exist:
@@ -453,7 +456,7 @@ namespace IVO.Implementation.FileSystem
 
             // Add the root node by default:
             CanonicalTreePath rootPath = (CanonicalTreePath)"/";
-            
+
             if (rootID.HasValue)
                 tpl = new Tuple<CanonicalTreePath, TreeNode.Builder>(rootPath, new TreeNode.Builder(root));
             else
@@ -676,7 +679,7 @@ namespace IVO.Implementation.FileSystem
             // Last depth group should be count of 1, the new root TreeNode:
             Debug.Assert(lastNodes.Count == 1);
 
-            return new TreeTree(lastNodes[0].Item2.ID, new ImmutableContainer<TreeID,TreeNode>(result));
+            return new TreeTree(lastNodes[0].Item2.ID, new ImmutableContainer<TreeID, TreeNode>(result));
         }
     }
 }
