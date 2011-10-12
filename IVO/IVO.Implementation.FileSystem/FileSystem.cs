@@ -21,11 +21,13 @@ namespace IVO.Implementation.FileSystem
         {
             // Create the 'objects' subdirectory if it doesn't exist:
             DirectoryInfo objDir = new DirectoryInfo(System.IO.Path.Combine(Root.FullName, "objects"));
-            lock (SystemLock)
-            {
-                if (!objDir.Exists)
-                    objDir.Create();
-            }
+            if (!objDir.Exists)
+                lock (SystemLock)
+                {
+                    objDir.Refresh();
+                    if (!objDir.Exists)
+                        objDir.Create();
+                }
             return objDir;
         }
 

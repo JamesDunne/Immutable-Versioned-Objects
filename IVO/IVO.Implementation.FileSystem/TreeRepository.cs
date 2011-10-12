@@ -121,6 +121,8 @@ namespace IVO.Implementation.FileSystem
                 {
                     Debug.WriteLine(String.Format("Self-repair scenario: overwriting old TreeID {0} with new contents", tr.ID));
                     fi.Delete();
+                    File.Move(tmpFile.FullName, fi.FullName);
+                    return tr;
                 }
 
                 // Create directory if it doesn't exist:
