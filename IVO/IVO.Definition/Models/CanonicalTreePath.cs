@@ -13,7 +13,6 @@ namespace IVO.Definition.Models
     public sealed class CanonicalTreePath : PathObjectModel, IEquatable<CanonicalTreePath>
     {
         private string _asString;
-        private CanonicalTreePath _parent;
 
         internal CanonicalTreePath(IList<string> parts)
         {
@@ -101,6 +100,16 @@ namespace IVO.Definition.Models
             if (aisnull || bisnull) return true;
 
             return a._asString != b._asString;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return this.Equals((CanonicalTreePath)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return _asString.GetHashCode();
         }
 
         public bool Equals(CanonicalTreePath other)
