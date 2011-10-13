@@ -148,3 +148,15 @@ namespace System
         }
     }
 }
+
+namespace System.Threading.Tasks
+{
+    public static class TaskExtensions
+    {
+        public static TResult GetResultSynchronously<TResult>(this Task<TResult> task)
+        {
+            task.RunSynchronously();
+            return task.Result;
+        }
+    }
+}
